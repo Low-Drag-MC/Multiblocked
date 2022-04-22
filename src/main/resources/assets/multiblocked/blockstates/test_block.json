@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "ldlib:block/test_block" }
+  }
+}

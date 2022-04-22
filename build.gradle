@@ -31,6 +31,38 @@ archivesBaseName = "${mod_name}"
 java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+
+// from gti
+import org.apache.tools.ant.taskdefs.condition.Os
+static def getPathSeparator() {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        return ";"
+    }
+    return ":"
+}
+
+def shouldCheckEnv() {
+    return findProject(':LDLib') != null
+}
+
+def isVSTask() {
+    return gradle.startParameter.taskNames[0].equals("genVSCodeRuns")
+}
+
+def getEnv() {
+    boolean vscode = isVSTask()
+    String resourcePath = vscode ? 'bin/main' : 'build/resources/main'
+    String codePath = vscode ? 'bin/main' : 'build/classes/java/main'
+    String s = "multiblocked%%${project.file(resourcePath)}" + getPathSeparator() + "multiblocked%%${project.file(codePath)}"
+    if (findProject(':LDLib') != null) {
+        s += getPathSeparator() + "ldlib%%${project(':LDLib').file(resourcePath)}" + getPathSeparator() + "ldlib%%${project(':LDLib').file(codePath)}"
+    }
+    return s
+}
+
+println("is LDLib found:")
+println(findProject(':LDLib') != null)
+
 minecraft {
     mappings channel: "parchment", version: "${mappings_version}"
 
@@ -45,6 +77,11 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
 
             property 'forge.logging.console.level', 'debug'
+
+            if (findProject(':LDLib') != null) arg "-mixin.config=ldlib.mixins.json"
+            if (shouldCheckEnv()) {
+                environment 'MOD_CLASSES', getEnv()
+            }
 
             mods {
                 multiblocked {
@@ -63,6 +100,11 @@ minecraft {
             arg "-mixin.config=multiblocked.mixins.json"
 
             property 'forge.logging.console.level', 'debug'
+
+            if (findProject(':LDLib') != null) arg "-mixin.config=ldlib.mixins.json"
+            if (shouldCheckEnv()) {
+                environment 'MOD_CLASSES', getEnv()
+            }
 
             mods {
                 multiblocked {
@@ -86,6 +128,11 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
+            if (findProject(':LDLib') != null) arg "-mixin.config=ldlib.mixins.json"
+            if (shouldCheckEnv()) {
+                environment 'MOD_CLASSES', getEnv()
+            }
+
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
             args '--mod', 'multiblocked', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
@@ -105,6 +152,15 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     // Apply Mixin AP
 
+    // LDLib
+    if (findProject(':LDLib') != null) {
+        implementation project(path: ':LDLib')
+    } else {
+        //compileOnly sources jar.
+        runtimeOnly fg.deobf("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
+        compileOnly ("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
+    }
+    
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")

@@ -1,0 +1,6 @@
+def folder = new File( 'LDLib' )
+if(folder.exists() ) {
+    include 'LDLib'
+    project(':LDLib').setProjectDir(new File("LDLib"))
+}
+

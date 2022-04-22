@@ -1,0 +1,3 @@
+[submodule "LDLib"]
+	path = LDLib
+	url = https://github.com/Low-Drag-MC/LDLib

@@ -1,0 +1,43 @@
+package com.lowdragmc.multiblocked.api.registry;
+
+import com.google.common.collect.Maps;
+import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
+import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.definition.PartDefinition;
+import com.lowdragmc.multiblocked.common.FEMultiblockCapability;
+import com.lowdragmc.multiblocked.common.FluidMultiblockCapability;
+import com.lowdragmc.multiblocked.common.ItemMultiblockCapability;
+import net.minecraft.util.ResourceLocation;
+
+import java.util.Map;
+
+public class MbdCapabilities {
+
+    public static final Map<String, MultiblockCapability<?>> CAPABILITY_REGISTRY = Maps.newHashMap();
+
+    public static void registerCapability(MultiblockCapability<?> capability) {
+        CAPABILITY_REGISTRY.put(capability.name, capability);
+    }
+
+    public static void registerCapabilities() {
+        registerCapability(FEMultiblockCapability.CAP);
+        registerCapability(ItemMultiblockCapability.CAP);
+        registerCapability(FluidMultiblockCapability.CAP);
+    }
+
+    public static MultiblockCapability<?> get(String s) {
+        return CAPABILITY_REGISTRY.get(s);
+    }
+
+    public static void registerAnyCapabilityBlocks() {
+        for (MultiblockCapability<?> capability : MbdCapabilities.CAPABILITY_REGISTRY.values()) {
+            ComponentDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, capability.name + ".any"));
+            definition.properties.isOpaque = false;
+            definition.properties.tabGroup = null;
+            definition.allowRotate = false;
+            definition.showInJei = false;
+            MbdComponents.registerComponent(definition);
+        }
+    }
+}

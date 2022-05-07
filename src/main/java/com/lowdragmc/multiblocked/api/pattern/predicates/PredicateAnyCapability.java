@@ -2,6 +2,10 @@ package com.lowdragmc.multiblocked.api.pattern.predicates;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
+import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -17,8 +21,10 @@ import net.minecraft.util.JSONUtils;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PredicateAnyCapability extends SimplePredicate {
     public String capability = "item";
@@ -63,24 +69,24 @@ public class PredicateAnyCapability extends SimplePredicate {
         return false;
     }
 
-//    @Override
-//    public List<WidgetGroup> getConfigWidget(List<WidgetGroup> groups) {
-//        super.getConfigWidget(groups);
-//        WidgetGroup group = new WidgetGroup(0, 0, 100, 20);
-//        groups.add(group);
-//        MultiblockCapability<?> current = MbdCapabilities.get(capability);
-//        group.addWidget(new SelectorWidget(0, 0, 120, 20, MbdCapabilities.CAPABILITY_REGISTRY.values().stream().map(MultiblockCapability::getUnlocalizedName).collect(
-//                Collectors.toList()), -1)
-//                .setValue(current == null ? "" : current.getUnlocalizedName())
-//                .setOnChanged(capability-> {
-//                    this.capability = capability.replace("multiblocked.capability.", "");
-//                    buildPredicate();
-//                })
-//                .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
-//                .setBackground(new ColorRectTexture(0xffaaaaaa))
-//                .setHoverTooltip("multiblocked.gui.predicate.capability"));
-//        return groups;
-//    }
+    @Override
+    public List<WidgetGroup> getConfigWidget(List<WidgetGroup> groups) {
+        super.getConfigWidget(groups);
+        WidgetGroup group = new WidgetGroup(0, 0, 100, 20);
+        groups.add(group);
+        MultiblockCapability<?> current = MbdCapabilities.get(capability);
+        group.addWidget(new SelectorWidget(0, 0, 120, 20, MbdCapabilities.CAPABILITY_REGISTRY.values().stream().map(MultiblockCapability::getUnlocalizedName).collect(
+                Collectors.toList()), -1)
+                .setValue(current == null ? "" : current.getUnlocalizedName())
+                .setOnChanged(capability-> {
+                    this.capability = capability.replace("multiblocked.capability.", "");
+                    buildPredicate();
+                })
+                .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
+                .setBackground(new ColorRectTexture(0xffaaaaaa))
+                .setHoverTooltips("multiblocked.gui.predicate.capability"));
+        return groups;
+    }
 
     @Override
     public JsonObject toJson(JsonObject jsonObject) {

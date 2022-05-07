@@ -10,6 +10,11 @@ public class DummyComponentTileEntity extends ComponentTileEntity<ComponentDefin
         super(definition);
     }
 
+    public void setDefinition(ComponentDefinition definition) {
+        this.definition = definition;
+    }
+
+
     @Override
     public boolean isFormed() {
         return isFormed;

@@ -6,6 +6,7 @@ import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
+import com.lowdragmc.multiblocked.api.registry.MbdItems;
 import com.lowdragmc.multiblocked.api.registry.MbdPredicates;
 import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
@@ -24,32 +25,32 @@ import java.io.File;
 
 public class CommonProxy {
     public CommonProxy() {
+        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        eventBus.register(this);
         MultiblockedNetworking.init();
         MbdCapabilities.registerCapabilities();
         MbdRenderers.registerRenderers();
         MbdPredicates.registerPredicates();
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        eventBus.register(CommonProxy.class);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void registerBlocks(RegistryEvent.Register<Block> event) {
+    public void registerBlocks(RegistryEvent.Register<Block> event) {
         registerComponents();
         IForgeRegistry<Block> registry = event.getRegistry();
         MbdComponents.registerBlocks(registry);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
+    public void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
         IForgeRegistry<TileEntityType<?>> registry = event.getRegistry();
         MbdComponents.registerTileEntity(registry);
     }
 
     @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
+    public void registerItems(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();
         MbdComponents.COMPONENT_ITEMS_REGISTRY.values().forEach(registry::register);
-//        MbdItems.registerItems(registry);
+        MbdItems.registerItems(registry);
     }
 
     public static void registerComponents(){

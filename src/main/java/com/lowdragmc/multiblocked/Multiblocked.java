@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 import com.lowdragmc.lowdraglib.ItemGroup.LDItemGroup;
 import com.lowdragmc.lowdraglib.json.BlockTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
@@ -53,6 +54,7 @@ public class Multiblocked {
     public static final Logger LOGGER = LogManager.getLogger(MODNAME);
     public static final ItemGroup TAB_ITEMS = new LDItemGroup("multiblocked", "all", BlueprintTableTileEntity.tableDefinition::getStackForm);
     public static final Random RNG = new Random();
+    public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
     public static final Gson GSON = new GsonBuilder()
             .registerTypeAdapterFactory(IBlockStateTypeAdapterFactory.INSTANCE)
             .registerTypeAdapterFactory(IMultiblockedRendererTypeAdapterFactory.INSTANCE)
@@ -79,5 +81,9 @@ public class Multiblocked {
 
     public static boolean isModLoaded(String mod) {
         return ModList.get().isLoaded(mod);
+    }
+
+    public static String prettyJson(String uglyJson) {
+        return GSON_PRETTY.toJson(new JsonParser().parse(uglyJson));
     }
 }

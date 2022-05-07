@@ -2,6 +2,9 @@ package com.lowdragmc.multiblocked.api.pattern.predicates;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
+import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
@@ -9,6 +12,8 @@ import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import net.minecraft.util.ResourceLocation;
+
+import java.util.List;
 
 public class PredicateComponent extends SimplePredicate {
     public ResourceLocation location = new ResourceLocation("mod_id", "component_id");
@@ -53,20 +58,20 @@ public class PredicateComponent extends SimplePredicate {
         return this;
     }
 
-//    @Override
-//    public List<WidgetGroup> getConfigWidget(List<WidgetGroup> groups) {
-//        super.getConfigWidget(groups);
-//        WidgetGroup group = new WidgetGroup(0, 0, 100, 20);
-//        groups.add(group);
-//        group.addWidget(new LabelWidget(0, 0, "multiblocked.gui.label.component_registry_name"));
-//        group.addWidget(new TextFieldWidget(0, 10, 120, 20, true, null, s -> {
-//            if (s != null && !s.isEmpty()) {
-//                location = new ResourceLocation(s);
-//                buildPredicate();
-//            }
-//        }).setCurrentString(location.toString()));
-//        return groups;
-//    }
+    @Override
+    public List<WidgetGroup> getConfigWidget(List<WidgetGroup> groups) {
+        super.getConfigWidget(groups);
+        WidgetGroup group = new WidgetGroup(0, 0, 100, 20);
+        groups.add(group);
+        group.addWidget(new LabelWidget(0, 0, "multiblocked.gui.label.component_registry_name"));
+        group.addWidget(new TextFieldWidget(0, 10, 120, 20, null, s -> {
+            if (s != null && !s.isEmpty()) {
+                location = new ResourceLocation(s);
+                buildPredicate();
+            }
+        }).setCurrentString(location.toString()));
+        return groups;
+    }
 
     @Override
     public JsonObject toJson(JsonObject jsonObject) {

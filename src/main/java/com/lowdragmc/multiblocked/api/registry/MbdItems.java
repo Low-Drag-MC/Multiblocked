@@ -1,17 +1,18 @@
 package com.lowdragmc.multiblocked.api.registry;
 
+import com.lowdragmc.multiblocked.api.item.ItemBlueprint;
+import com.lowdragmc.multiblocked.api.item.ItemMultiblockBuilder;
 import net.minecraft.item.Item;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class MbdItems {
-//    public static ItemBlueprint BLUEPRINT = new ItemBlueprint();
-//    public static ItemMultiblockBuilder BUILDER = new ItemMultiblockBuilder();
-//
-//    public static void registerItems(IForgeRegistry<Item> registry) {
-//        registry.register(BLUEPRINT);
-//        registry.register(BUILDER);
-//    }
+    public static ItemBlueprint BLUEPRINT = new ItemBlueprint();
+    public static ItemMultiblockBuilder BUILDER = new ItemMultiblockBuilder();
+
+    public static void registerItems(IForgeRegistry<Item> registry) {
+        registry.register(BLUEPRINT);
+        registry.register(BUILDER);
+    }
 //
 //    @SuppressWarnings("ConstantConditions")
 //    public static void registerModels() {

@@ -3,7 +3,19 @@ package com.lowdragmc.multiblocked.api.pattern.predicates;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
+import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
+import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
+import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
+import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
@@ -156,87 +168,87 @@ public class SimplePredicate {
         return candidates == null ? Collections.emptyList() : Arrays.stream(this.candidates.get()).filter(info -> info.getBlockState().getBlock() != Blocks.AIR).map(BlockInfo::getItemStackForm).collect(Collectors.toList());
     }
 
-//    public List<WidgetGroup> getConfigWidget(List<WidgetGroup> groups) {
-//        WidgetGroup group = new WidgetGroup(0, 0, 300, 90);
-//        groups.add(group);
-//        group.setClientSideWidget();
-//        group.addWidget(new LabelWidget(0, 0, () -> LocalizationUtils.format("multiblocked.gui.label.type") + " " + type).setTextColor(-1).setDrop(true));
-//        TextFieldWidget min, max, preview, nbt, tooltips;
-//
-//        group.addWidget(min = new TextFieldWidget(55, 15, 30, 15, true, () -> minCount + "", s -> {
-//            minCount = Integer.parseInt(s);
-//            if (minCount > maxCount) {
-//                maxCount = minCount;
-//            }
-//        }).setNumbersOnly(0, Integer.MAX_VALUE));
-//        min.setHoverTooltip("multiblocked.gui.tips.min").setVisible(minCount != -1);
-//        group.addWidget(new SwitchWidget(0, 15, 50, 15, (cd, r)->{
-//            min.setVisible(r);
-//            minCount = r ? 0 : -1;
-//        }).setPressed(minCount != -1).setHoverBorderTexture(1, -1).setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("min (N)", -1).setDropShadow(true)).setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("min (Y)", -1).setDropShadow(true))
-//                .setHoverTooltip("multiblocked.gui.predicate.min"));
-//
-//        group.addWidget(max = new TextFieldWidget(55, 33, 30, 15, true, () -> maxCount + "", s -> {
-//            maxCount = Integer.parseInt(s);
-//            if (minCount > maxCount) {
-//                minCount = maxCount;
-//            }
-//        }).setNumbersOnly(0, Integer.MAX_VALUE));
-//        max.setHoverTooltip("multiblocked.gui.tips.max").setVisible(maxCount != -1);
-//        group.addWidget(new SwitchWidget(0, 33, 50, 15, (cd, r)->{
-//            max.setVisible(r);
-//            maxCount = r ? 0 : -1;
-//        }).setPressed(maxCount != -1).setHoverBorderTexture(1, -1).setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("max (N)", -1).setDropShadow(true)).setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("max (Y)", -1).setDropShadow(true))
-//                .setHoverTooltip("multiblocked.gui.predicate.max"));
-//
-//
-//        group.addWidget(preview = (TextFieldWidget) new TextFieldWidget(55, 51 , 30, 15, true, () -> previewCount + "", s -> previewCount = Integer.parseInt(s)).setNumbersOnly(0, Integer.MAX_VALUE).setHoverTooltip("multiblocked.gui.predicate.preview"));
-//        preview.setHoverTooltip("multiblocked.gui.predicate.jei").setVisible(previewCount != -1);
-//        group.addWidget(new SwitchWidget(0, 51, 50, 15, (cd, r)->{
-//            preview.setVisible(r);
-//            previewCount = r ? 0 : -1;
-//        }).setPressed(previewCount != -1).setHoverBorderTexture(1, -1).setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("jei (N)", -1).setDropShadow(true)).setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("jei (Y)", -1).setDropShadow(true))
-//                .setHoverTooltip("multiblocked.gui.predicate.preview.1"));
-//        WidgetGroup widgetGroup = new WidgetGroup(0, 70, 100, 15)
-//                .addWidget(new SwitchWidget(0, 0, 15, 15, (cd, r)->disableRenderFormed = r)
-//                        .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
-//                        .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
-//                        .setHoverTexture(new ColorBorderTexture(1, -1))
-//                        .setPressed(disableRenderFormed)
-//                        .setHoverTooltip("multiblocked.gui.predicate.disabled"))
-//                .addWidget(new ImageWidget(2, 2, 11, 11, new ColorBorderTexture(1, -1)))
-//                .addWidget(new LabelWidget(20, 3, "disableRenderFormed").setTextColor(-1).setDrop(true));
-//        group.addWidget(widgetGroup);
-//
-//        group.addWidget(nbt = new TextFieldWidget(155, 15, 100, 15, true, null, s -> nbtParser = s));
-//        nbt.setCurrentString(nbtParser == null ? "" : nbtParser).setHoverTooltip("nbt parser").setVisible(nbtParser != null);
-//        group.addWidget(new SwitchWidget(100, 15, 50, 15, (cd, r)->{
-//            nbt.setVisible(r);
-//            nbtParser = r ? "" : null;
-//        }).setPressed(nbtParser != null).setHoverBorderTexture(1, -1)
-//                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("nbt (N)", -1).setDropShadow(true))
-//                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("nbt (Y)", -1).setDropShadow(true))
-//                .setHoverTooltip("multiblocked.gui.predicate.nbt"));
-//
-//        group.addWidget(tooltips = new TextFieldWidget(155, 33, 100, 15, true, null, s -> customTips = s));
-//        tooltips.setCurrentString(customTips != null ? customTips : "").setHoverTooltip("multiblocked.gui.predicate.tips").setVisible(customTips != null);
-//        group.addWidget(new SwitchWidget(100, 33, 50, 15, (cd, r) -> {
-//            tooltips.setVisible(r);
-//            customTips = r ? "" : null;
-//        }).setPressed(customTips != null).setHoverBorderTexture(1, -1)
-//                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("tips (N)", -1).setDropShadow(true))
-//                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("tips (Y)", -1).setDropShadow(true))
-//                .setHoverTooltip("multiblocked.gui.predicate.add_tips"));
-//
-//        group.addWidget(new SelectorWidget(130, 70, 40, 15, Arrays.asList("IN", "OUT", "BOTH", "NULL"), -1)
-//                .setValue(io == null ? "NULL" : io.name())
-//                .setIsUp(true)
-//                .setOnChanged(io-> this.io = io.equals("NULL") ? null : IO.valueOf(io))
-//                .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
-//                .setBackground(new ColorRectTexture(0xff333333))
-//                .setHoverTooltip("multiblocked.gui.tips.io"));
-//        return groups;
-//    }
+    public List<WidgetGroup> getConfigWidget(List<WidgetGroup> groups) {
+        WidgetGroup group = new WidgetGroup(0, 0, 300, 90);
+        groups.add(group);
+        group.setClientSideWidget();
+        group.addWidget(new LabelWidget(0, 0, () -> LocalizationUtils.format("multiblocked.gui.label.type") + " " + type).setTextColor(-1).setDrop(true));
+        TextFieldWidget min, max, preview, nbt, tooltips;
+
+        group.addWidget(min = new TextFieldWidget(55, 15, 30, 15, () -> minCount + "", s -> {
+            minCount = Integer.parseInt(s);
+            if (minCount > maxCount) {
+                maxCount = minCount;
+            }
+        }).setNumbersOnly(0, Integer.MAX_VALUE));
+        min.setHoverTooltips("multiblocked.gui.tips.min").setVisible(minCount != -1);
+        group.addWidget(new SwitchWidget(0, 15, 50, 15, (cd, r)->{
+            min.setVisible(r);
+            minCount = r ? 0 : -1;
+        }).setPressed(minCount != -1).setHoverBorderTexture(1, -1).setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("min (N)", -1).setDropShadow(true)).setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("min (Y)", -1).setDropShadow(true))
+                .setHoverTooltips("multiblocked.gui.predicate.min"));
+
+        group.addWidget(max = new TextFieldWidget(55, 33, 30, 15, () -> maxCount + "", s -> {
+            maxCount = Integer.parseInt(s);
+            if (minCount > maxCount) {
+                minCount = maxCount;
+            }
+        }).setNumbersOnly(0, Integer.MAX_VALUE));
+        max.setHoverTooltips("multiblocked.gui.tips.max").setVisible(maxCount != -1);
+        group.addWidget(new SwitchWidget(0, 33, 50, 15, (cd, r)->{
+            max.setVisible(r);
+            maxCount = r ? 0 : -1;
+        }).setPressed(maxCount != -1).setHoverBorderTexture(1, -1).setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("max (N)", -1).setDropShadow(true)).setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("max (Y)", -1).setDropShadow(true))
+                .setHoverTooltips("multiblocked.gui.predicate.max"));
+
+
+        group.addWidget(preview = (TextFieldWidget) new TextFieldWidget(55, 51 , 30, 15, () -> previewCount + "", s -> previewCount = Integer.parseInt(s)).setNumbersOnly(0, Integer.MAX_VALUE).setHoverTooltips("multiblocked.gui.predicate.preview"));
+        preview.setHoverTooltips("multiblocked.gui.predicate.jei").setVisible(previewCount != -1);
+        group.addWidget(new SwitchWidget(0, 51, 50, 15, (cd, r)->{
+            preview.setVisible(r);
+            previewCount = r ? 0 : -1;
+        }).setPressed(previewCount != -1).setHoverBorderTexture(1, -1).setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("jei (N)", -1).setDropShadow(true)).setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("jei (Y)", -1).setDropShadow(true))
+                .setHoverTooltips("multiblocked.gui.predicate.preview.1"));
+        WidgetGroup widgetGroup = new WidgetGroup(0, 70, 100, 15)
+                .addWidget(new SwitchWidget(0, 0, 15, 15, (cd, r)->disableRenderFormed = r)
+                        .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
+                        .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
+                        .setHoverTexture(new ColorBorderTexture(1, -1))
+                        .setPressed(disableRenderFormed)
+                        .setHoverTooltips("multiblocked.gui.predicate.disabled"))
+                .addWidget(new ImageWidget(2, 2, 11, 11, new ColorBorderTexture(1, -1)))
+                .addWidget(new LabelWidget(20, 3, "disableRenderFormed").setTextColor(-1).setDrop(true));
+        group.addWidget(widgetGroup);
+
+        group.addWidget(nbt = new TextFieldWidget(155, 15, 100, 15, null, s -> nbtParser = s));
+        nbt.setCurrentString(nbtParser == null ? "" : nbtParser).setHoverTooltips("nbt parser").setVisible(nbtParser != null);
+        group.addWidget(new SwitchWidget(100, 15, 50, 15, (cd, r)->{
+            nbt.setVisible(r);
+            nbtParser = r ? "" : null;
+        }).setPressed(nbtParser != null).setHoverBorderTexture(1, -1)
+                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("nbt (N)", -1).setDropShadow(true))
+                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("nbt (Y)", -1).setDropShadow(true))
+                .setHoverTooltips("multiblocked.gui.predicate.nbt"));
+
+        group.addWidget(tooltips = new TextFieldWidget(155, 33, 100, 15, null, s -> customTips = s));
+        tooltips.setCurrentString(customTips != null ? customTips : "").setHoverTooltips("multiblocked.gui.predicate.tips").setVisible(customTips != null);
+        group.addWidget(new SwitchWidget(100, 33, 50, 15, (cd, r) -> {
+            tooltips.setVisible(r);
+            customTips = r ? "" : null;
+        }).setPressed(customTips != null).setHoverBorderTexture(1, -1)
+                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("tips (N)", -1).setDropShadow(true))
+                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("tips (Y)", -1).setDropShadow(true))
+                .setHoverTooltips("multiblocked.gui.predicate.add_tips"));
+
+        group.addWidget(new SelectorWidget(130, 70, 40, 15, Arrays.asList("IN", "OUT", "BOTH", "NULL"), -1)
+                .setValue(io == null ? "NULL" : io.name())
+                .setIsUp(true)
+                .setOnChanged(io-> this.io = io.equals("NULL") ? null : IO.valueOf(io))
+                .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
+                .setBackground(new ColorRectTexture(0xff333333))
+                .setHoverTooltips("multiblocked.gui.tips.io"));
+        return groups;
+    }
 
     public JsonObject toJson(JsonObject jsonObject) {
         jsonObject.add("type", new JsonPrimitive(type));

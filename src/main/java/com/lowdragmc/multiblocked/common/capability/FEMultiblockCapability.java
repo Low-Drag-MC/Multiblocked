@@ -1,16 +1,19 @@
-package com.lowdragmc.multiblocked.common;
+package com.lowdragmc.multiblocked.common.capability;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
+import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -18,7 +21,6 @@ import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +30,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     public static final FEMultiblockCapability CAP = new FEMultiblockCapability();
 
     private FEMultiblockCapability() {
-        super("forge_energy", new Color(0xCB0000).getRGB());
+        super("forge_energy", 0xFFCB0000);
     }
 
     @Override
@@ -51,10 +53,10 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
         return new FECapabilityProxy(tileEntity);
     }
 
-//    @Override
-//    public ContentWidget<? super Integer> createContentWidget() {
-//        return new NumberContentWidget().setContentTexture(new TextTexture("FE", color)).setUnit("FE");
-//    }
+    @Override
+    public ContentWidget<? super Integer> createContentWidget() {
+        return new NumberContentWidget().setContentTexture(new TextTexture("FE", color)).setUnit("FE");
+    }
 //
 //    @Override
 //    public boolean hasTrait() {

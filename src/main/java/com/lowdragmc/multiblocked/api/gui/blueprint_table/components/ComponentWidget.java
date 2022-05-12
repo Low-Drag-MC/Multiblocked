@@ -209,7 +209,7 @@ public class ComponentWidget<T extends ComponentDefinition> extends
     @OnlyIn(Dist.CLIENT)
     protected WidgetGroup createScene(int x, int y, String text, String tips, IMultiblockedRenderer init, Consumer<IMultiblockedRenderer> onUpdate) {
         TrackedDummyWorld world = new TrackedDummyWorld();
-        world.addBlock(BlockPos.ZERO, new BlockInfo(MbdComponents.DummyComponentBlock));
+        world.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock.defaultBlockState()));
         DummyComponentTileEntity tileEntity = (DummyComponentTileEntity) world.getBlockEntity(BlockPos.ZERO);
         tileEntity.setDefinition(new PartDefinition(new ResourceLocation(Multiblocked.MODID, "component_widget")));
         tileEntity.getDefinition().baseRenderer = init;

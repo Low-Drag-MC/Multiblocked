@@ -1,4 +1,4 @@
-package com.lowdragmc.multiblocked.common;
+package com.lowdragmc.multiblocked.common.capability;
 
 
 import com.google.gson.JsonDeserializationContext;
@@ -11,17 +11,18 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
+import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.common.capability.widget.FluidContentWidget;
 import net.minecraft.block.Block;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,12 +32,12 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
     public static final FluidMultiblockCapability CAP = new FluidMultiblockCapability();
 
     private  FluidMultiblockCapability() {
-        super("fluid", new Color(0x3C70EE).getRGB());
+        super("fluid", 0xFF3C70EE);
     }
 
     @Override
     public FluidStack defaultContent() {
-        return new FluidStack(ForgeMod.MILK.get(), 1000);
+        return new FluidStack(Fluids.LAVA.getFluid(), 1000);
     }
 
     @Override
@@ -55,10 +56,10 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
         return new FluidCapabilityProxy(tileEntity);
     }
 
-//    @Override
-//    public ContentWidget<? super FluidStack> createContentWidget() {
-//        return new FluidContentWidget();
-//    }
+    @Override
+    public ContentWidget<? super FluidStack> createContentWidget() {
+        return new FluidContentWidget();
+    }
 //
 //    @Override
 //    public boolean hasTrait() {

@@ -294,7 +294,7 @@ public class TemplateBuilderWidget extends WidgetGroup {
                             for (int k = 0; k < patternString[0][0].length(); k++) {
                                 char symbol = patternString[i][j].charAt(k);
                                 BlockPos pos = pattern.getActualPosOffset(k - centerOffset[2], j - centerOffset[1], i - centerOffset[0], Direction.NORTH).offset(offset, offset, offset);
-                                world.addBlock(pos, new BlockInfo(MbdComponents.DummyComponentBlock));
+                                world.addBlock(pos, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock.defaultBlockState()));
                                 DummyComponentTileEntity tileEntity = (DummyComponentTileEntity) world.getBlockEntity(pos);
                                 ComponentDefinition definition = null;
                                 assert tileEntity != null;

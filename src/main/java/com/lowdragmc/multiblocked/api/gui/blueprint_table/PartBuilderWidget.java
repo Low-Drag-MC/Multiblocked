@@ -23,6 +23,7 @@ import com.lowdragmc.multiblocked.api.gui.blueprint_table.components.PartWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import jdk.nashorn.internal.ir.Block;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -75,7 +76,7 @@ public class PartBuilderWidget extends WidgetGroup {
     @OnlyIn(Dist.CLIENT)
     private void initScene() {
         TrackedDummyWorld world = new TrackedDummyWorld();
-        world.addBlock(BlockPos.ZERO, new BlockInfo(MbdComponents.DummyComponentBlock));
+        world.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock.defaultBlockState()));
         tileEntity = (DummyComponentTileEntity) world.getBlockEntity(BlockPos.ZERO);
         this.addWidget(new ImageWidget(30, 59, 138, 138, new GuiTextureGroup(new ColorBorderTexture(3, -1), new ColorRectTexture(0xaf444444))));
         this.addWidget(new SceneWidget(30, 59,  138, 138, world)

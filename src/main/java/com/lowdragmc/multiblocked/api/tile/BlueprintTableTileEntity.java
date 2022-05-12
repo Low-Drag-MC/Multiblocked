@@ -1,18 +1,23 @@
 package com.lowdragmc.multiblocked.api.tile;
 
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
+import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
+import com.lowdragmc.multiblocked.api.gui.blueprint_table.BlueprintTableWidget;
+import com.lowdragmc.multiblocked.api.gui.controller.structure.StructurePageWidget;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.Predicates;
-import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDIModelRenderer;
-import com.lowdragmc.multiblocked.common.ItemMultiblockCapability;
-import net.minecraft.block.Blocks;
-import net.minecraft.tileentity.TileEntityType;
+import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+
+import java.util.Arrays;
 
 public class BlueprintTableTileEntity extends ControllerTileEntity{
 
@@ -30,20 +35,18 @@ public class BlueprintTableTileEntity extends ControllerTileEntity{
         recipeLogic = null;
     }
 
-//    @Override
-//    public ModularUI createUI(PlayerEntity entityPlayer) {
-//        if (isFormed()) {
-//            return new ModularUIBuilder(IGuiTexture.EMPTY, 384, 256)
-//                    .widget(new BlueprintTableWidget(this))
-//                    .build(this, entityPlayer);
-//        } else {
-//            TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
-//            new StructurePageWidget(this.definition, tabContainer);
-//            return new ModularUIBuilder(IGuiTexture.EMPTY, 196, 256)
-//                    .widget(tabContainer)
-//                    .build(this, entityPlayer);
-//        }
-//    }
+    @Override
+    public ModularUI createUI(PlayerEntity entityPlayer) {
+        if (isFormed()) {
+            return new ModularUI(384, 256, this, entityPlayer).widget(new BlueprintTableWidget(this))
+                    .widget(new SelectorWidget(50, 150, 100, 20, Arrays.asList("1123","2123","3123","4123","1235","1236"), -1)
+                            .setButtonBackground(new ColorRectTexture(0xffff0000)));
+        } else {
+            TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
+            new StructurePageWidget(this.definition, tabContainer);
+            return new ModularUI(196, 256, this, entityPlayer).widget(tabContainer);
+        }
+    }
 
     public final static ControllerDefinition tableDefinition = new ControllerDefinition(new ResourceLocation(Multiblocked.MODID, "blueprint_table"), BlueprintTableTileEntity::new);
     public final static PartDefinition partDefinition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "blueprint_table_part"));

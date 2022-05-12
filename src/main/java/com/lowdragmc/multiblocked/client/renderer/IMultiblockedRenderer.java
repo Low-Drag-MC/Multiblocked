@@ -51,7 +51,7 @@ public interface IMultiblockedRenderer extends IRenderer {
      * @param current current renderer.
      * @return called when updated.
      */
-    default Supplier<IMultiblockedRenderer> createConfigurator(WidgetGroup parent, DraggableScrollableWidgetGroup group, IRenderer current) {
+    default Supplier<IMultiblockedRenderer> createConfigurator(WidgetGroup parent, DraggableScrollableWidgetGroup group, IMultiblockedRenderer current) {
         group.addWidget(new LabelWidget(5,5,"multiblocked.gui.label.configurator"));
         return null;
     }

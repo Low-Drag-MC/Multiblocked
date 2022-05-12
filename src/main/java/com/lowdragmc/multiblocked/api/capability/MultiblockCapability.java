@@ -67,7 +67,7 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
             @Override
             protected void onContentUpdate() {
                 if (Multiblocked.isClient()) {
-                    setHoverTooltips(I18n.get("multiblocked.content.miss", io, I18n.get(MultiblockCapability.this.getUnlocalizedName()), content.toString()));
+                    setHoverTooltips(I18n.get("multiblocked.content.miss", io, I18n.get(MultiblockCapability.this.getUnlocalizedName())));
                 }
             }
 

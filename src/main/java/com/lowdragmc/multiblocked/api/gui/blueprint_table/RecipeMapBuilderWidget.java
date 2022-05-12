@@ -32,7 +32,7 @@ public class RecipeMapBuilderWidget extends WidgetGroup {
         super(x, y, width, height);
         this.setClientSideWidget();
         this.parent = parent;
-        if (!Multiblocked.isClient()) return;
+        if (!isRemote()) return;
         this.addWidget(new ImageWidget(20, 0, width - 20, height, ResourceBorderTexture.BORDERED_BACKGROUND_BLUE));
         this.addWidget(recipeMapList = new DraggableScrollableWidgetGroup(20, 4, width - 20, height - 8));
         this.addWidget(new ButtonWidget(0, 5, 20, 20, new ResourceTexture("multiblocked:textures/gui/save.png"), cd->{

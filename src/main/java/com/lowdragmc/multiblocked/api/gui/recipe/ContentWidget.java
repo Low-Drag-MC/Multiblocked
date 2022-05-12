@@ -223,7 +223,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
         }
     }
 
-    protected void drawHookBackground(MatrixStack matrixStack, double mouseX, double mouseY, float partialTicks) {
+    protected void drawHookBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 
     }
 

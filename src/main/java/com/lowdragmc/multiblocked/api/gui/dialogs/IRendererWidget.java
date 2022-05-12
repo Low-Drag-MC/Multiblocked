@@ -44,7 +44,7 @@ public class IRendererWidget extends DialogWidget {
         this.originalRenderer = renderer;
         this.addWidget(new ImageWidget(0, 0, getSize().width, getSize().height, new ColorRectTexture(0xaf000000)));
         TrackedDummyWorld world = new TrackedDummyWorld();
-        world.addBlock(BlockPos.ZERO, new BlockInfo(MbdComponents.DummyComponentBlock));
+        world.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock.defaultBlockState()));
         tileEntity = (DummyComponentTileEntity) world.getBlockEntity(BlockPos.ZERO);
         setNewRenderer(renderer);
         this.addWidget(new ImageWidget(35, 59, 138, 138, new GuiTextureGroup(new ColorBorderTexture(3, -1), new ColorRectTexture(0xaf444444))));

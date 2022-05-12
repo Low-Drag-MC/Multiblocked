@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.api.tile;
 
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.gui.factory.TileEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
@@ -10,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
+import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
@@ -320,7 +322,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     //************* gui *************//
 
     public final boolean isRemote() {
-        return level == null ? Multiblocked.isClient() : level.isClientSide;
+        return level == null ? LDLMod.isRemote() : level.isClientSide;
     }
 
     public boolean canConnectRedstone(Direction direction) {
@@ -329,35 +331,11 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     @Override
     public ModularUI createUI(PlayerEntity PlayerEntity) {
-        SceneWidget widget;
-        if (isRemote()) {
-            widget = new SceneWidget(20, 20, 150, 150, level);
-            widget.setRenderedCore(Arrays.asList(
-                    getBlockPos(),
-                    getBlockPos().relative(Direction.DOWN),
-                    getBlockPos().relative(Direction.UP),
-                    getBlockPos().relative(Direction.EAST),
-                    getBlockPos().relative(Direction.WEST),
-                    getBlockPos().relative(Direction.SOUTH),
-                    getBlockPos().relative(Direction.NORTH)), null);
-        } else {
-            widget = new SceneWidget(20, 20, 150, 150, null);
-        }
-        widget.setBackground(new ColorRectTexture(0x4f444444));
-        widget.useCacheBuffer();
-
-        return new ModularUI(200, 232, this, PlayerEntity)
-                .widget(new ImageWidget(0, 0, 200, 232, ResourceBorderTexture.BORDERED_BACKGROUND))
-                .widget(new ButtonWidget(10, 10, 40, 20, ResourceBorderTexture.BUTTON_COMMON, null).setHoverBorderTexture(1,-1))
-                .widget(new LabelWidget(10, 35, "aefasefs"))
-                .widget(new ImageWidget(10, 45, 20, 10, new TextTexture("1234567").setWidth(20).setType(TextTexture.TextType.ROLL)))
-                .widget(widget);
 //        if (traits.isEmpty()) return null;
 //        TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
 //        initTraitUI(tabContainer, PlayerEntity);
-//        return new ModularUIBuilder(IGuiTexture.EMPTY, 196, 256)
-//                .widget(tabContainer)
-//                .build(this, PlayerEntity);
+//        return new ModularUI(196, 256,this, PlayerEntity).widget(tabContainer);
+        return null;
     }
 
     @Override

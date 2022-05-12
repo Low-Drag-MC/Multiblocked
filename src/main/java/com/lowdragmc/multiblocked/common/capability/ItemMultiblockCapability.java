@@ -1,4 +1,4 @@
-package com.lowdragmc.multiblocked.common;
+package com.lowdragmc.multiblocked.common.capability;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -9,8 +9,10 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
+import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.common.capability.widget.ItemsContentWidget;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -20,7 +22,6 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     public static final ItemMultiblockCapability CAP = new ItemMultiblockCapability();
 
     private ItemMultiblockCapability() {
-        super("item", new Color(0xD96106).getRGB());
+        super("item", 0xFFD96106);
     }
 
     @Override
@@ -61,10 +62,10 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
 //        return new ItemCapabilityTrait();
 //    }
 //
-//    @Override
-//    public ContentWidget<? super ItemsIngredient> createContentWidget() {
-//        return new ItemsContentWidget();
-//    }
+    @Override
+    public ContentWidget<? super ItemsIngredient> createContentWidget() {
+        return new ItemsContentWidget();
+    }
 
     @Override
     public BlockInfo[] getCandidates() {

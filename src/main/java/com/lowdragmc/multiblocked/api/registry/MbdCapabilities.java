@@ -5,9 +5,9 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
-import com.lowdragmc.multiblocked.common.FEMultiblockCapability;
-import com.lowdragmc.multiblocked.common.FluidMultiblockCapability;
-import com.lowdragmc.multiblocked.common.ItemMultiblockCapability;
+import com.lowdragmc.multiblocked.common.capability.FEMultiblockCapability;
+import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
+import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Map;

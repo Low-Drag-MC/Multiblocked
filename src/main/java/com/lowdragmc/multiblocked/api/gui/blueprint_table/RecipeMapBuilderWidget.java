@@ -39,7 +39,7 @@ public class RecipeMapBuilderWidget extends WidgetGroup {
             try {
                 File dir = new File(Multiblocked.location, "recipe_map");
                 Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.open_folder"));

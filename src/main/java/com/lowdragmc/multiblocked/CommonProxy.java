@@ -1,7 +1,9 @@
 package com.lowdragmc.multiblocked;
 
+import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
+import com.lowdragmc.multiblocked.api.gui.dialogs.JsonBlockPatternWidget;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
@@ -10,6 +12,7 @@ import com.lowdragmc.multiblocked.api.registry.MbdItems;
 import com.lowdragmc.multiblocked.api.registry.MbdPredicates;
 import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
+import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -18,6 +21,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -31,6 +35,15 @@ public class CommonProxy {
         MbdCapabilities.registerCapabilities();
         MbdRenderers.registerRenderers();
         MbdPredicates.registerPredicates();
+    }
+
+    @SubscribeEvent
+    public void clientSetup(FMLCommonSetupEvent e) {
+        e.enqueueWork(()->{
+            for (MultiblockCapability<?> capability : MbdCapabilities.CAPABILITY_REGISTRY.values()) {
+                capability.getAnyBlock().definition.baseRenderer = new CycleBlockStateRenderer(capability.getCandidates());
+            }
+        });
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -63,7 +76,7 @@ public class CommonProxy {
         // register part tester
 //        PartTileTesterEntity.registerTestPart();
         // register JsonBlockPatternBlock
-//        JsonBlockPatternWidget.registerBlock();
+        JsonBlockPatternWidget.registerBlock();
         // register JsonFiles
         MbdComponents.registerComponentFromFile(
                 Multiblocked.GSON,

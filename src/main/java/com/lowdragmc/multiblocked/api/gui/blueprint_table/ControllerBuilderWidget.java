@@ -61,7 +61,7 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
                 try {
                     File dir = new File(Multiblocked.location, "definition/controller");
                     Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -206,8 +206,7 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
                             for (String s : jsonPattern.symbolMap.get(symbol)) {
                                 SimplePredicate predicate = jsonPattern.predicates.get(s);
                                 if (predicate instanceof PredicateComponent && ((PredicateComponent) predicate).definition != null) {
-                                    world.addBlock(pos, new BlockInfo(
-                                            MbdComponents.DummyComponentBlock));
+                                    world.addBlock(pos, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock));
                                     DummyComponentTileEntity tileEntity = (DummyComponentTileEntity) world.getBlockEntity(pos);
                                     assert tileEntity != null;
                                     tileEntity.setDefinition(((PredicateComponent) predicate).definition);

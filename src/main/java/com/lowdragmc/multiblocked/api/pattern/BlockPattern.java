@@ -13,6 +13,7 @@ import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
+import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.block.BlockState;
@@ -262,14 +263,14 @@ public class BlockPattern {
                                     if (info.getBlockState().getBlock() != Blocks.AIR) {
                                         BlockState blockState = info.getBlockState();
                                         if (blockState.getBlock() instanceof BlockComponent && ((BlockComponent) blockState.getBlock()).definition != null) {
-//                                            if (((BlockComponent) blockState.getBlock()).definition.baseRenderer instanceof CycleBlockStateRenderer) {
-//                                                CycleBlockStateRenderer renderer = (CycleBlockStateRenderer) ((BlockComponent) blockState.getBlock()).definition.baseRenderer;
-//                                                for (BlockInfo blockInfo : renderer.blockInfos) {
-//                                                    candidates.add(blockInfo.getItemStackForm());
-//                                                }
-//                                            } else {
-//                                                candidates.add(info.getItemStackForm());
-//                                            }
+                                            if (((BlockComponent) blockState.getBlock()).definition.baseRenderer instanceof CycleBlockStateRenderer) {
+                                                CycleBlockStateRenderer renderer = (CycleBlockStateRenderer) ((BlockComponent) blockState.getBlock()).definition.baseRenderer;
+                                                for (BlockInfo blockInfo : renderer.blockInfos) {
+                                                    candidates.add(blockInfo.getItemStackForm());
+                                                }
+                                            } else {
+                                                candidates.add(info.getItemStackForm());
+                                            }
                                         } else {
                                             candidates.add(info.getItemStackForm());
                                         }

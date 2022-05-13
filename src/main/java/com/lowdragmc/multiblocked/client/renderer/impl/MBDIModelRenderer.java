@@ -2,7 +2,6 @@ package com.lowdragmc.multiblocked.client.renderer.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.lowdragmc.lowdraglib.client.model.ModelFactory;
 import com.lowdragmc.lowdraglib.client.renderer.impl.IModelRenderer;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
@@ -12,23 +11,14 @@ import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.io.File;
 import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -39,9 +29,6 @@ import java.util.function.Supplier;
 public class MBDIModelRenderer extends IModelRenderer implements IMultiblockedRenderer {
     public static final IMultiblockedRenderer INSTANCE = new MBDIModelRenderer();
 
-    @OnlyIn(Dist.CLIENT)
-    protected Map<Direction, IBakedModel> blockModels;
-
     protected MBDIModelRenderer() {
         super();
     }
@@ -51,27 +38,6 @@ public class MBDIModelRenderer extends IModelRenderer implements IMultiblockedRe
         if (FMLEnvironment.dist == Dist.CLIENT) {
             blockModels = new EnumMap<>(Direction.class);
         }
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    protected IBakedModel getBlockBakedModel(BlockPos pos, IBlockDisplayReader blockAccess) {
-        TileEntity tileEntity = blockAccess.getBlockEntity(pos);
-        Direction frontFacing = Direction.NORTH;
-        if (tileEntity instanceof ComponentTileEntity) {
-            frontFacing = ((ComponentTileEntity<?>) tileEntity).getFrontFacing();
-        }
-        return blockModels.computeIfAbsent(frontFacing, facing -> getModel().bake(
-                ModelLoader.instance(),
-                ModelLoader.defaultTextureGetter(),
-                ModelFactory.getRotation(facing),
-                modelLocation));
-    }
-
-    @Override
-    public void onTextureSwitchEvent(TextureStitchEvent.Pre event) {
-        blockModels.clear();
-        super.onTextureSwitchEvent(event);
     }
 
     @Override

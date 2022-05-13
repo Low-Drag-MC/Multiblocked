@@ -481,7 +481,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
                     for (int k = 0; k < pattern[0][0].length(); k++) {
                         char c = pattern[i][j].charAt(k);
                         BlockPos pos = JsonBlockPatternWidget.this.pattern.getActualPosOffset(k - centerOffset[2], j - centerOffset[1], i - centerOffset[0], Direction.NORTH).offset(offset, offset, offset);
-                        world.addBlock(pos, new BlockInfo(symbolBlock.defaultBlockState()));
+                        world.addBlock(pos, BlockInfo.fromBlockState(symbolBlock.defaultBlockState()));
                         SymbolTileEntity tileEntity = (SymbolTileEntity) world.getBlockEntity(pos);
                         assert tileEntity != null;
                         tileEntity.init(c, JsonBlockPatternWidget.this, i, j, k);

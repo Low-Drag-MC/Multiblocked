@@ -10,6 +10,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
+import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -35,13 +37,20 @@ import java.util.List;
  * Date: 2022/04/23
  * Description:
  */
+@ParametersAreNonnullByDefault
 public class BlockComponent extends Block implements IBlockRendererProvider {
     public ComponentDefinition definition;
 
     public BlockComponent(ComponentDefinition definition) {
         super(definition.properties.createBlock());
+        registerDefaultState(defaultBlockState().setValue(BlockStateProperties.FACING, Direction.NORTH));
         this.setRegistryName(definition.location);
         this.definition = definition;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
+        pBuilder.add(BlockStateProperties.FACING);
     }
 
     public ComponentTileEntity<?> getComponent(IBlockReader world, BlockPos pos) {
@@ -51,7 +60,6 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
 
     @Nonnull
     @Override
-    @ParametersAreNonnullByDefault
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
         ComponentTileEntity<?> instance = getComponent(world, pos);
         if (instance != null) {

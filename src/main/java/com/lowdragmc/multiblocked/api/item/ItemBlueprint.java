@@ -1,14 +1,23 @@
 package com.lowdragmc.multiblocked.api.item;
 
 import com.lowdragmc.multiblocked.Multiblocked;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class ItemBlueprint extends Item {
 
     public ItemBlueprint() {
@@ -99,4 +108,13 @@ public class ItemBlueprint extends Item {
         return ActionResultType.PASS;
     }
 
+    @Override
+    public ActionResult<ItemStack> use(World pLevel, PlayerEntity player, Hand pHand) {
+        if (player.isCrouching() && pHand == Hand.MAIN_HAND) {
+            ItemStack stack = player.getItemInHand(pHand);
+            removePos(stack);
+            setRaw(stack);
+        }
+        return super.use(pLevel, player, pHand);
+    }
 }

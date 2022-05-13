@@ -7,8 +7,8 @@ import com.lowdragmc.lowdraglib.ItemGroup.LDItemGroup;
 import com.lowdragmc.lowdraglib.json.BlockTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.json.IBlockStateTypeAdapterFactory;
-import com.lowdragmc.multiblocked.api.json.IMultiblockedRendererTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.ItemStackTypeAdapter;
+import com.lowdragmc.multiblocked.api.json.IMultiblockedRendererTypeAdapterFactory;
 import com.lowdragmc.multiblocked.api.json.RecipeMapTypeAdapter;
 import com.lowdragmc.multiblocked.api.json.RecipeTypeAdapter;
 import com.lowdragmc.multiblocked.api.json.SimplePredicateFactory;
@@ -71,7 +71,7 @@ public class Multiblocked {
     
     public Multiblocked() {
         location = new File(FMLPaths.GAMEDIR.get().toFile(), "multiblocked");
-        location.mkdirs();
+        location.mkdir();
         DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
     }
 

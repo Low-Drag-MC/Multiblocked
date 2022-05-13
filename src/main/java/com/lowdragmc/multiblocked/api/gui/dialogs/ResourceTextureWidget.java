@@ -61,7 +61,7 @@ public class ResourceTextureWidget extends DialogWidget {
         addWidget(new ButtonWidget(x + 15, y + 15, 20, 20, cd -> {
             try {
                 Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/darkened_slot.png"), new TextTexture("F", -1).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000).setHoverTooltips("multiblocked.gui.tips.open_folder"));

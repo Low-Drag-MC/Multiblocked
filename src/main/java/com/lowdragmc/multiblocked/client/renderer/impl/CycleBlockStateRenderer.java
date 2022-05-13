@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockDisplayReader;
@@ -72,8 +73,14 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     }
 
     @Override
-    public BlockState getState() {
-        return getBlockInfo().getBlockState();
+    public BlockState getState(BlockState blockState) {
+        BlockState state = getBlockInfo().getBlockState();
+        if (blockState.hasProperty(BlockStateProperties.FACING) && state.hasProperty(BlockStateProperties.FACING)) {
+            state = state.setValue(BlockStateProperties.FACING, blockState.getValue(BlockStateProperties.FACING));
+        } else if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            state = state.setValue(BlockStateProperties.HORIZONTAL_FACING, blockState.getValue(BlockStateProperties.HORIZONTAL_FACING));
+        }
+        return state;
     }
 
     @Override
@@ -87,13 +94,13 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
 
     @Override
     public void render(TileEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-        BlockState state = getState();
+        BlockState state = getState(te.getBlockState());
         TileEntity tileEntity = getBlockInfo().getTileEntity();
         Minecraft mc = Minecraft.getInstance();
 
         BlockRendererDispatcher brd  = mc.getBlockRenderer();
 
-        FacadeBlockWorld dummyWorld = new FacadeBlockWorld(te.getLevel(), te.getBlockPos(), getState(), tileEntity);
+        FacadeBlockWorld dummyWorld = new FacadeBlockWorld(te.getLevel(), te.getBlockPos(), getState(te.getBlockState()), tileEntity);
         if (tileEntity != null) {
             tileEntity.setLevelAndPosition(dummyWorld, te.getBlockPos());
         }
@@ -116,6 +123,7 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
             if (RenderTypeLookup.canRenderInLayer(state, layer)) {
                 ForgeHooksClient.setRenderLayer(layer);
                 BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
+                bufferBuilder.begin(layer.mode(), layer.format());
                 IModelData modelData = tileEntity == null ? EmptyModelData.INSTANCE : tileEntity.getModelData();
                 if (state.getBlock() instanceof BlockComponent) {
                     IMultiblockedRenderer renderer = ((BlockComponent) state.getBlock()).definition.baseRenderer;
@@ -125,9 +133,8 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
                 } else {
                     brd.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
                 }
-                Tessellator.getInstance().end();
+                layer.end(bufferBuilder, 0, 0, 0);
             }
-
         }
 
         RenderSystem.shadeModel(7425);

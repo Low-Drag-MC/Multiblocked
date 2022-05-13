@@ -22,7 +22,10 @@ public class ItemsIngredient {
     }
 
     public ItemsIngredient(String tag, int amount) {
-        ITag<Item> itag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tag.toLowerCase()));
+        ITag<Item> itag = null;
+        try {
+            itag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tag.toLowerCase()));
+        } catch (Exception ignored) {}
         this.tag = tag;
         if (itag != null) {
             this.ingredient = Ingredient.of(itag);

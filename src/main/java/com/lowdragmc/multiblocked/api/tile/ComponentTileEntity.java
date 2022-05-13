@@ -4,19 +4,9 @@ import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.gui.factory.TileEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
-import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
-import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import io.netty.buffer.ByteBuf;
@@ -31,6 +21,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -67,8 +58,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     protected IMultiblockedRenderer currentRenderer;
 
     public Object rendererObject; // used for renderer
-
-    private Direction frontFacing = Direction.NORTH; // 0
 
     private UUID owner;
 
@@ -181,15 +170,14 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 //    }
 
     public Direction getFrontFacing() {
-        return frontFacing;
+        return getBlockState().getValue(BlockStateProperties.FACING);
     }
 
     public void setFrontFacing(Direction facing) {
-        if (!isValidFrontFacing(facing)) return;
-        frontFacing = facing;
         if (level != null && !level.isClientSide) {
-            markAsDirty();
-            writeCustomData(0, buffer -> buffer.writeByte(frontFacing.ordinal()));
+            if (!isValidFrontFacing(facing)) return;
+            if (getBlockState().getValue(BlockStateProperties.FACING) == facing) return;
+            level.setBlock(getBlockPos(), getBlockState().setValue(BlockStateProperties.FACING, facing), 1 + 2);
         }
     }
 
@@ -378,7 +366,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     protected final List<UpdateEntry> updateEntries = new ArrayList<>();
 
     public void writeInitialSyncData(PacketBuffer buf) {
-        buf.writeByte(this.frontFacing.ordinal());
         buf.writeUtf(status);
 //        if (definition.writeInitialData != null) { // ct
 //
@@ -388,7 +375,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     public void receiveInitialSyncData(PacketBuffer buf) {
-        this.frontFacing = Direction.values()[buf.readByte()];
         status = buf.readUtf();
 //        if (buf.readBoolean()) { // ct
 //            CompoundNBT nbt = buf.readNbt();
@@ -396,10 +382,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     public void receiveCustomData(int dataId, PacketBuffer buf) {
-        if (dataId == 0) {
-            this.frontFacing = Direction.values()[buf.readByte()];
-            scheduleChunkForRenderUpdate();
-        } else if (dataId == 1) {
+        if (dataId == 1) {
             status = buf.readUtf();
             scheduleChunkForRenderUpdate();
         } else if (dataId == 2) {
@@ -444,7 +427,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         if (needAlwaysUpdate()) {
             MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
         }
-        this.frontFacing = compound.contains("frontFacing") ? Direction.values()[compound.getByte("frontFacing")] : this.frontFacing;
         if (compound.contains("owner")) {
             this.owner = compound.getUUID("owner");
         }
@@ -459,7 +441,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     public CompoundNBT save(@Nonnull CompoundNBT compound) {
         super.save(compound);
         compound.putString("loc", definition.location.toString());
-        compound.putByte("frontFacing", (byte) frontFacing.ordinal());
         if (this.owner != null) {
             compound.putUUID("owner", this.owner);
         }

@@ -70,7 +70,9 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     @Override
     public BlockInfo[] getCandidates() {
         return new BlockInfo[] {
-                BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState())
+                BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState()),
+                BlockInfo.fromBlockState(Blocks.WHITE_SHULKER_BOX.defaultBlockState()),
+                BlockInfo.fromBlockState(Blocks.TRAPPED_CHEST.defaultBlockState())
         };
     }
 

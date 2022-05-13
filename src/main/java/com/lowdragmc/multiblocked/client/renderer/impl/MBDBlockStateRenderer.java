@@ -46,7 +46,7 @@ public class MBDBlockStateRenderer extends BlockStateRenderer implements IMultib
 
     @Override
     public JsonObject toJson(Gson gson, JsonObject jsonObject) {
-        jsonObject.add("state", gson.toJsonTree(getState(), BlockState.class));
+        jsonObject.add("state", gson.toJsonTree(blockInfo.getBlockState(), BlockState.class));
         return jsonObject;
     }
 
@@ -54,7 +54,7 @@ public class MBDBlockStateRenderer extends BlockStateRenderer implements IMultib
     public Supplier<IMultiblockedRenderer> createConfigurator(WidgetGroup parent, DraggableScrollableWidgetGroup group, IMultiblockedRenderer current) {
         BlockSelectorWidget blockSelectorWidget = new BlockSelectorWidget(0, 1, true);
         if (current instanceof BlockStateRenderer) {
-            blockSelectorWidget.setBlock(((BlockStateRenderer) current).getState());
+            blockSelectorWidget.setBlock(((BlockStateRenderer) current).blockInfo.getBlockState());
         }
         group.addWidget(blockSelectorWidget);
         return () -> {

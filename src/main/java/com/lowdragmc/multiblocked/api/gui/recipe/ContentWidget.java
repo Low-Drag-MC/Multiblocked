@@ -234,6 +234,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
         Position pos = getPosition();
         Size size = getSize();
         matrixStack.pushPose();
+        matrixStack.translate(0 ,0 , 170);
         matrixStack.scale(0.5f, 0.5f, 1);
         String s = chance == 0 ? LocalizationUtils.format("multiblocked.gui.content.chance_0_short") : String.format("%.1f", chance * 100) + "%";
         int color = chance == 0 ? 0xff0000 : 0xFFFF00;
@@ -248,6 +249,8 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
             Position pos = getPosition();
             Size size = getSize();
             matrixStack.pushPose();
+            RenderSystem.disableDepthTest();
+            matrixStack.translate(0 ,0 , 170);
             matrixStack.scale(0.5f, 0.5f, 1);
             String s = LocalizationUtils.format("multiblocked.gui.content.tips.per_tick_short");
             int color = 0xFFFF00;

@@ -1,18 +1,23 @@
 package com.lowdragmc.multiblocked.api.gui.blueprint_table;
 
+import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ShaderTexture;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.gui.dialogs.IRendererWidget;
+import com.lowdragmc.multiblocked.api.gui.dialogs.IShaderWidget;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 public class RendererBuilderWidget extends WidgetGroup {
-//    public final ShaderTexture shaderTexture;
+    public final ShaderTexture shaderTexture;
 
     public RendererBuilderWidget() {
         super(0, 0, 384, 256);
@@ -20,12 +25,12 @@ public class RendererBuilderWidget extends WidgetGroup {
         this.addWidget(0, new ImageWidget(0, 0, getSize().width, getSize().height, new ResourceTexture("multiblocked:textures/gui/blueprint_page.png")));
         this.addWidget(new ButtonWidget(40, 40, 40, 40, new ItemStackTexture(new ItemStack(Blocks.BEACON)), this::renderer).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.builder.renderer.irenderer"));
 //        this.addWidget(new ButtonWidget(90, 40, 40, 40, new ResourceTexture("multiblocked:textures/fx/fx.png"), this::particle).setHoverBorderTexture(1, -1).setHoverTooltip("multiblocked.gui.builder.renderer.particle"));
-//        this.addWidget(new ButtonWidget(140, 40, 40, 40, shaderTexture = ShaderTexture.createShader(new ResourceLocation(Multiblocked.MODID, "fbm")), this::shader).setHoverBorderTexture(1, -1).setHoverTooltip("multiblocked.gui.builder.renderer.shader"));
+        this.addWidget(new ButtonWidget(140, 40, 40, 40, shaderTexture = ShaderTexture.createShader(new ResourceLocation(Multiblocked.MODID, "fbm")), this::shader).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.builder.renderer.shader"));
     }
-//
-//    private void shader(ClickData clickData) {
-//        new IShaderWidget(this, Shaders.FBM.source);
-//    }
+
+    private void shader(ClickData clickData) {
+        new IShaderWidget(this, shaderTexture.getRawShader());
+    }
 //
 //    private void particle(ClickData clickData) {
 //        new IParticleWidget(this);
@@ -38,9 +43,9 @@ public class RendererBuilderWidget extends WidgetGroup {
     @Override
     public void setGui(ModularUI gui) {
         super.setGui(gui);
-//        if (gui != null && shaderTexture != null) {
-//            gui.registerCloseListener(shaderTexture::dispose);
-//        }
+        if (gui != null && shaderTexture != null) {
+            gui.registerCloseListener(shaderTexture::dispose);
+        }
     }
 
 }

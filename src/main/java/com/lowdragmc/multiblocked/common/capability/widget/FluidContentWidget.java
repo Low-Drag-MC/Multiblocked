@@ -27,7 +27,7 @@ public class FluidContentWidget extends ContentWidget<FluidStack> {
     protected void onContentUpdate() {
         if (Multiblocked.isClient()) {
             List<String> tooltips = new ArrayList<>();
-            tooltips.add(content.getFluid().getAttributes().getDisplayName(content).getContents());
+            tooltips.add(content.getFluid().getAttributes().getDisplayName(content).getString());
             tooltips.add(I18n.get("multiblocked.fluid.amount", content.getAmount(), content.getAmount()));
             tooltips.add(I18n.get("multiblocked.fluid.temperature", content.getFluid().getAttributes().getTemperature(content)));
             tooltips.add(I18n.get(content.getFluid().getAttributes().isGaseous(content) ? "multiblocked.fluid.state_gas" : "multiblocked.fluid.state_liquid"));

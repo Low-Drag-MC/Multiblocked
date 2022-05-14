@@ -52,9 +52,9 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
             addWidget(new SlotWidget(itemHandler, 0, 1, 1, false, false).setDrawOverlay(false).setOnAddedTooltips((s, l)-> {
                 if (chance < 1) {
                     l.add(chance == 0 ? new TranslationTextComponent("multiblocked.gui.content.chance_0") : new TranslationTextComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
-                    if (perTick) {
-                        l.add(new TranslationTextComponent("multiblocked.gui.content.per_tick"));
-                    }
+                }
+                if (perTick) {
+                    l.add(new TranslationTextComponent("multiblocked.gui.content.per_tick"));
                 }
             }));
         }

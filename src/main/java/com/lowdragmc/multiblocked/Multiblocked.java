@@ -16,10 +16,12 @@ import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.client.ClientProxy;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -85,5 +87,10 @@ public class Multiblocked {
 
     public static String prettyJson(String uglyJson) {
         return GSON_PRETTY.toJson(new JsonParser().parse(uglyJson));
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static boolean isSinglePlayer() {
+        return Minecraft.getInstance().hasSingleplayerServer();
     }
 }

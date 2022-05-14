@@ -12,6 +12,8 @@ import com.lowdragmc.multiblocked.api.registry.MbdItems;
 import com.lowdragmc.multiblocked.api.registry.MbdPredicates;
 import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
+import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
+import com.lowdragmc.multiblocked.api.tile.part.PartTileTesterEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import net.minecraft.block.Block;
@@ -72,9 +74,9 @@ public class CommonProxy {
         // register blueprint table
         BlueprintTableTileEntity.registerBlueprintTable();
         // register controller tester
-//        ControllerTileTesterEntity.registerTestController();
+        ControllerTileTesterEntity.registerTestController();
         // register part tester
-//        PartTileTesterEntity.registerTestPart();
+        PartTileTesterEntity.registerTestPart();
         // register JsonBlockPatternBlock
         JsonBlockPatternWidget.registerBlock();
         // register JsonFiles

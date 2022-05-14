@@ -4,7 +4,9 @@ import com.lowdragmc.lowdraglib.utils.CustomResourcePack;
 import com.lowdragmc.multiblocked.CommonProxy;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
+import com.lowdragmc.multiblocked.api.registry.MbdItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.resources.IPackNameDecorator;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -17,6 +19,9 @@ public class ClientProxy extends CommonProxy {
 
     @SubscribeEvent
     public void clientSetup(final FMLClientSetupEvent e) {
-        e.enqueueWork(MbdComponents::clientLastWork);
+        e.enqueueWork(()->{
+            MbdComponents.clientLastWork();
+            MbdItems.registerModelsProperties();
+        });
     }
 }

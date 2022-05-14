@@ -35,7 +35,7 @@ public class ItemMultiblockBuilder extends Item {
     }
 
     public static boolean isRaw(ItemStack stack) {
-        return stack.getMaxDamage() == 0;
+        return stack.getDamageValue() == 0;
     }
 
     public static boolean setPattern(ItemStack stack) {

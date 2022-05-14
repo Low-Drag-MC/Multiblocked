@@ -41,7 +41,6 @@ import net.minecraftforge.items.CapabilityItemHandler;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -206,7 +205,7 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
                             for (String s : jsonPattern.symbolMap.get(symbol)) {
                                 SimplePredicate predicate = jsonPattern.predicates.get(s);
                                 if (predicate instanceof PredicateComponent && ((PredicateComponent) predicate).definition != null) {
-                                    world.addBlock(pos, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock));
+                                    world.addBlock(pos, BlockInfo.fromBlock(MbdComponents.DummyComponentBlock));
                                     DummyComponentTileEntity tileEntity = (DummyComponentTileEntity) world.getBlockEntity(pos);
                                     assert tileEntity != null;
                                     tileEntity.setDefinition(((PredicateComponent) predicate).definition);

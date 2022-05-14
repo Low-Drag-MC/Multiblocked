@@ -2,5 +2,13 @@
   "parent": "item/generated",
   "textures": {
     "layer0": "multiblocked:items/blueprint"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "multiblocked:raw": 1
+      },
+      "model": "multiblocked:item/blueprint_pattern"
+    }
+  ]
 }

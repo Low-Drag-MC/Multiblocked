@@ -79,6 +79,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
     public BlockPatternSceneWidget sceneWidget;
     public SelectorWidget[] selectors;
     public TextFieldWidget[] repeats;
+    public WidgetGroup bottomInfoGroup;
     public DraggableScrollableWidgetGroup symbolSelector;
     public DraggableScrollableWidgetGroup predicateGroup;
     public DraggableScrollableWidgetGroup tfGroup;
@@ -92,6 +93,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
         this.setOnClosed(()->onClose.accept(null));
         this.pattern = pattern;
         this.addWidget(new ImageWidget(0, 0, getSize().width, getSize().height, new ResourceTexture("multiblocked:textures/gui/json_block_pattern.png")));
+        this.addWidget(bottomInfoGroup = new WidgetGroup(0, 0, getSize().width, getSize().height));
         this.addWidget(sceneWidget = new BlockPatternSceneWidget());
         this.addWidget(container = new TabContainer(0, 0, 384, 256));
         this.addWidget(new ButtonWidget(280, 29, 70, 20, cd -> {
@@ -256,20 +258,21 @@ public class JsonBlockPatternWidget extends DialogWidget {
         });
 
         //information
-        addWidget(new LabelWidget(31, 166, () -> LocalizationUtils.format("multiblocked.gui.label.symbol") + " " + (sceneWidget.selected == null ? "" : ("'" + sceneWidget.selected.symbol + "'"))).setTextColor(-1));
-        addWidget(new LabelWidget(31, 178, () -> {
+        bottomInfoGroup.addWidget(new LabelWidget(31, 166, () -> LocalizationUtils.format("multiblocked.gui.label.symbol") + " " + (sceneWidget.selected == null ? "" : ("'" + sceneWidget.selected.symbol + "'"))).setTextColor(-1));
+        bottomInfoGroup.addWidget(new LabelWidget(31, 178, () -> {
             if (sceneWidget.selected == null) return "Aisle Repetition: ";
             return String.format("Aisle Index: %d", sceneWidget.selected.a);
         }).setTextColor(-1));
-        addWidget(new LabelWidget(31, 190, () -> {
+        bottomInfoGroup. addWidget(new LabelWidget(31, 190, () -> {
             if (sceneWidget.selected == null) return "Aisle Repetition: ";
             int[] repeat = pattern.aisleRepetitions[sceneWidget.selected.a];
             return String.format("Aisle Repetition: (%d, %d)", repeat[0], repeat[1]);
         }).setTextColor(-1));
-        addWidget(predicateGroup = new DraggableScrollableWidgetGroup(171, 166, 179, 58)
+        bottomInfoGroup.addWidget(predicateGroup = new DraggableScrollableWidgetGroup(171, 166, 179, 58)
                 .setBackground(new ColorRectTexture(bgColor))
                 .setYScrollBarWidth(4)
                 .setYBarStyle(null, new ColorRectTexture(-1)));
+
         updatePredicateSelector();
         for (SymbolTileEntity tile : sceneWidget.tiles.values()) {
             tile.updateRenderer();

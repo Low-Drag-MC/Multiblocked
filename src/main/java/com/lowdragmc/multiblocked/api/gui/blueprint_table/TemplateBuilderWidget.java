@@ -63,7 +63,6 @@ public class TemplateBuilderWidget extends WidgetGroup {
     public BlockPos pos;
     public Direction facing;
     protected DraggableScrollableWidgetGroup containers;
-    private boolean init;
 
     public TemplateBuilderWidget(BlueprintTableTileEntity table) {
         super(0, 0, 384, 256);
@@ -146,18 +145,11 @@ public class TemplateBuilderWidget extends WidgetGroup {
     @Override
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
-        if (init) return;
-        init = true;
-        writeUpdateInfo(-1, this::writeInitialData);
     }
 
     @Override
     public void readUpdateInfo(int id, PacketBuffer buffer) {
-        if (id == -1) {
-            readInitialData(buffer);
-        } else {
-            super.readUpdateInfo(id, buffer);
-        }
+        super.readUpdateInfo(id, buffer);
     }
 
     @Override

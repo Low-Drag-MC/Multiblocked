@@ -5,11 +5,11 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
@@ -117,11 +117,11 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     @Override
     public void load(@Nonnull BlockState state, @Nonnull CompoundNBT compound) {
         super.load(state, compound);
-//        for (MultiblockState state : MultiblockWorldSavedData.getOrCreate(world).getControllerInChunk(new ChunkPos(pos))) {
-//            if(state.isPosInCache(pos)) {
-//                controllerPos.add(state.controllerPos);
-//            }
-//        }
+        for (MultiblockState multiblockState : MultiblockWorldSavedData.getOrCreate(level).getControllerInChunk(new ChunkPos(getBlockPos()))) {
+            if(multiblockState.isPosInCache(getBlockPos())) {
+                controllerPos.add(multiblockState.controllerPos);
+            }
+        }
     }
 
     private void writeControllersToBuffer(PacketBuffer buffer) {

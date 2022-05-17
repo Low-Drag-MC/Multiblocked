@@ -36,6 +36,7 @@ public class PartTileTesterEntity extends PartTileEntity<PartDefinition> {
                     }
                 }
             }
+            initTrait();
         }
     }
 
@@ -51,7 +52,7 @@ public class PartTileTesterEntity extends PartTileEntity<PartDefinition> {
             TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
             new PartScriptWidget(this, tabContainer);
             if (getDefinition() != DEFAULT_DEFINITION) {
-//                if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
+                if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
             }
             return new ModularUI(196, 256, this, entityPlayer)
                     .widget(tabContainer);

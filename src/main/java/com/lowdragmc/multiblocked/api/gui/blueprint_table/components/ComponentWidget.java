@@ -22,14 +22,17 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
+import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.dialogs.IRendererWidget;
+import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
@@ -81,63 +84,63 @@ public class ComponentWidget<T extends ComponentDefinition> extends
                 S2 = new WidgetGroup(0, 0, getSize().width, getSize().height));
         int y = 55;
         for (MultiblockCapability<?> capability : MbdCapabilities.CAPABILITY_REGISTRY.values()) {
-//            if (capability.hasTrait()) {
-//                WidgetGroup widgetGroup = new WidgetGroup(47, y, 100, 15);
-//                Runnable configurator = () -> {
-//                    DialogWidget dialog = new DialogWidget(group, true);
-//                    CapabilityTrait trait = capability.createTrait();
-//                    trait.serialize(definition.traits.get(capability.name));
-//                    
-//                    // set background
-//                    int xOffset = (384 - 176) / 2;
-//                    dialog.addWidget(new ImageWidget(0, 0, 384, 256, new ColorRectTexture(0xaf000000)));
-//                    ImageWidget imageWidget;
-//                    dialog.addWidget(imageWidget = new ImageWidget(xOffset, 0, 176, 256, null));
-//                    imageWidget.setImage(new ResourceTexture(JsonUtils.getString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png")));
-//                    dialog.addWidget(new ButtonWidget(xOffset - 20,10, 20, 20, new ResourceTexture("multiblocked:textures/gui/option.png"), cd2 -> {
-//                        new ResourceTextureWidget(dialog, texture -> {
-//                            if (texture != null) {
-//                                imageWidget.setImage(texture);
-//                            }
-//                        });
-//                    }).setHoverTooltips("multiblocked.gui.widget.component.set_bg"));
-//                    
-//                    // open trait settings
-//                    trait.openConfigurator(dialog);
-//                    
-//                    // save when closed
-//                    dialog.setOnClosed(() -> {
-//                        String background = ((ResourceTexture)imageWidget.getImage()).imageLocation.toString();
-//                        if (!background.equals("multiblocked:textures/gui/custom_gui.png")) {
-//                            definition.traits.addProperty("background", background);
-//                        }
-//                        definition.traits.add(capability.name, trait.deserialize());
-//                    });
-//                };
-//                ButtonWidget buttonWidget = new ButtonWidget(20, 0, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"), cd -> {
-//                    if (definition.traits.has(capability.name)) {
-//                        configurator.run();
-//                    }
-//                });
-//                buttonWidget.setVisible(definition.traits.has(capability.name));
-//                widgetGroup.addWidget(buttonWidget);
-//                widgetGroup.addWidget(new SwitchWidget(0, 0, 15, 15, (cd, r)-> {
-//                    if (r) {
-//                        configurator.run();
-//                    } else {
-//                        definition.traits.remove(capability.name);
-//                    }
-//                    buttonWidget.setVisible(r);
-//                })
-//                        .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
-//                        .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
-//                        .setHoverTexture(new ColorBorderTexture(1, 0xff545757))
-//                        .setPressed(definition.traits.has(capability.name))
-//                        .setHoverTooltips(capability.getUnlocalizedName()));
-//                widgetGroup.addWidget(new LabelWidget(40, 3, capability.getUnlocalizedName()));
-//                S2.addWidget(widgetGroup);
-//                y += 15;
-//            }
+            if (capability.hasTrait()) {
+                WidgetGroup widgetGroup = new WidgetGroup(47, y, 100, 15);
+                Runnable configurator = () -> {
+                    DialogWidget dialog = new DialogWidget(group, true);
+                    CapabilityTrait trait = capability.createTrait();
+                    trait.serialize(definition.traits.get(capability.name));
+
+                    // set background
+                    int xOffset = (384 - 176) / 2;
+                    dialog.addWidget(new ImageWidget(0, 0, 384, 256, new ColorRectTexture(0xaf000000)));
+                    ImageWidget imageWidget;
+                    dialog.addWidget(imageWidget = new ImageWidget(xOffset, 0, 176, 256, null));
+                    imageWidget.setImage(new ResourceTexture(JSONUtils.getAsString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png")));
+                    dialog.addWidget(new ButtonWidget(xOffset - 20,10, 20, 20, new ResourceTexture("multiblocked:textures/gui/option.png"), cd2 -> {
+                        new ResourceTextureWidget(dialog, texture -> {
+                            if (texture != null) {
+                                imageWidget.setImage(texture);
+                            }
+                        });
+                    }).setHoverTooltips("multiblocked.gui.widget.component.set_bg"));
+
+                    // open trait settings
+                    trait.openConfigurator(dialog);
+
+                    // save when closed
+                    dialog.setOnClosed(() -> {
+                        String background = ((ResourceTexture)imageWidget.getImage()).imageLocation.toString();
+                        if (!background.equals("multiblocked:textures/gui/custom_gui.png")) {
+                            definition.traits.addProperty("background", background);
+                        }
+                        definition.traits.add(capability.name, trait.deserialize());
+                    });
+                };
+                ButtonWidget buttonWidget = new ButtonWidget(20, 0, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"), cd -> {
+                    if (definition.traits.has(capability.name)) {
+                        configurator.run();
+                    }
+                });
+                buttonWidget.setVisible(definition.traits.has(capability.name));
+                widgetGroup.addWidget(buttonWidget);
+                widgetGroup.addWidget(new SwitchWidget(0, 0, 15, 15, (cd, r)-> {
+                    if (r) {
+                        configurator.run();
+                    } else {
+                        definition.traits.remove(capability.name);
+                    }
+                    buttonWidget.setVisible(r);
+                })
+                        .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
+                        .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
+                        .setHoverTexture(new ColorBorderTexture(1, 0xff545757))
+                        .setPressed(definition.traits.has(capability.name))
+                        .setHoverTooltips(capability.getUnlocalizedName()));
+                widgetGroup.addWidget(new LabelWidget(40, 3, capability.getUnlocalizedName()));
+                S2.addWidget(widgetGroup);
+                y += 15;
+            }
         }
 
         tabContainer.addTab((TabButton) new TabButton(235, 26, 20, 20)

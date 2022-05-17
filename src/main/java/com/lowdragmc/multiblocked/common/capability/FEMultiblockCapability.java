@@ -11,8 +11,10 @@ import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
+import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.common.capability.trait.FECapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
@@ -57,16 +59,16 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     public ContentWidget<? super Integer> createContentWidget() {
         return new NumberContentWidget().setContentTexture(new TextTexture("FE", color)).setUnit("FE");
     }
-//
-//    @Override
-//    public boolean hasTrait() {
-//        return true;
-//    }
-//
-//    @Override
-//    public CapabilityTrait createTrait() {
-//        return new FECapabilityTrait();
-//    }
+
+    @Override
+    public boolean hasTrait() {
+        return true;
+    }
+
+    @Override
+    public CapabilityTrait createTrait() {
+        return new FECapabilityTrait();
+    }
 
     @Override
     public BlockInfo[] getCandidates() {

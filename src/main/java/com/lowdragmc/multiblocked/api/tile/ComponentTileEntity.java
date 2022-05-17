@@ -1,12 +1,21 @@
 package com.lowdragmc.multiblocked.api.tile;
 
+import com.google.gson.JsonElement;
 import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.gui.factory.TileEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
+import com.lowdragmc.lowdraglib.gui.widget.TabButton;
+import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
+import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
+import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import io.netty.buffer.ByteBuf;
@@ -26,6 +35,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -42,7 +52,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -67,34 +79,37 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     protected String status = "unformed";
 
-//    protected Map<MultiblockCapability<?>, CapabilityTrait> traits = new HashMap<>();
+    protected Map<MultiblockCapability<?>, CapabilityTrait> traits = new HashMap<>();
 
     public ComponentTileEntity(T definition) {
         super(definition.getTileType());
         this.definition = definition;
-        //        for (Map.Entry<String, JsonElement> entry : this.definition.traits.entrySet()) {
-//            MultiblockCapability<?> capability = MbdCapabilities.get(entry.getKey());
-//            if (capability != null && capability.hasTrait()) {
-//                CapabilityTrait trait = capability.createTrait();
-//                trait.serialize(entry.getValue());
-//                trait.setComponent(this);
-//                traits.put(capability, trait);
-//            }
-//        }
+        initTrait();
+    }
+
+    protected void initTrait() {
+        for (Map.Entry<String, JsonElement> entry : this.definition.traits.entrySet()) {
+            MultiblockCapability<?> capability = MbdCapabilities.get(entry.getKey());
+            if (capability != null && capability.hasTrait()) {
+                CapabilityTrait trait = capability.createTrait();
+                trait.serialize(entry.getValue());
+                trait.setComponent(this);
+                traits.put(capability, trait);
+            }
+        }
     }
 
     public boolean needAlwaysUpdate() {
-        return level != null && !isRemote() && definition.needUpdateTick();
-//        return level != null && !isRemote() && (definition.needUpdateTick() || traits.values().stream().anyMatch(CapabilityTrait::hasUpdate));
+        return level != null && !isRemote() && (definition.needUpdateTick() || traits.values().stream().anyMatch(CapabilityTrait::hasUpdate));
     }
 
-//    public boolean hasTrait(MultiblockCapability<?> capability) {
-//        return traits.get(capability) != null;
-//    }
+    public boolean hasTrait(MultiblockCapability<?> capability) {
+        return traits.get(capability) != null;
+    }
 
-//    public CapabilityTrait getTrait(MultiblockCapability<?> capability) {
-//        return traits.get(capability);
-//    }
+    public CapabilityTrait getTrait(MultiblockCapability<?> capability) {
+        return traits.get(capability);
+    }
 
     public T getDefinition() {
         return definition;
@@ -143,11 +158,11 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         timer++;
 //        if (definition.updateTick != null) {
 //        }
-//        if (!traits.isEmpty()) {
-//            for (CapabilityTrait trait : traits.values()) {
-//                trait.update();
-//            }
-//        }
+        if (!traits.isEmpty()) {
+            for (CapabilityTrait trait : traits.values()) {
+                trait.update();
+            }
+        }
     }
 
     public String getStatus() {
@@ -177,7 +192,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         if (level != null && !level.isClientSide) {
             if (!isValidFrontFacing(facing)) return;
             if (getBlockState().getValue(BlockStateProperties.FACING) == facing) return;
-            level.setBlock(getBlockPos(), getBlockState().setValue(BlockStateProperties.FACING, facing), 1 + 2);
+            level.setBlock(getBlockPos(), getBlockState().setValue(BlockStateProperties.FACING, facing), 3);
         }
     }
 
@@ -258,9 +273,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     public void onDrops(NonNullList<ItemStack> drops, PlayerEntity player) {
 //        if (definition.onDrops != null) {
 //        }
-//        for (CapabilityTrait trait : traits.values()) {
-//            trait.onDrops(drops, player);
-//        }
+        for (CapabilityTrait trait : traits.values()) {
+            trait.onDrops(drops, player);
+        }
         drops.add(definition.getStackForm());
     }
 
@@ -269,7 +284,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
             if (player instanceof ServerPlayerEntity) {
                 return TileEntityUIFactory.INSTANCE.openUI(this, (ServerPlayerEntity) player) ? ActionResultType.SUCCESS : ActionResultType.PASS;
             } else {
-//                return !traits.isEmpty();
+                return traits.isEmpty() ? ActionResultType.PASS : ActionResultType.SUCCESS;
             }
         }
         return ActionResultType.PASS;
@@ -285,26 +300,26 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     @Override
     @Nonnull
-    public <K> LazyOptional<K> getCapability(@Nonnull Capability<K> cap, @Nullable Direction facing) {
-//        for (CapabilityTrait trait : traits.values()) {
-//            K result = trait.getCapability(capability, facing);
-//            if (result != null) {
-//                return result;
-//            }
-//        }
-        return super.getCapability(cap, facing);
+    public <K> LazyOptional<K> getCapability(@Nonnull Capability<K> capability, @Nullable Direction facing) {
+        for (CapabilityTrait trait : traits.values()) {
+            LazyOptional<K> result = trait.getCapability(capability, facing);
+            if (result.isPresent()) {
+                return result;
+            }
+        }
+        return super.getCapability(capability, facing);
     }
 
     @Nullable
     @Override
-    public  <K> LazyOptional<K> getInnerCapability(@Nonnull Capability<K> cap, @Nullable Direction facing) {
-//        for (CapabilityTrait trait : traits.values()) {
-//            K result = trait.getInnerCapability(capability, facing);
-//            if (result != null) {
-//                return result;
-//            }
-//        }
-        return getCapability(cap, facing);
+    public  <K> LazyOptional<K> getInnerCapability(@Nonnull Capability<K> capability, @Nullable Direction facing) {
+        for (CapabilityTrait trait : traits.values()) {
+            LazyOptional<K> result = trait.getInnerCapability(capability, facing);
+            if (result.isPresent()) {
+                return result;
+            }
+        }
+        return getCapability(capability, facing);
     }
 
     //************* gui *************//
@@ -319,11 +334,10 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     @Override
     public ModularUI createUI(PlayerEntity PlayerEntity) {
-//        if (traits.isEmpty()) return null;
-//        TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
-//        initTraitUI(tabContainer, PlayerEntity);
-//        return new ModularUI(196, 256,this, PlayerEntity).widget(tabContainer);
-        return null;
+        if (traits.isEmpty()) return null;
+        TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
+        initTraitUI(tabContainer, PlayerEntity);
+        return new ModularUI(196, 256,this, PlayerEntity).widget(tabContainer);
     }
 
     @Override
@@ -331,25 +345,24 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         return isRemoved();
     }
 
-    //    protected void initTraitUI(TabContainer tabContainer, PlayerEntity PlayerEntity) {
-//        WidgetGroup group = new WidgetGroup(20, 0, 176, 256);
-//        tabContainer.addTab(new TabButton(0, tabContainer.containerGroup.widgets.size() * 20, 20, 20)
-//                        .setTexture(
-//                                new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0, 1, 0.5),
-//                                new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0.5, 1, 0.5)), group);
-//        group.addWidget(new ImageWidget(0, 0, 176, 256, new ResourceTexture(JsonUtils.getString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png"))));
-//        for (CapabilityTrait trait : traits.values()) {
-//            trait.createUI(this, group, PlayerEntity);
-//        }
-//    }
+    protected void initTraitUI(TabContainer tabContainer, PlayerEntity PlayerEntity) {
+        WidgetGroup group = new WidgetGroup(20, 0, 176, 256);
+        tabContainer.addTab(new TabButton(0, tabContainer.containerGroup.widgets.size() * 20, 20, 20)
+                        .setTexture(new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0, 1, 0.5),
+                                new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0.5, 1, 0.5)), group);
+        group.addWidget(new ImageWidget(0, 0, 176, 256, new ResourceTexture(JSONUtils.getAsString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png"))));
+        for (CapabilityTrait trait : traits.values()) {
+            trait.createUI(this, group, PlayerEntity);
+        }
+    }
 
-//    public final void writeTraitData(CapabilityTrait trait, int internalId, Consumer<PacketBuffer> dataWriter) {
-//        this.writeCustomData(3, (buffer) -> {
-//            buffer.writeUtf(trait.capability.name);
-//            buffer.writeVarInt(internalId);
-//            dataWriter.accept(buffer);
-//        });
-//    }
+    public final void writeTraitData(CapabilityTrait trait, int internalId, Consumer<PacketBuffer> dataWriter) {
+        this.writeCustomData(3, (buffer) -> {
+            buffer.writeUtf(trait.capability.name);
+            buffer.writeVarInt(internalId);
+            dataWriter.accept(buffer);
+        });
+    }
 
     //************* data sync *************//
 
@@ -395,10 +408,10 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 //                Multiblocked.LOGGER.error("handling ct custom data error id:{}", id);
 //            }
         } else if (dataId == 3) {
-//            MultiblockCapability<?> capability = MbdCapabilities.get(buf.readUtf());
-//            if (traits.containsKey(capability)) {
-//                traits.get(capability).receiveCustomData(buf.readVarInt(), buf);
-//            }
+            MultiblockCapability<?> capability = MbdCapabilities.get(buf.readUtf());
+            if (traits.containsKey(capability)) {
+                traits.get(capability).receiveCustomData(buf.readVarInt(), buf);
+            }
         }
     }
 
@@ -430,10 +443,10 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         if (compound.contains("owner")) {
             this.owner = compound.getUUID("owner");
         }
-//        CompoundNBT traitTag = compound.getCompound("trait");
-//        for (Map.Entry<MultiblockCapability<?>, CapabilityTrait> entry : traits.entrySet()) {
-//            entry.getValue().readFromNBT(traitTag.getCompoundTag(entry.getKey().name));
-//        }
+        CompoundNBT traitTag = compound.getCompound("trait");
+        for (Map.Entry<MultiblockCapability<?>, CapabilityTrait> entry : traits.entrySet()) {
+            entry.getValue().readFromNBT(traitTag.getCompound(entry.getKey().name));
+        }
     }
 
     @Nonnull
@@ -445,13 +458,13 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
             compound.putUUID("owner", this.owner);
         }
         compound.putString("mbd_def", definition.location.toString());
-//        CompoundNBT traitTag = new CompoundNBT();
-//        for (Map.Entry<MultiblockCapability<?>, CapabilityTrait> entry : traits.entrySet()) {
-//            CompoundNBT tag = new CompoundNBT();
-//            entry.getValue().writeToNBT(tag);
-//            traitTag.setTag(entry.getKey().name, tag);
-//        }
-//        compound.setTag("trait", traitTag);
+        CompoundNBT traitTag = new CompoundNBT();
+        for (Map.Entry<MultiblockCapability<?>, CapabilityTrait> entry : traits.entrySet()) {
+            CompoundNBT tag = new CompoundNBT();
+            entry.getValue().writeToNBT(tag);
+            traitTag.put(entry.getKey().name, tag);
+        }
+        compound.put("trait", traitTag);
         return compound;
     }
 
@@ -460,7 +473,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         dataWriter.accept(new PacketBuffer(backedBuffer));
         byte[] updateData = Arrays.copyOfRange(backedBuffer.array(), 0, backedBuffer.writerIndex());
         updateEntries.add(new UpdateEntry(discriminator, updateData));
-        @SuppressWarnings("deprecation")
         BlockState state = getBlockState();
         if (level != null) {
             level.sendBlockUpdated(getBlockPos(), state, state, 3);

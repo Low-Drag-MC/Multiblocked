@@ -16,12 +16,14 @@ import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.lowdraglib.utils.ItemStackKey;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -29,6 +31,7 @@ import it.unimi.dsi.fastutil.longs.LongSets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -154,7 +157,8 @@ public class PatternWidget extends WidgetGroup {
         slotWidgets = new SlotWidget[Math.min(pattern.parts.size(), 18)];
         IItemHandler itemHandler = new ItemStackHandler(pattern.parts);
         for (int i = 0; i < slotWidgets.length; i++) {
-            slotWidgets[i] = new SlotWidget(itemHandler, i, 7 + (i % 9) * 18, 176 + (i / 9) * 18, false, false);
+            slotWidgets[i] = new SlotWidget(itemHandler, i, 7 + (i % 9) * 18, 176 + (i / 9) * 18, false, false)
+                    .setItemHook(this::itemHook);
             addWidget(slotWidgets[i]);
         }
         leftButton.setVisible(index > 0);
@@ -201,12 +205,26 @@ public class PatternWidget extends WidgetGroup {
             for (int i = 0; i < candidateStacks.size(); i++) {
                 int finalI = i;
                 candidates[i] = new SlotWidget(itemHandler, i, 9 + (i / 6) * 18, 33 + (i % 6) * 18, false, false)
+                        .setItemHook(this::itemHook)
                         .setBackgroundTexture(new ColorRectTexture(0x4fffffff))
                         .setOnAddedTooltips((slot, list) -> predicateTips.get(finalI).forEach(tip -> list.add(new StringTextComponent(tip))));
                 addWidget(candidates[i]);
             }
             updateClientSlots();
         }
+    }
+
+    private ItemStack itemHook(ItemStack itemStack) {
+        if (itemStack.getItem() instanceof BlockItem) {
+            Block block = ((BlockItem) itemStack.getItem()).getBlock();
+            if (block instanceof BlockComponent) {
+                if (((BlockComponent) block).definition.baseRenderer instanceof CycleBlockStateRenderer) {
+                    CycleBlockStateRenderer renderer = ((CycleBlockStateRenderer) ((BlockComponent) block).definition.baseRenderer);
+                    itemStack = renderer.getBlockInfo().getItemStackForm();
+                }
+            }
+        }
+        return itemStack;
     }
 
     private void updateClientSlots() {

@@ -53,6 +53,7 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
                     }
                 }
             }
+            initTrait();
         }
     }
 
@@ -68,7 +69,7 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
             TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
             new ControllerScriptWidget(this, tabContainer);
             if (getDefinition() != DEFAULT_DEFINITION) {
-//                if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
+                if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
                 if (isFormed()) {
                     new RecipePage(this, tabContainer);
                     new IOPageWidget(this, tabContainer);

@@ -13,6 +13,7 @@ buildscript {
 }
 
 repositories {
+    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     maven { url 'https://dvs1.progwml6.com/files/maven' }
 }
 
@@ -160,7 +161,10 @@ dependencies {
         runtimeOnly fg.deobf("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
         compileOnly ("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
     }
-    
+
+    //geckolib
+    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.71')
+
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}")

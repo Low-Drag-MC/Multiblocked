@@ -11,8 +11,10 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
+import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.common.capability.trait.FluidCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.FluidContentWidget;
 import net.minecraft.block.Block;
 import net.minecraft.fluid.Fluids;
@@ -60,16 +62,16 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
     public ContentWidget<? super FluidStack> createContentWidget() {
         return new FluidContentWidget();
     }
-//
-//    @Override
-//    public boolean hasTrait() {
-//        return true;
-//    }
-//
-//    @Override
-//    public CapabilityTrait createTrait() {
-//        return new FluidCapabilityTrait();
-//    }
+
+    @Override
+    public boolean hasTrait() {
+        return true;
+    }
+
+    @Override
+    public CapabilityTrait createTrait() {
+        return new FluidCapabilityTrait();
+    }
 
     @Override
     public BlockInfo[] getCandidates() {

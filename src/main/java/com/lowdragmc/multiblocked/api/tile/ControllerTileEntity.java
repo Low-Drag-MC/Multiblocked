@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.api.tile;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
+import com.lowdragmc.lowdraglib.gui.factory.TileEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.multiblocked.Multiblocked;
@@ -28,14 +29,21 @@ import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -45,6 +53,8 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static net.minecraft.util.Util.NIL_UUID;
 
 /**
  * A TileEntity that defies all controller machines.
@@ -337,8 +347,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return compound;
     }
 
-//    @Override
-//    public boolean onRightClick(PlayerEntity player, Hand hand, Direction facing, float hitX, float hitY, float hitZ) {
+    @Override
+    public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
 //        if (definition.onRightClick != null) {
 //            try {
 //                if (definition.onRightClick.apply(this, CraftTweakerMC.getIPlayer(player), CraftTweakerMC.getIFacing(facing), hitX, hitY, hitZ)) return true;
@@ -347,40 +357,40 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 //                Multiblocked.LOGGER.error("definition {} custom logic {} error", definition.location, "onRightClick", exception);
 //            }
 //        }
-//        if (!world.isRemote) {
-//            if (!isFormed() && definition.catalyst != null) {
-//                if (state == null) state = new MultiblockState(world, pos);
-//                ItemStack held = player.getHeldItem(hand);
-//                if (definition.catalyst.isEmpty() || held.isItemEqual(definition.catalyst)) {
-//                    if (checkPattern()) { // formed
-//                        player.swingArm(hand);
-//                        ITextComponent formedMsg = new TextComponentTranslation(getUnlocalizedName()).appendSibling(new TextComponentTranslation("multiblocked.multiblock.formed"));
-//                        player.sendStatusMessage(formedMsg, true);
-//                        if (!player.isCreative() && !definition.catalyst.isEmpty()) {
-//                            held.shrink(1);
-//                        }
-//                        MultiblockWorldSavedData.getOrCreate(world).addMapping(state);
-//                        if (!needAlwaysUpdate()) {
-//                            MultiblockWorldSavedData.getOrCreate(world).addLoading(this);
-//                        }
-//                        onStructureFormed();
-//                        return true;
-//                    }
-//                }
-//            }
-//            if (!player.isSneaking()) {
-//                if (!world.isRemote && player instanceof EntityPlayerMP) {
-//                    TileEntityUIFactory.INSTANCE.openUI(this, (EntityPlayerMP) player);
-//                }
-//            }
-//        }
-//        return true;
-//    }
-//
+        if (!isRemote()) {
+            if (!isFormed() && definition.catalyst != null) {
+                if (state == null) state = new MultiblockState(level, getBlockPos());
+                ItemStack held = player.getItemInHand(hand);
+                if (definition.catalyst.isEmpty() || held.equals(definition.catalyst, false)) {
+                    if (checkPattern()) { // formed
+                        player.swing(hand);
+                        ITextComponent formedMsg = new TranslationTextComponent(getUnlocalizedName()).append(new TranslationTextComponent("multiblocked.multiblock.formed"));
+                        player.sendMessage(formedMsg, NIL_UUID);
+                        if (!player.isCreative() && !definition.catalyst.isEmpty()) {
+                            held.shrink(1);
+                        }
+                        MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
+                        if (!needAlwaysUpdate()) {
+                            MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
+                        }
+                        onStructureFormed();
+                        return ActionResultType.SUCCESS;
+                    }
+                }
+            }
+            if (!player.isCrouching()) {
+                if (!isRemote() && player instanceof ServerPlayerEntity) {
+                    TileEntityUIFactory.INSTANCE.openUI(this, (ServerPlayerEntity) player);
+                }
+            }
+        }
+        return ActionResultType.SUCCESS;
+    }
+
     @Override
     public ModularUI createUI(PlayerEntity entityPlayer) {
         TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
-//        if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
+        if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
         if (isFormed()) {
             new RecipePage(this, tabContainer);
             new IOPageWidget(this, tabContainer);

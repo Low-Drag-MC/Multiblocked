@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class MbdComponents {
-    public static final Set<Class <? extends TileEntity>> CLASS_SET = new HashSet<>();
     public static final Map<ResourceLocation, ComponentDefinition> DEFINITION_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, BlockComponent> COMPONENT_BLOCKS_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, ItemComponent> COMPONENT_ITEMS_REGISTRY = new HashMap<>();
@@ -87,7 +86,7 @@ public class MbdComponents {
 
     }
 
-    public static void executeInitHandler() {
+    public static void commonLastWork() {
         handlers.forEach(Runnable::run);
         handlers.clear();
     }

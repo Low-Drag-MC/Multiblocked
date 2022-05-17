@@ -9,9 +9,11 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
+import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.common.capability.trait.ItemCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.ItemsContentWidget;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
@@ -53,15 +55,15 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
         return new ItemCapabilityProxy(tileEntity);
     }
 
-//    @Override
-//    public boolean hasTrait() {
-//        return true;
-//    }
-//
-//    public CapabilityTrait createTrait() {
-//        return new ItemCapabilityTrait();
-//    }
-//
+    @Override
+    public boolean hasTrait() {
+        return true;
+    }
+
+    public CapabilityTrait createTrait() {
+        return new ItemCapabilityTrait();
+    }
+
     @Override
     public ContentWidget<? super ItemsIngredient> createContentWidget() {
         return new ItemsContentWidget();

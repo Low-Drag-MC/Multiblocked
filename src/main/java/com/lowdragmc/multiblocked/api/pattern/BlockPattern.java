@@ -22,6 +22,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -38,11 +40,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BlockPattern {
 
     static Direction[] FACINGS = {Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST, Direction.UP, Direction.DOWN};
+    static Direction[] FACINGS_H = {Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST};
     public final int[][] aisleRepetitions;
     public final RelativeDirection[] structureDir;
     protected final TraceabilityPredicate[][][] blockMatches; //[z][y][x]
@@ -304,6 +309,8 @@ public class BlockPattern {
                             TileEntity tileEntity = world.getBlockEntity(pos);
                             if (tileEntity instanceof ComponentTileEntity) {
                                 blocks.put(pos, tileEntity);
+                            } else {
+                                blocks.put(pos, world.getBlockState(pos));
                             }
                         }
                     }
@@ -311,28 +318,20 @@ public class BlockPattern {
                 z++;
             }
         }
-        Direction[] facings = ArrayUtils.addAll(new Direction[]{facing}, FACINGS); // follow controller first
         blocks.forEach((pos, block) -> { // adjust facing
-            if (block instanceof ComponentTileEntity) {
-                ComponentTileEntity<?> componentTileEntity = (ComponentTileEntity<?>) block;
-                boolean find = false;
-                for (Direction Direction : facings) {
-                    if (componentTileEntity.isValidFrontFacing(Direction)) {
-                        if (!blocks.containsKey(pos.relative(Direction))) {
-                            componentTileEntity.setFrontFacing(Direction);
-                            find = true;
-                            break;
-                        }
+            if (block instanceof BlockState) {
+                resetFacing(pos, (BlockState) block, (p, f) -> {
+                    Object object = blocks.get(p.relative(f));
+                    return object == null || (object instanceof BlockState && ((BlockState) object).getBlock() == Blocks.AIR);
+                }, state -> world.setBlock(pos, state, 3));
+            } else if (block instanceof ComponentTileEntity) {
+                resetFacing(pos, ((ComponentTileEntity<?>) block).getBlockState(), (p, f) -> {
+                    Object object = blocks.get(p.relative(f));
+                    if (object == null || (object instanceof BlockState && ((BlockState) object).getBlock() == Blocks.AIR)) {
+                        return ((ComponentTileEntity<?>) block).isValidFrontFacing(f);
                     }
-                }
-                if (!find) {
-                    for (Direction Direction : FACINGS) {
-                        if (world.isEmptyBlock(pos.relative(Direction)) && componentTileEntity.isValidFrontFacing(Direction)) {
-                            componentTileEntity.setFrontFacing(Direction);
-                            break;
-                        }
-                    }
-                }
+                    return false;
+                }, state -> world.setBlock(pos, state, 3));
             }
         });
     }
@@ -447,31 +446,42 @@ public class BlockPattern {
         int finalMinY = minY;
         int finalMinZ = minZ;
         blocks.forEach((pos, info) -> {
-            if (info.getTileEntity() instanceof ComponentTileEntity<?>) {
-                ComponentTileEntity<?> componentTileEntity = (ComponentTileEntity<?>) info.getTileEntity();
-                boolean find = false;
-                for (Direction Direction : FACINGS) {
-                    if (componentTileEntity.isValidFrontFacing(Direction)) {
-                        if (!blocks.containsKey(pos.relative(Direction))) {
-                            componentTileEntity.setFrontFacing(Direction);
-                            find = true;
-                            break;
-                        }
+            TileEntity te = blocks.get(pos).getTileEntity();
+            resetFacing(pos, info.getBlockState(), (p, f) -> {
+                BlockInfo blockInfo = blocks.get(p.relative(f));
+                if (blockInfo == null || blockInfo.getBlockState().getBlock() == Blocks.AIR) {
+                    if (te instanceof ComponentTileEntity) {
+                        return ((ComponentTileEntity<?>) te).isValidFrontFacing(f);
                     }
+                    return true;
                 }
-                if (!find) {
-                    for (Direction Direction : FACINGS) {
-                        BlockInfo blockInfo = blocks.get(pos.relative(Direction));
-                        if (blockInfo != null && blockInfo.getBlockState().getBlock() == Blocks.AIR && componentTileEntity.isValidFrontFacing(Direction)) {
-                            componentTileEntity.setFrontFacing(Direction);
-                            break;
-                        }
-                    }
-                }
-            }
+                return false;
+            }, info::setBlockState);
             result[pos.getX() - finalMinX][pos.getY() - finalMinY][pos.getZ() - finalMinZ] = info;
         });
         return result;
+    }
+
+    private void resetFacing(BlockPos pos, BlockState blockState, BiFunction<BlockPos, Direction, Boolean> checker, Consumer<BlockState> consumer) {
+        if (blockState.hasProperty(BlockStateProperties.FACING)) {
+            tryFacings(blockState, pos, checker, consumer, BlockStateProperties.FACING, FACINGS);
+        } else if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            tryFacings(blockState, pos, checker, consumer, BlockStateProperties.HORIZONTAL_FACING, FACINGS_H);
+        }
+    }
+
+    private void tryFacings(BlockState blockState, BlockPos pos, BiFunction<BlockPos, Direction, Boolean> checker, Consumer<BlockState> consumer, DirectionProperty property, Direction[] facings) {
+        Direction found = null;
+        for (Direction facing : facings) {
+            if (checker.apply(pos, facing)) {
+                found = facing;
+                break;
+            }
+        }
+        if (found == null) {
+            found = Direction.NORTH;
+        }
+        consumer.accept(blockState.setValue(property, found));
     }
 
     private BlockPos setActualRelativeOffset(int x, int y, int z, Direction facing) {

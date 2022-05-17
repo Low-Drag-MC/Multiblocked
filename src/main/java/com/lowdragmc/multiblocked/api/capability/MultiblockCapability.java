@@ -10,6 +10,7 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
+import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import net.minecraft.client.resources.I18n;
@@ -80,13 +81,13 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
         }.setBackground(new ColorRectTexture(color));
     }
 
-//    public boolean hasTrait() {
-//        return false;
-//    }
+    public boolean hasTrait() {
+        return false;
+    }
 
-//    public CapabilityTrait createTrait() {
-//        return null;
-//    }
+    public CapabilityTrait createTrait() {
+        return null;
+    }
 
     public <C> Set<C> getCapability(Capability<C> capability, @Nonnull TileEntity tileEntity) {
         Set<C> found = new LinkedHashSet<>();

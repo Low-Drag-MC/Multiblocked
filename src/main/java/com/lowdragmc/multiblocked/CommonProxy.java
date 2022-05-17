@@ -26,11 +26,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
+import software.bernie.geckolib3.GeckoLib;
 
 import java.io.File;
 
 public class CommonProxy {
     public CommonProxy() {
+        if (Multiblocked.isModLoaded(Multiblocked.MODID_GEO)) {
+            GeckoLib.initialize();
+        }
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         eventBus.register(this);
         MultiblockedNetworking.init();
@@ -40,11 +44,13 @@ public class CommonProxy {
     }
 
     @SubscribeEvent
-    public void clientSetup(FMLCommonSetupEvent e) {
+    public void commonSetup(FMLCommonSetupEvent e) {
         e.enqueueWork(()->{
             for (MultiblockCapability<?> capability : MbdCapabilities.CAPABILITY_REGISTRY.values()) {
                 capability.getAnyBlock().definition.baseRenderer = new CycleBlockStateRenderer(capability.getCandidates());
             }
+            RecipeMap.registerRecipeFromFile(Multiblocked.GSON, new File(Multiblocked.location, "recipe_map"));
+            MbdComponents.commonLastWork();
         });
     }
 

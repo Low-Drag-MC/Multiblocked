@@ -14,6 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
@@ -29,6 +30,7 @@ public class ItemBlueprint extends Item {
         return !stack.isEmpty() && stack.getItem() instanceof ItemBlueprint;
     }
 
+    @Nullable
     public static BlockPos[] getPos(ItemStack stack) {
         CompoundNBT tag = stack.getOrCreateTagElement("blueprint");
         if (!tag.contains("minX")) return null;

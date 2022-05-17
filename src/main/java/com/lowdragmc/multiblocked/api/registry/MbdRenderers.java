@@ -4,6 +4,8 @@ package com.lowdragmc.multiblocked.api.registry;
 import com.google.common.collect.Maps;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import com.lowdragmc.multiblocked.client.renderer.impl.GTRenderer;
+import com.lowdragmc.multiblocked.client.renderer.impl.GeoComponentRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDIModelRenderer;
 
@@ -23,12 +25,10 @@ public class MbdRenderers {
     public static void registerRenderers() {
         registerRenderer(MBDIModelRenderer.INSTANCE);
         registerRenderer(MBDBlockStateRenderer.INSTANCE);
-//        registerRenderer(B3DRenderer.INSTANCE);
-//        registerRenderer(OBJRenderer.INSTANCE);
 //        registerRenderer(TextureParticleRenderer.INSTANCE);
-//        registerRenderer(GTRenderer.INSTANCE);
+        registerRenderer(GTRenderer.INSTANCE);
         if (Multiblocked.isModLoaded(Multiblocked.MODID_GEO)) {
-//            registerRenderer(GeoComponentRenderer.INSTANCE);
+            registerRenderer(GeoComponentRenderer.INSTANCE);
         }
     }
 }

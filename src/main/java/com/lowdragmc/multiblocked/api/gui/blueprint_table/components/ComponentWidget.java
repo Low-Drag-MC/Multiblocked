@@ -69,7 +69,7 @@ public class ComponentWidget<T extends ComponentDefinition> extends
                 S1 = new WidgetGroup(0, 0, getSize().width, getSize().height));
         int x = 47;
         S1.addWidget(new LabelWidget(x, 57, "multiblocked.gui.label.registry_name"));
-        S1.addWidget(new TextFieldWidget(x + 80, 54, 150, 15,  null, this::updateRegistryName).setCurrentString(this.location.toString()));
+        S1.addWidget(new TextFieldWidget(x + 80, 54, 150, 15,  null, this::updateRegistryName).setResourceLocationOnly().setCurrentString(this.location.toString()));
         S1.addWidget(createBoolSwitch(x, 75, "allowRotate", "multiblocked.gui.widget.component.allowRotate", definition.allowRotate, r -> definition.allowRotate = r));
         S1.addWidget(createBoolSwitch(x, 90, "showInJei", "multiblocked.gui.widget.component.jei", definition.showInJei, r -> definition.showInJei = r));
         S1.addWidget(createBoolSwitch(x, 105, "isOpaqueCube", "multiblocked.gui.widget.component.opaque", definition.properties.isOpaque, r -> definition.properties.isOpaque = r));

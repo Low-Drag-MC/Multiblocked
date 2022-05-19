@@ -61,27 +61,33 @@ public class RecipePage extends PageWidget{
                         .setWidth(162)
                         .setDropShadow(true)));
         this.addWidget(new ProgressWidget(this::getProgress, 17, 154, 143, 9).setProgressBar(
-                (matrixStack, mouseX, mouseY, x, y, width, height) -> { // back
-                    float imageU = 185f / 256;
-                    float imageV = 0;
-                    float imageWidth = 9f / 256;
-                    float imageHeight = 143f / 256;
-                    Minecraft.getInstance().textureManager.bind(resourceTexture.imageLocation);
-                    Tessellator tessellator = Tessellator.getInstance();
-                    BufferBuilder bufferbuilder = tessellator.getBuilder();
-                    bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-                    Matrix4f mat = matrixStack.last().pose();
-                    bufferbuilder.vertex(mat, x, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).endVertex();
-                    bufferbuilder.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth, imageV).endVertex();
-                    bufferbuilder.vertex(mat, x + width, y, 0).uv(imageU, imageV).endVertex();
-                    bufferbuilder.vertex(mat, x, y, 0).uv(imageU, imageV + imageHeight).endVertex();
-                    tessellator.end();
+                new IGuiTexture() {
+                    @OnlyIn(Dist.CLIENT)
+                    @Override
+                    public void draw(MatrixStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+                        float imageU = 185f / 256;
+                        float imageV = 0;
+                        float imageWidth = 9f / 256;
+                        float imageHeight = 143f / 256;
+                        Minecraft.getInstance().textureManager.bind(resourceTexture.imageLocation);
+                        Tessellator tessellator = Tessellator.getInstance();
+                        BufferBuilder bufferbuilder = tessellator.getBuilder();
+                        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+                        Matrix4f mat = stack.last().pose();
+                        bufferbuilder.vertex(mat, x, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).endVertex();
+                        bufferbuilder.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth, imageV).endVertex();
+                        bufferbuilder.vertex(mat, x + width, y, 0).uv(imageU, imageV).endVertex();
+                        bufferbuilder.vertex(mat, x, y, 0).uv(imageU, imageV + imageHeight).endVertex();
+                        tessellator.end();
+                    }
                 }, new IGuiTexture() {
+                    @OnlyIn(Dist.CLIENT)
                     @Override
                     public void draw(MatrixStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
 
                     }
 
+                    @OnlyIn(Dist.CLIENT)
                     @Override
                     public void drawSubArea(MatrixStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
                         float imageU = 176f / 256;

@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
@@ -55,7 +56,13 @@ public class RecipeTypeAdapter implements JsonSerializer<Recipe>,
                 ImmutableList.Builder<Tuple<Object, Float>> listBuilder = new ImmutableList.Builder<>();
                 for (JsonElement element : entry.getValue().getAsJsonArray()) {
                     JsonObject recipe = element.getAsJsonObject();
-                    Object content = capability.deserialize(recipe.get("content"));
+                    Object content;
+                    try {
+                        content = capability.deserialize(recipe.get("content"));
+                    } catch (Exception e) {
+                        Multiblocked.LOGGER.error(e);
+                        content = null;
+                    }
                     if (content != null) {
                         listBuilder.add(new Tuple<>(content, recipe.get("chance").getAsFloat()));
                     }

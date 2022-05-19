@@ -6,11 +6,12 @@
   "minVersion": "0.8",
   "client": [
     "RenderChunkMixin",
-    "TileEntityRendererDispatcherMixin",
+    "TileEntityRendererDispatcherMixin"
   ],
   "mixins": [
     "BlockMixin",
     "ChunkMixin",
+    "ServerChunkProviderMixin",
     "WorldMixin"
   ]
 }

@@ -1,10 +1,10 @@
 package com.lowdragmc.multiblocked.persistence;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.lowdragmc.lowdraglib.utils.DummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -32,8 +32,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public class MultiblockWorldSavedData extends WorldSavedData {
 
@@ -49,7 +52,7 @@ public class MultiblockWorldSavedData extends WorldSavedData {
         }
 
         @Override
-        public void createSearchingThread() {
+        public void createExecutorService() {
         }
     };
 
@@ -128,12 +131,12 @@ public class MultiblockWorldSavedData extends WorldSavedData {
             if (last instanceof IAsyncThreadUpdate) {
                 asyncComponents.remove(last);
                 if (asyncComponents.isEmpty()) {
-                    releaseSearchingThread();
+                    releaseExecutorService();
                 }
             }
             if (tileEntity instanceof IAsyncThreadUpdate) {
                 asyncComponents.add((IAsyncThreadUpdate) tileEntity);
-                createSearchingThread();
+                createExecutorService();
             }
         }
     }
@@ -143,7 +146,7 @@ public class MultiblockWorldSavedData extends WorldSavedData {
         if (component instanceof IAsyncThreadUpdate) {
             asyncComponents.remove(component);
             if (asyncComponents.isEmpty()) {
-                releaseSearchingThread();
+                releaseExecutorService();
             }
         }
     }
@@ -209,57 +212,46 @@ public class MultiblockWorldSavedData extends WorldSavedData {
 
     // ********************************* thread for searching ********************************* //
     private final CopyOnWriteArrayList<IAsyncThreadUpdate> asyncComponents = new CopyOnWriteArrayList<>();
-    private Thread thread;
-    private long periodID = Multiblocked.RNG.nextLong();
-    private float tps = 4;
+    private ScheduledExecutorService executorService;
+    private final static ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder()
+            .setNameFormat("Multiblocked Async Thread-%d")
+            .setDaemon(true)
+            .build();
+    private static final ThreadLocal<Boolean> IN_SERVICE = ThreadLocal.withInitial(()->false);
+    private long periodID = Long.MIN_VALUE;
 
-    public void createSearchingThread() {
-        if (thread != null && !thread.isInterrupted()) return;
-        thread = new Thread(this::searchingTask);
-        thread.start();
+    public void createExecutorService() {
+        if (executorService != null && !executorService.isShutdown()) return;
+        executorService = Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
+        executorService.scheduleAtFixedRate(this::searchingTask, 0, 250, TimeUnit.MILLISECONDS);
     }
 
     private void searchingTask() {
-        long tpsST = System.currentTimeMillis();
-        while (!Thread.interrupted()) {
-            long st = System.currentTimeMillis();
-            try {
-                for (IAsyncThreadUpdate asyncComponent : asyncComponents) {
-                    asyncComponent.asyncThreadLogic(periodID);
-                }
-            } catch (Throwable e) {
-                Multiblocked.LOGGER.error("asyncThreadLogic error: {}", e.getMessage());
+        try {
+            IN_SERVICE.set(true);
+            for (IAsyncThreadUpdate asyncComponent : asyncComponents) {
+                asyncComponent.asyncThreadLogic(periodID);
             }
-            periodID++;
-            long et = System.currentTimeMillis();
-            if (periodID % 20 == 0) {
-                tps = Math.min((et - tpsST) / 1250f, 4);
-                tpsST = et;
-            }
-            long dur = (et - st);
-            if (dur < 250) {
-                try {
-                    Thread.sleep(Math.min(250, 250 - dur));
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
+            IN_SERVICE.set(false);
+        } catch (Throwable e) {
+            Multiblocked.LOGGER.error("asyncThreadLogic error: {}", e.getMessage());
         }
+        periodID++;
     }
 
-    public void releaseSearchingThread() {
-        if (thread != null) {
-            thread.interrupt();
+    public static boolean isThreadService() {
+        return IN_SERVICE.get();
+    }
+
+    public void releaseExecutorService() {
+        if (executorService != null) {
+            executorService.shutdownNow();
         }
-        thread = null;
+        executorService = null;
     }
 
     public long getPeriodID() {
         return periodID;
-    }
-
-    public float getTPS () {
-        return tps;
     }
 
 }

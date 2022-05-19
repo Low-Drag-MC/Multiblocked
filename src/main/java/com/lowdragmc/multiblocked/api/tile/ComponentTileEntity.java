@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
+import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TabButton;
 import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
@@ -351,6 +352,16 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
                         .setTexture(new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0, 1, 0.5),
                                 new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0.5, 1, 0.5)), group);
         group.addWidget(new ImageWidget(0, 0, 176, 256, new ResourceTexture(JSONUtils.getAsString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png"))));
+        if (traits.size() > 0 ) {
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 9; col++) {
+                    group.addWidget(new SlotWidget(PlayerEntity.inventory, col + (row + 1) * 9, 7 + col * 18, 173 + row * 18).setLocationInfo(true, false));
+                }
+            }
+            for (int slot = 0; slot < 9; slot++) {
+                group.addWidget(new SlotWidget(PlayerEntity.inventory, slot, 7 + slot * 18, 231).setLocationInfo(true, true));
+            }
+        }
         for (CapabilityTrait trait : traits.values()) {
             trait.createUI(this, group, PlayerEntity);
         }

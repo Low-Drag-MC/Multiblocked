@@ -7,7 +7,6 @@ import com.lowdragmc.lowdraglib.gui.widget.BlockSelectorWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import net.minecraft.block.BlockState;
 
@@ -22,9 +21,7 @@ public class MBDBlockStateRenderer extends BlockStateRenderer implements IMultib
 
     public static final IMultiblockedRenderer INSTANCE = new MBDBlockStateRenderer();
 
-    private MBDBlockStateRenderer() {
-        super((BlockInfo) null);
-    }
+    private MBDBlockStateRenderer() { }
 
     public MBDBlockStateRenderer(BlockState state) {
         super(state);

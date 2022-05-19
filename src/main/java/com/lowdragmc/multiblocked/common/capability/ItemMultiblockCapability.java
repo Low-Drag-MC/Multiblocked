@@ -81,14 +81,22 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     @Override
     public ItemsIngredient deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        return new ItemsIngredient(Ingredient.fromJson(jsonObject.get("in")), jsonObject.get("amount").getAsInt());
+        if (jsonObject.has("tag")) {
+            return new ItemsIngredient(jsonObject.get("tag").getAsString(), jsonObject.get("amount").getAsInt());
+        } else {
+            return new ItemsIngredient(Ingredient.fromJson(jsonObject.get("matches")), jsonObject.get("amount").getAsInt());
+        }
     }
 
     @Override
     public JsonElement serialize(ItemsIngredient itemsIngredient, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.add("in", itemsIngredient.ingredient.toJson());
         jsonObject.addProperty("amount", itemsIngredient.getAmount());
+        if (itemsIngredient.isTag()) {
+            jsonObject.addProperty("tag", itemsIngredient.getTag());
+        } else {
+            jsonObject.add("matches", itemsIngredient.ingredient.toJson());
+        }
         return jsonObject;
     }
 

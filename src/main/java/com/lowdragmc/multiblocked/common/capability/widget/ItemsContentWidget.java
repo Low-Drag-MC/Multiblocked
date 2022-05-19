@@ -92,7 +92,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         dialog.addWidget(groupIngredient);
         dialog.addWidget(groupOre);
 
-        groupOre.addWidget(tag = new TextFieldWidget(30, 3, 90, 15,  () -> content.isTag() ? content.getTag() : "", null));
+        groupOre.addWidget(tag = new TextFieldWidget(30, 3, 90, 15,  () -> content.isTag() ? content.getTag() : "", null).setResourceLocationOnly());
         IItemHandlerModifiable handler;
         PhantomSlotWidget phantomSlotWidget = new PhantomSlotWidget(handler = new ItemStackHandler(1), 0, 0, 1).setClearSlotOnRightClick(false);
         groupOre.addWidget(phantomSlotWidget);

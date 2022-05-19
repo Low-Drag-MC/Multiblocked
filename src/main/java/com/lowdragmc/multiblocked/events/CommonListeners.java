@@ -39,7 +39,7 @@ public class CommonListeners {
     public static void onWorldUnLoad(WorldEvent.Unload event) {
         IWorld world = event.getWorld();
         if (!world.isClientSide() && world instanceof World) {
-            MultiblockWorldSavedData.getOrCreate((World) world).releaseSearchingThread();
+            MultiblockWorldSavedData.getOrCreate((World) world).releaseExecutorService();
         }
     }
 }

@@ -21,6 +21,7 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -61,7 +62,7 @@ import static net.minecraft.util.Util.NIL_UUID;
  *
  * Head of the multiblock.
  */
-public class ControllerTileEntity extends ComponentTileEntity<ControllerDefinition> implements ICapabilityProxyHolder {
+public class ControllerTileEntity extends ComponentTileEntity<ControllerDefinition> implements ICapabilityProxyHolder, IAsyncThreadUpdate {
     public MultiblockState state;
     public boolean asyncRecipeSearching = true;
     protected Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities;
@@ -102,15 +103,16 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         super.update();
         if (isFormed()) {
             updateFormed();
-        } else {
-            if (getDefinition().catalyst == null && getTimer() % 20 == 0) {
-                if (state == null) state = new MultiblockState(level, worldPosition);
-                if (checkPattern()) { // formed
-                    MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
-                    onStructureFormed();
-                }
-            }
         }
+//        else {
+//            if (getDefinition().catalyst == null && getTimer() % 20 == 0) {
+//                if (state == null) state = new MultiblockState(level, worldPosition);
+//                if (checkPattern()) { // formed
+//                    MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
+//                    onStructureFormed();
+//                }
+//            }
+//        }
     }
 
     public void updateFormed() {
@@ -400,6 +402,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return new ModularUI(196, 256, this, entityPlayer).widget(tabContainer);
     }
 
+    @Override
     public void asyncThreadLogic(long periodID) {
         if (!isFormed() && getDefinition().catalyst == null && (getOffset() + periodID) % 4 == 0) {
             if (getPattern().checkPatternAt(new MultiblockState(level, worldPosition), false)) {
@@ -414,7 +417,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
         try {
             if (hasProxies()) {
-                // should i do lock for proxies?
+                // should i add locks for proxies?
                 for (Long2ObjectOpenHashMap<CapabilityProxy<?>> map : getCapabilitiesProxy().values()) {
                     if (map != null) {
                         for (CapabilityProxy<?> proxy : map.values()) {

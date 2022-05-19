@@ -12,13 +12,9 @@ import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.io.File;
-import java.util.EnumMap;
 import java.util.function.Supplier;
 
 /**
@@ -35,9 +31,6 @@ public class MBDIModelRenderer extends IModelRenderer implements IMultiblockedRe
 
     public MBDIModelRenderer(ResourceLocation modelLocation) {
         super(modelLocation);
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            blockModels = new EnumMap<>(Direction.class);
-        }
     }
 
     @Override

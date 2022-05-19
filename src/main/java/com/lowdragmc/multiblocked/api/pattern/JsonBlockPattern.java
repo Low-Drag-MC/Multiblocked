@@ -1,10 +1,12 @@
 package com.lowdragmc.multiblocked.api.pattern;
 
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateBlocks;
 import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
 import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateStates;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.Direction;
@@ -56,8 +58,8 @@ public class JsonBlockPattern {
 
         predicates.put("controller", new PredicateComponent(location)); // controller
 
-        Map<BlockState, Character> map = new HashMap<>();
-        map.put(Blocks.AIR.defaultBlockState(), ' ');
+        Map<Block, Character> map = new HashMap<>();
+        map.put(Blocks.AIR, ' ');
 
         char c = 'A'; // auto
 
@@ -69,15 +71,15 @@ public class JsonBlockPattern {
                     if (controllerPos.equals(pos)) {
                         builder.append('@'); // controller
                     } else {
-                        BlockState state = world.getBlockState(pos);
-                        if (!map.containsKey(state)) {
-                            map.put(state, c);
+                        Block block = world.getBlockState(pos).getBlock();
+                        if (!map.containsKey(block)) {
+                            map.put(block, c);
                             String name = String.valueOf(c);
-                            predicates.put(name, new PredicateStates(state));
+                            predicates.put(name, new PredicateBlocks(block));
                             symbolMap.computeIfAbsent(c, key -> new HashSet<>()).add(name); // any
                             c++;
                         }
-                        builder.append(map.get(state));
+                        builder.append(map.get(block));
                     }
                 }
                 pattern[x - minX][y - minY] = builder.toString();

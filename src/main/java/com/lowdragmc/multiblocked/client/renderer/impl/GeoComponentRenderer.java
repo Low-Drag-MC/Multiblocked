@@ -16,11 +16,14 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.JSONUtils;
@@ -30,6 +33,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.data.IModelData;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.IAnimatableModel;
@@ -52,14 +56,17 @@ import software.bernie.geckolib3.util.RenderUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.ComponentFactory> implements IMultiblockedRenderer, IGeoRenderer<GeoComponentRenderer.ComponentFactory> {
     public final static GeoComponentRenderer INSTANCE = new GeoComponentRenderer(null, false);
+    private static final Set<String> particleTexture = new HashSet<>();
 
     static {
         if (Multiblocked.isClient()) {
@@ -81,6 +88,9 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     public GeoComponentRenderer(String modelName, boolean isGlobal) {
         this.modelName = modelName;
         this.isGlobal = isGlobal;
+        if (Multiblocked.isClient() && modelName != null && particleTexture.add(modelName)) {
+            registerTextureSwitchEvent();
+        }
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -105,6 +115,18 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
         return false;
     }
 
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void onTextureSwitchEvent(TextureStitchEvent.Pre event) {
+        event.addSprite(new ResourceLocation(Multiblocked.MODID, modelName));
+    }
+
+    @Nonnull
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public TextureAtlasSprite getParticleTexture() {
+        return Minecraft.getInstance().getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(new ResourceLocation(Multiblocked.MODID, modelName));
+    }
 
     @Override
     public boolean isGlobalRenderer(@Nonnull TileEntity te) {

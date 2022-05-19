@@ -13,6 +13,9 @@ buildscript {
 }
 
 repositories {
+    flatDir {
+        dir 'libs'
+    }
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     maven { url 'https://dvs1.progwml6.com/files/maven' }
 }
@@ -164,6 +167,15 @@ dependencies {
 
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.71')
+
+    //botania
+    implementation fg.deobf("blank:botania-1.16.5:420.2")
+    //mekanism
+    implementation fg.deobf("blank:mekanism-1.16.5:10.1.2.457")
+    // patchouli
+    implementation fg.deobf("blank:patchouli-1.16.4:53.2")
+    // curios
+    implementation fg.deobf("blank:curios-forge-1.16.5:4.0.5.3")
 
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")

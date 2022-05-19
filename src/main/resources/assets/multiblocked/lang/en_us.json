@@ -102,7 +102,7 @@
   "multiblocked.gui.tips.add": "Add",
   "multiblocked.gui.tips.select_image": "Select an Image",
   "multiblocked.gui.trait.add_slot": "Add a Slot",
-  "multiblocked.gui.trait.remove_slot": "Remove Selected Slot",
+  "multiblocked.gui.trait.remove_slot": "Remove Slot",
   "multiblocked.gui.trait.capability_io": "Capability IO (e.g., Pipe Interaction)",
   "multiblocked.gui.trait.gui_io": "Gui IO (e.g. Gui Interaction)",
   "multiblocked.gui.trait.auto_io": "Auto IO",

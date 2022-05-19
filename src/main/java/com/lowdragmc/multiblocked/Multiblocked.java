@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import com.lowdragmc.lowdraglib.ItemGroup.LDItemGroup;
 import com.lowdragmc.lowdraglib.json.BlockTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
-import com.lowdragmc.lowdraglib.json.IBlockStateTypeAdapterFactory;
+import com.lowdragmc.lowdraglib.json.BlockStateTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.ItemStackTypeAdapter;
 import com.lowdragmc.multiblocked.api.json.IMultiblockedRendererTypeAdapterFactory;
 import com.lowdragmc.multiblocked.api.json.RecipeMapTypeAdapter;
@@ -58,7 +58,7 @@ public class Multiblocked {
     public static final Random RNG = new Random();
     public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
     public static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapterFactory(IBlockStateTypeAdapterFactory.INSTANCE)
+            .registerTypeAdapterFactory(BlockStateTypeAdapterFactory.INSTANCE)
             .registerTypeAdapterFactory(IMultiblockedRendererTypeAdapterFactory.INSTANCE)
             .registerTypeAdapterFactory(BlockTypeAdapterFactory.INSTANCE)
             .registerTypeAdapterFactory(SimplePredicateFactory.INSTANCE)

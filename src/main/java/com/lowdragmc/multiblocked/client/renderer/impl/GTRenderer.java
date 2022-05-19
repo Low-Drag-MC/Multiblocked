@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.client.renderer.impl;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
+import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
@@ -21,11 +22,12 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BlockModel;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IUnbakedModel;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -33,10 +35,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.data.IModelData;
 
+import javax.annotation.Nonnull;
 import java.util.EnumMap;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -88,6 +90,13 @@ public class GTRenderer extends MBDIModelRenderer {
         }
     }
 
+    @Nonnull
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public TextureAtlasSprite getParticleTexture() {
+        return Minecraft.getInstance().getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(baseTexture);
+    }
+
     @Override
     @OnlyIn(Dist.CLIENT)
     public String getType() {
@@ -100,6 +109,7 @@ public class GTRenderer extends MBDIModelRenderer {
         return false;
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
     public boolean renderModel(BlockState state, BlockPos pos,
                                IBlockDisplayReader blockReader,
@@ -116,8 +126,9 @@ public class GTRenderer extends MBDIModelRenderer {
                             ModelLoader.defaultTextureGetter(),
                             ModelFactory.getRotation(part.getFrontFacing()),
                             modelLocation);
-                    RenderType layer = MinecraftForgeClient.getRenderLayer();
-                    if (layer != RenderType.cutoutMipped() || model == null) return false;
+                    if (model == null) return false;
+                    model = new CustomBakedModel(model);
+                    if (!((CustomBakedModel)model).shouldRenderInLayer(state, rand)) return false;
                     BlockRendererDispatcher brd = Minecraft.getInstance().getBlockRenderer();
                     return brd.getModelRenderer().renderModel(blockReader, model, state, pos, matrixStack, vertexBuilder, checkSides, rand, state.getSeed(pos), OverlayTexture.NO_OVERLAY, modelData);
                 }

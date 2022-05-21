@@ -5,9 +5,12 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
+import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
 import com.lowdragmc.multiblocked.common.capability.FEMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
+import com.lowdragmc.multiblocked.common.capability.HeatMekanismCapability;
 import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
+import com.lowdragmc.multiblocked.common.capability.ManaBotaniaCapability;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Map;
@@ -24,6 +27,16 @@ public class MbdCapabilities {
         registerCapability(FEMultiblockCapability.CAP);
         registerCapability(ItemMultiblockCapability.CAP);
         registerCapability(FluidMultiblockCapability.CAP);
+        if (Multiblocked.isModLoaded(Multiblocked.MODID_MEK)) {
+            registerCapability(ChemicalMekanismCapability.CAP_GAS);
+            registerCapability(ChemicalMekanismCapability.CAP_SLURRY);
+            registerCapability(ChemicalMekanismCapability.CAP_INFUSE);
+            registerCapability(ChemicalMekanismCapability.CAP_PIGMENT);
+            registerCapability(HeatMekanismCapability.CAP);
+        }
+        if (Multiblocked.isModLoaded(Multiblocked.MODID_BOT)) {
+            registerCapability(ManaBotaniaCapability.CAP);
+        }
     }
 
     public static MultiblockCapability<?> get(String s) {

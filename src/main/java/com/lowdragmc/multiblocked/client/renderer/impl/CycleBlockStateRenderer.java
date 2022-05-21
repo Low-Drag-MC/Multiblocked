@@ -150,7 +150,11 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
         if (tileEntity == null) return;
         TileEntityRenderer<TileEntity> tesr = TileEntityRendererDispatcher.instance.getRenderer(tileEntity);
         if (tesr != null) {
-            tesr.render(tileEntity, partialTicks, stack, buffer, combinedLight, combinedOverlay);
+            try {
+                tesr.render(tileEntity, partialTicks, stack, buffer, combinedLight, combinedOverlay);
+            } catch (Exception e) {
+                getBlockInfo().setTileEntity(null);
+            }
         }
     }
 

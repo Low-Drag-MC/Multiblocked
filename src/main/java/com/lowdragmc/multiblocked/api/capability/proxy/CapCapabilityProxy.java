@@ -10,9 +10,9 @@ import java.util.Objects;
  * The Proxy of a Capability {@link Capability}
  */
 public abstract class CapCapabilityProxy<C, K> extends CapabilityProxy<K>{
-    public final Capability<C> CAP;
+    public final Capability<? extends C> CAP;
 
-    public CapCapabilityProxy(MultiblockCapability<? super K> capability, TileEntity tileEntity, Capability<C> cap) {
+    public CapCapabilityProxy(MultiblockCapability<? super K> capability, TileEntity tileEntity, Capability<? extends C> cap) {
         super(capability, tileEntity);
         CAP = cap;
     }

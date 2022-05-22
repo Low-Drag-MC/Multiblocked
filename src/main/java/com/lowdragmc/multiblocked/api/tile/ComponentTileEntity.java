@@ -121,7 +121,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
     
     public String getUnlocalizedName() {
-        return getLocation().getPath() + ".name";
+        return String.format("block.%s.%s", getLocation().getNamespace(), getLocation().getPath());
     }
     
     public String getLocalizedName() {

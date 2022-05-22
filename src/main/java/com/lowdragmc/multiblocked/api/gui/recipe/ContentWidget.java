@@ -25,6 +25,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -62,7 +63,8 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
     public List<Target> getPhantomTargets(Object ingredient) {
         List<Target> pattern = super.getPhantomTargets(ingredient);
         if (pattern != null && pattern.size() > 0) return pattern;
-        if (!ingredient.getClass().equals(getJEIIngredient(getContent()).getClass())) {
+        Object ingredientContent = getJEIIngredient(getContent());
+        if (ingredientContent == null || !ingredient.getClass().equals(ingredientContent.getClass())) {
             return Collections.emptyList();
         }
         Rectangle2d rectangle = toRectangleBox();
@@ -75,7 +77,8 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
 
             @Override
             public void accept(@Nonnull Object ingredient) {
-                if (ingredient.getClass().equals(getJEIIngredient(getContent()).getClass())) {
+                Object ingredientContent = getJEIIngredient(getContent());
+                if (ingredientContent != null && ingredient.getClass().equals(ingredientContent.getClass())) {
                     T content = getJEIContent(ingredient);
                     if (content != null) {
                         setContent(io, content, chance, perTick);
@@ -111,6 +114,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
      * get the content's ingredient form in JEI
      * @return ingredient
      */
+    @Nullable
     public Object getJEIIngredient(T content) {
         return content;
     }

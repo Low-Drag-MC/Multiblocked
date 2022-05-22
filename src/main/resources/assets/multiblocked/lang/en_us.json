@@ -74,6 +74,7 @@
   "multiblocked.gui.tips.min": "Min",
   "multiblocked.gui.tips.max": "Max",
   "multiblocked.gui.tips.io": "IO",
+  "multiblocked.gui.tips.component": "Existing Components",
   "multiblocked.gui.tips.json": "JSON",
   "multiblocked.gui.tips.switch_view": "Switch View",
   "multiblocked.gui.tips.configuration": "Configuration",

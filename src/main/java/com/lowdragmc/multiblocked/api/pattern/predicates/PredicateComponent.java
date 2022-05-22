@@ -2,11 +2,16 @@ package com.lowdragmc.multiblocked.api.pattern.predicates;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
+import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -14,8 +19,14 @@ import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.lang3.ArrayUtils;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class PredicateComponent extends SimplePredicate {
     public ResourceLocation location = new ResourceLocation("mod_id", "component_id");
@@ -65,13 +76,37 @@ public class PredicateComponent extends SimplePredicate {
         WidgetGroup group = new WidgetGroup(0, 0, 100, 20);
         groups.add(group);
         group.addWidget(new LabelWidget(0, 0, "multiblocked.gui.label.component_registry_name"));
-        group.addWidget(new TextFieldWidget(0, 10, 120, 20, null, s -> {
-            if (s != null && !s.isEmpty()) {
-                location = new ResourceLocation(s);
-                buildPredicate();
-            }
-        }).setCurrentString(location.toString()));
+        group.addWidget(new SelectorWidget(0, 10, 120, 20, getAvailableComponents(), -1)
+                .setValue(this.location.toString())
+                .setOnChanged(name -> {
+                    if (name != null && !name.isEmpty()) {
+                        this.location = new ResourceLocation(name);
+                        buildPredicate();
+                    }
+                })
+                .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
+                .setBackground(new ColorRectTexture(0xff333333))
+                .setHoverTooltips("multiblocked.gui.tips.component"));
         return groups;
+    }
+
+    private List<String> getAvailableComponents() {
+        File dir = new File(Multiblocked.location, "definition/part");
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                return Arrays.stream(files).map(file -> {
+                    try {
+                        return FileUtility.loadJson(file).getAsJsonObject().get("location").getAsString();
+                    } catch (Exception e) {
+                        return null;
+                    }
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+            } else {
+                return Collections.emptyList();
+            }
+        }
+        return Collections.emptyList();
     }
 
     @Override

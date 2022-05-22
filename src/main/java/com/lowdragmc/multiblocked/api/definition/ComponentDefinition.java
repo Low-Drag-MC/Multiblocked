@@ -20,9 +20,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.function.Function;
 
-///**
-// * Definition of a component.
-// */
+/**
+ * Definition of a component.
+ */
 public class ComponentDefinition {
     private TileEntityType<? extends ComponentTileEntity<?>> tileType;
     public final ResourceLocation location;

@@ -18,6 +18,19 @@ repositories {
     }
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     maven { url 'https://dvs1.progwml6.com/files/maven' }
+    maven {
+        url = "https://maven.architectury.dev"
+        content {
+            includeGroup "me.shedaniel"
+        }
+    }
+
+    maven {
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
+        }
+    }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -164,6 +177,11 @@ dependencies {
         runtimeOnly fg.deobf("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
         compileOnly ("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
     }
+
+    // KubeJS
+    implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+    implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
+    implementation fg.deobf("me.shedaniel:architectury-forge:${architectury_version}")
 
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.71')

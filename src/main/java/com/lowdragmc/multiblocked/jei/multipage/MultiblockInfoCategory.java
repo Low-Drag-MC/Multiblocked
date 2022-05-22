@@ -70,7 +70,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     @Nonnull
     @Override
     public String getTitle() {
-        return I18n.get(UID.toString());
+        return I18n.get("multiblocked.jei.multiblock_info");
     }
 
     @Nonnull

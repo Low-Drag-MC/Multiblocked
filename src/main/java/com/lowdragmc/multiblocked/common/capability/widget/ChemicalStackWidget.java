@@ -20,6 +20,7 @@ import mekanism.client.gui.GuiUtils;
 import mekanism.client.render.MekanismRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TextFormatting;
 
@@ -49,11 +50,12 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
     @Override
     protected void onContentUpdate() {
         if (isRemote() && content != null) {
+            String chemical = LocalizationUtils.format(CAP.getUnlocalizedName());
             this.setHoverTooltips(
                     TextFormatting.AQUA + content.getType().getTextComponent().getString() + TextFormatting.RESET,
                     handler == null ?
-                    LocalizationUtils.format("multiblocked.gui.trait.mek.amount", content.getAmount()) :
-                    LocalizationUtils.format("multiblocked.gui.trait.mek.amount2", content.getAmount(), lastCapability));
+                    LocalizationUtils.format("multiblocked.gui.trait.mek.amount", chemical, content.getAmount()) :
+                    LocalizationUtils.format("multiblocked.gui.trait.mek.amount2", chemical, content.getAmount(), lastCapability));
         }
     }
 

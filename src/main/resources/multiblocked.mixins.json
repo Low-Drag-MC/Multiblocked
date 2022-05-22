@@ -2,7 +2,7 @@
   "required": true,
   "package": "com.lowdragmc.multiblocked.core.mixins",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "ldlib.refmap.json",
+  "refmap": "multiblocked.refmap.json",
   "minVersion": "0.8",
   "client": [
     "RenderChunkMixin",

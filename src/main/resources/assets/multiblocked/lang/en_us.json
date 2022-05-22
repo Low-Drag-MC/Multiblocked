@@ -171,8 +171,8 @@
   "multiblocked.gui.trait.impetus.tips.6": "Beam endpoint Y offset",
   "multiblocked.gui.trait.impetus.tips.7": "Beam endpoint Z offset",
   "multiblocked.gui.trait.aspect.amount": "Amount:",
-  "multiblocked.gui.trait.mek.amount": "Chemical Amount: %d",
-  "multiblocked.gui.trait.mek.amount2": "Chemical Amount: %d / %d",
+  "multiblocked.gui.trait.mek.amount": "%s Amount: %d",
+  "multiblocked.gui.trait.mek.amount2": "%s Amount: %d / %d",
   "multiblocked.gui.trait.item.ore_dict": "oreDict",
   "multiblocked.gui.trait.item.add": "Add a New Item Matcher",
   "multiblocked.gui.predicate.capability": "Capability",
@@ -221,5 +221,6 @@
   "multiblocked.gui.label.type": "Type:",
   "multiblocked.gui.label.save_pattern": "Save Pattern",
   "multiblocked.gui.label.save_recipe_map": "Save Recipe Map",
-  "multiblocked.gui.label.pattern_settings": "Pattern Settings"
+  "multiblocked.gui.label.pattern_settings": "Pattern Settings",
+  "multiblocked.jei.multiblock_info": "Multiblock Page"
 }

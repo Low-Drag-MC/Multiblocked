@@ -84,15 +84,13 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     }
 
     @Override
-    public void renderBlockDamage(BlockState state, BlockPos pos, IBlockDisplayReader blockReader, MatrixStack matrixStack, IVertexBuilder vertexBuilder, IModelData modelData) {
-    }
-
-    @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean renderModel(BlockState state, BlockPos pos, IBlockDisplayReader blockReader, MatrixStack matrixStack, IVertexBuilder vertexBuilder, boolean checkSides, Random rand, IModelData modelData) {
         return false;
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void render(TileEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
         BlockState state = getState(te.getBlockState());
         TileEntity tileEntity = getBlockInfo().getTileEntity();

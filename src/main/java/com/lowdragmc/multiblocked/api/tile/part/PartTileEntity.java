@@ -1,11 +1,17 @@
 package com.lowdragmc.multiblocked.api.tile.part;
 
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
+import com.lowdragmc.multiblocked.api.kubejs.events.PartAddedEvent;
+import com.lowdragmc.multiblocked.api.kubejs.events.PartRemovedEvent;
+import com.lowdragmc.multiblocked.api.kubejs.events.StatusChangedEvent;
+import com.lowdragmc.multiblocked.api.kubejs.events.UpdateRendererEvent;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
+import dev.latvian.kubejs.script.ScriptType;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -45,13 +51,16 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
 
     @Override
     public IMultiblockedRenderer updateCurrentRenderer() {
-//        if (definition.dynamicRenderer != null) {
-//
-//        }
         if (definition.workingRenderer != null) {
             for (ControllerTileEntity controller : getControllers()) {
                 if (controller.isFormed() && controller.getStatus().equals("working")) {
-                    return definition.workingRenderer;
+                    IMultiblockedRenderer renderer = definition.workingRenderer;
+                    if (Multiblocked.isKubeJSLoaded()) {
+                        UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
+                        event.post(ScriptType.SERVER, UpdateRendererEvent.ID, getSubID());
+                        renderer = event.getRenderer();
+                    }
+                    return renderer;
                 }
             }
         }
@@ -76,8 +85,9 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public void addedToController(@Nonnull ControllerTileEntity controller){
         if (controllerPos.add(controller.getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-//            if (definition.partAddedToMulti != null) {
-//            }
+            if (Multiblocked.isKubeJSLoaded()) {
+                new PartAddedEvent(controller).post(ScriptType.SERVER, PartAddedEvent.ID, getSubID());
+            }
             setStatus("idle");
         }
     }
@@ -85,8 +95,9 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public void removedFromController(@Nonnull ControllerTileEntity controller){
         if (controllerPos.remove(controller.getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-//            if (definition.partRemovedFromMulti != null) {
-//            }
+            if (Multiblocked.isKubeJSLoaded()) {
+                new PartRemovedEvent(controller).post(ScriptType.SERVER, PartRemovedEvent.ID, getSubID());
+            }
             if (getControllers().isEmpty()) {
                 setStatus("unformed");
             }

@@ -8,6 +8,7 @@ import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeMapCategory;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeWrapper;
+import dev.latvian.kubejs.BuiltinKubeJSPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
@@ -52,6 +53,7 @@ public class JEIPlugin implements IModPlugin {
     @Override
     public void registerCategories(@Nonnull IRecipeCategoryRegistration registry) {
         Multiblocked.LOGGER.info("JEI register categories");
+        BuiltinKubeJSPlugin
         IJeiHelpers jeiHelpers = registry.getJeiHelpers();
         registry.addRecipeCategories(new MultiblockInfoCategory(jeiHelpers));
         for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {

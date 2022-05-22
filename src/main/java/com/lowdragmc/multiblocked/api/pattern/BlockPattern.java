@@ -318,14 +318,15 @@ public class BlockPattern {
                 z++;
             }
         }
+        Direction frontFacing = controller.getFrontFacing();
         blocks.forEach((pos, block) -> { // adjust facing
             if (block instanceof BlockState) {
-                resetFacing(pos, (BlockState) block, (p, f) -> {
+                resetFacing(pos, (BlockState) block, frontFacing, (p, f) -> {
                     Object object = blocks.get(p.relative(f));
                     return object == null || (object instanceof BlockState && ((BlockState) object).getBlock() == Blocks.AIR);
                 }, state -> world.setBlock(pos, state, 3));
             } else if (block instanceof ComponentTileEntity) {
-                resetFacing(pos, ((ComponentTileEntity<?>) block).getBlockState(), (p, f) -> {
+                resetFacing(pos, ((ComponentTileEntity<?>) block).getBlockState(), frontFacing, (p, f) -> {
                     Object object = blocks.get(p.relative(f));
                     if (object == null || (object instanceof BlockState && ((BlockState) object).getBlock() == Blocks.AIR)) {
                         return ((ComponentTileEntity<?>) block).isValidFrontFacing(f);
@@ -447,7 +448,7 @@ public class BlockPattern {
         int finalMinZ = minZ;
         blocks.forEach((pos, info) -> {
             TileEntity te = blocks.get(pos).getTileEntity();
-            resetFacing(pos, info.getBlockState(), (p, f) -> {
+            resetFacing(pos, info.getBlockState(), null, (p, f) -> {
                 BlockInfo blockInfo = blocks.get(p.relative(f));
                 if (blockInfo == null || blockInfo.getBlockState().getBlock() == Blocks.AIR) {
                     if (te instanceof ComponentTileEntity) {
@@ -462,11 +463,11 @@ public class BlockPattern {
         return result;
     }
 
-    private void resetFacing(BlockPos pos, BlockState blockState, BiFunction<BlockPos, Direction, Boolean> checker, Consumer<BlockState> consumer) {
+    private void resetFacing(BlockPos pos, BlockState blockState, Direction facing, BiFunction<BlockPos, Direction, Boolean> checker, Consumer<BlockState> consumer) {
         if (blockState.hasProperty(BlockStateProperties.FACING)) {
-            tryFacings(blockState, pos, checker, consumer, BlockStateProperties.FACING, FACINGS);
+            tryFacings(blockState, pos, checker, consumer, BlockStateProperties.FACING, facing == null ? FACINGS : ArrayUtils.add(FACINGS, facing));
         } else if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-            tryFacings(blockState, pos, checker, consumer, BlockStateProperties.HORIZONTAL_FACING, FACINGS_H);
+            tryFacings(blockState, pos, checker, consumer, BlockStateProperties.HORIZONTAL_FACING, facing == null || facing.getAxis() == Direction.Axis.Y ? FACINGS_H : ArrayUtils.add(FACINGS_H, facing));
         }
     }
 

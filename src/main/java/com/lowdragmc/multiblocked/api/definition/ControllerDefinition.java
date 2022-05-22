@@ -45,14 +45,6 @@ public class ControllerDefinition extends ComponentDefinition {
         if (basePattern != null) {
             return autoGenDFS(basePattern, new ArrayList<>(), new Stack<>());
         }
-//        else if (dynamicPattern != null) {
-//            try {
-//                return autoGenDFS(dynamicPattern.apply((ControllerTileEntity) createNewTileEntity(null)), new ArrayList<>(), new Stack<>());
-//            } catch (Exception exception) {
-//                dynamicPattern = null;
-//                Multiblocked.LOGGER.error("definition {} custom logic {} error", location, "dynamicPattern", exception);
-//            }
-//        }
         return Collections.emptyList();
     }
 

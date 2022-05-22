@@ -15,6 +15,7 @@ import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.RecipePage;
 import com.lowdragmc.multiblocked.api.gui.controller.structure.StructurePageWidget;
+import com.lowdragmc.multiblocked.api.kubejs.events.*;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
@@ -23,6 +24,7 @@ import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
+import dev.latvian.kubejs.script.ScriptType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -50,6 +52,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,10 +77,15 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         super(definition);
     }
 
+    @Nullable
     public BlockPattern getPattern() {
-//        if (definition.dynamicPattern != null) {
-//
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            DynamicPatternEvent event = new DynamicPatternEvent(this, definition.basePattern);
+            if (event.post(ScriptType.SERVER, DynamicPatternEvent.ID, getSubID())) {
+                return null;
+            }
+            return event.pattern;
+        }
         return definition.basePattern;
     }
     public RecipeLogic getRecipeLogic() {
@@ -86,7 +94,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     public boolean checkPattern() {
         if (state == null) return false;
-        return getPattern().checkPatternAt(state, false);
+        BlockPattern pattern = getPattern();
+        return pattern != null && pattern.checkPatternAt(state, false);
     }
 
     @Override
@@ -104,33 +113,31 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (isFormed()) {
             updateFormed();
         }
-//        else {
-//            if (getDefinition().catalyst == null && getTimer() % 20 == 0) {
-//                if (state == null) state = new MultiblockState(level, worldPosition);
-//                if (checkPattern()) { // formed
-//                    MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
-//                    onStructureFormed();
-//                }
-//            }
-//        }
     }
 
     public void updateFormed() {
         if (recipeLogic != null) {
             recipeLogic.update();
         }
-//        if (definition.updateFormed != null) {
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new UpdateFormedEvent(this).post(ScriptType.SERVER, UpdateFormedEvent.ID, getSubID());
+        }
     }
 
     @Override
     public IMultiblockedRenderer updateCurrentRenderer() {
-//        if (definition.dynamicRenderer != null) {
-//        }
+        IMultiblockedRenderer renderer;
         if (definition.workingRenderer != null && isFormed() && (status.equals("working") || status.equals("suspend"))) {
-            return definition.workingRenderer;
+            renderer = definition.workingRenderer;
+            if (Multiblocked.isKubeJSLoaded()) {
+                UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
+                event.post(ScriptType.SERVER, UpdateRendererEvent.ID, getSubID());
+                renderer = event.getRenderer();
+            }
+        } else {
+            renderer = super.updateCurrentRenderer();
         }
-        return super.updateCurrentRenderer();
+        return renderer;
     }
 
     public Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> getCapabilitiesProxy() {
@@ -204,8 +211,9 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
 
         writeCustomData(-1, this::writeState);
-//        if (definition.structureFormed != null) {
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new StructureFormedEvent(this).post(ScriptType.SERVER, StructureFormedEvent.ID, getSubID());
+        }
     }
     
     public void onStructureInvalid() {
@@ -224,8 +232,9 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         capabilities = null;
 
         writeCustomData(-1, this::writeState);
-//        if (definition.structureInvalid != null) {
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new StructureInvalidEvent(this).post(ScriptType.SERVER, StructureInvalidEvent.ID, getSubID());
+        }
     }
 
     @Override
@@ -351,14 +360,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Override
     public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-//        if (definition.onRightClick != null) {
-//            try {
-//                if (definition.onRightClick.apply(this, CraftTweakerMC.getIPlayer(player), CraftTweakerMC.getIFacing(facing), hitX, hitY, hitZ)) return true;
-//            } catch (Exception exception) {
-//                definition.onRightClick = null;
-//                Multiblocked.LOGGER.error("definition {} custom logic {} error", definition.location, "onRightClick", exception);
-//            }
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            RightClickEvent event = new RightClickEvent(this, player, hand, hit);
+            if (event.post(ScriptType.SERVER, RightClickEvent.ID, getSubID())) {
+                return ActionResultType.SUCCESS;
+            }
+        }
         if (!isRemote()) {
             if (!isFormed() && definition.catalyst != null) {
                 if (state == null) state = new MultiblockState(level, getBlockPos());
@@ -405,7 +412,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     @Override
     public void asyncThreadLogic(long periodID) {
         if (!isFormed() && getDefinition().catalyst == null && (getOffset() + periodID) % 4 == 0) {
-            if (getPattern().checkPatternAt(new MultiblockState(level, worldPosition), false)) {
+            BlockPattern pattern = getPattern();
+            if (pattern != null && pattern.checkPatternAt(new MultiblockState(level, worldPosition), false)) {
                 ServerLifecycleHooks.getCurrentServer().execute(() -> {
                     if (state == null) state = new MultiblockState(level, worldPosition);
                     if (checkPattern()) { // formed

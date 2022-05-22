@@ -18,6 +18,7 @@ import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
+import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
@@ -304,7 +305,8 @@ public class PatternWidget extends WidgetGroup {
 
     private void loadControllerFormed(Collection<BlockPos> poses, ControllerTileEntity controllerBase) {
         controllerBase.state = new MultiblockState(world, controllerBase.getBlockPos());
-        if (controllerBase.getPattern().checkPatternAt(controllerBase.state, true)) {
+        BlockPattern pattern = controllerBase.getPattern();
+        if (pattern != null && pattern.checkPatternAt(controllerBase.state, true)) {
             controllerBase.onStructureFormed();
         }
         if (controllerBase.isFormed()) {

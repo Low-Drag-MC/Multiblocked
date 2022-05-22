@@ -16,9 +16,11 @@ import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.kubejs.events.*;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
+import dev.latvian.kubejs.script.ScriptType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.block.BlockState;
@@ -27,6 +29,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
@@ -71,6 +74,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     protected IMultiblockedRenderer currentRenderer;
 
     public Object rendererObject; // used for renderer
+
+    public INBT persistedData; // used for renderer
 
     private UUID owner;
 
@@ -121,11 +126,15 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
     
     public String getUnlocalizedName() {
-        return String.format("block.%s.%s", getLocation().getNamespace(), getLocation().getPath());
+        return "block." + definition.getID();
     }
     
     public String getLocalizedName() {
         return I18n.get(getUnlocalizedName());
+    }
+
+    public String getSubID() {
+        return definition.getID();
     }
 
     public abstract boolean isFormed();
@@ -157,8 +166,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void update(){
         timer++;
-//        if (definition.updateTick != null) {
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new UpdateTickEvent(this).post(ScriptType.SERVER, UpdateTickEvent.ID, getSubID());
+        }
         if (!traits.isEmpty()) {
             for (CapabilityTrait trait : traits.values()) {
                 trait.update();
@@ -172,9 +182,14 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void setStatus(String status) {
         if (!isRemote()) {
+            if (Multiblocked.isKubeJSLoaded()) {
+                StatusChangedEvent event = new StatusChangedEvent(this, status);
+                if (event.post(ScriptType.SERVER, StatusChangedEvent.ID, getSubID())) {
+                    return;
+                }
+                status = event.getStatus();
+            }
             if (!this.status.equals(status)) {
-//                if (definition.statusChanged != null) {
-//                }
                 this.status = status;
                 writeCustomData(1, buffer->buffer.writeUtf(this.status));
             }
@@ -208,12 +223,18 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     public IMultiblockedRenderer updateCurrentRenderer() {
-//        if (definition.dynamicRenderer != null) {
-//        }
+        IMultiblockedRenderer renderer;
         if (isFormed()) {
-            return definition.formedRenderer == null ? definition.baseRenderer : definition.formedRenderer;
+            renderer = definition.formedRenderer == null ? definition.baseRenderer : definition.formedRenderer;
+        } else {
+            renderer = definition.baseRenderer;
         }
-        return definition.baseRenderer;
+        if (Multiblocked.isKubeJSLoaded()) {
+            UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
+            event.post(ScriptType.CLIENT, UpdateRendererEvent.ID, getSubID());
+            renderer = event.getRenderer();
+        }
+        return renderer;
     }
 
     public IMultiblockedRenderer getRenderer() {
@@ -239,9 +260,11 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 //    }
 
     public int getOutputRedstoneSignal(Direction facing) {
-//        if (definition.getOutputRedstoneSignal != null) {
-//
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            OutputRedstoneEvent event = new OutputRedstoneEvent(this, facing);
+            event.post(ScriptType.SERVER, OutputRedstoneEvent.ID, getSubID());
+            return event.redstone;
+        }
         return 0;
     }
 
@@ -262,18 +285,14 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         super.setChanged();
     }
 
-    //************* TESR *************//
-
-    public boolean hasTESRRenderer() {
-        IMultiblockedRenderer renderer = getRenderer();
-        return renderer != null && renderer.hasTESR(this);
-    }
-
     //************* events *************//
 
     public void onDrops(NonNullList<ItemStack> drops, PlayerEntity player) {
-//        if (definition.onDrops != null) {
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            if (new DropEvent(this, drops, player).post(ScriptType.SERVER, DropEvent.ID, getSubID())) {
+                return;
+            }
+        }
         for (CapabilityTrait trait : traits.values()) {
             trait.onDrops(drops, player);
         }
@@ -281,6 +300,12 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+        if (Multiblocked.isKubeJSLoaded()) {
+            RightClickEvent event = new RightClickEvent(this, player, hand, hit);
+            if (event.post(ScriptType.SERVER, RightClickEvent.ID, getSubID())) {
+                return ActionResultType.SUCCESS;
+            }
+        }
         if (!player.isCrouching() && hand == Hand.MAIN_HAND) {
             if (player instanceof ServerPlayerEntity) {
                 return TileEntityUIFactory.INSTANCE.openUI(this, (ServerPlayerEntity) player) ? ActionResultType.SUCCESS : ActionResultType.PASS;
@@ -292,9 +317,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
     
     public void onNeighborChange() {
-//        if (definition.onNeighborChanged != null) {
-//     
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new NeighborChangedEvent(this).post(ScriptType.SERVER, NeighborChangedEvent.ID, getSubID());
+        }
     }
     //************* capability *************//
 
@@ -391,38 +416,29 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void writeInitialSyncData(PacketBuffer buf) {
         buf.writeUtf(status);
-//        if (definition.writeInitialData != null) { // ct
-//
-//        } else {
-//            buf.writeBoolean(false);
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new WriteInitialDataEvent(this, buf).post(ScriptType.SERVER, WriteInitialDataEvent.ID, getSubID());
+        }
     }
 
     public void receiveInitialSyncData(PacketBuffer buf) {
         status = buf.readUtf();
-//        if (buf.readBoolean()) { // ct
-//            CompoundNBT nbt = buf.readNbt();
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new ReadInitialDataEvent(this, buf).post(ScriptType.CLIENT, ReadInitialDataEvent.ID, getSubID());
+        }
     }
 
     public void receiveCustomData(int dataId, PacketBuffer buf) {
         if (dataId == 1) {
             status = buf.readUtf();
             scheduleChunkForRenderUpdate();
-        } else if (dataId == 2) {
-//            int id = buf.readVarInt();
-//            try {
-//                CompoundNBT nbt = buf.readNbt();
-//                if (nbt != null && definition.receiveCustomData != null) {
-//                }
-//            } catch (IOException e) {
-//                Multiblocked.LOGGER.error("handling ct custom data error id:{}", id);
-//            }
         } else if (dataId == 3) {
             MultiblockCapability<?> capability = MbdCapabilities.get(buf.readUtf());
             if (traits.containsKey(capability)) {
                 traits.get(capability).receiveCustomData(buf.readVarInt(), buf);
             }
+        } else if (Multiblocked.isKubeJSLoaded()) {
+            new ReceiveCustomDataEvent(this, dataId, buf).post(ScriptType.CLIENT, ReceiveCustomDataEvent.ID, getSubID());
         }
     }
 
@@ -458,6 +474,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         for (Map.Entry<MultiblockCapability<?>, CapabilityTrait> entry : traits.entrySet()) {
             entry.getValue().readFromNBT(traitTag.getCompound(entry.getKey().name));
         }
+        if (compound.contains("persisted")) {
+            persistedData = compound.get("persisted");
+        }
     }
 
     @Nonnull
@@ -476,6 +495,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
             traitTag.put(entry.getKey().name, tag);
         }
         compound.put("trait", traitTag);
+        if (persistedData != null) {
+            compound.put("persisted", persistedData);
+        }
         return compound;
     }
 

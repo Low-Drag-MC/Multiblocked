@@ -40,18 +40,10 @@ public class Multiblocked {
     public static final String MODID_CT = "crafttweaker";
     public static final String MODID_JEI = "jei";
     public static final String MODID_BOT = "botania";
-    public static final String MODID_QMD = "qmd";
-    public static final String MODID_TC6 = "thaumcraft";
-    public static final String MODID_THAUMJEI = "thaumicjei";
     public static final String MODID_MEK = "mekanism";
     public static final String MODID_GEO = "geckolib3";
     public static final String MODID_GTCE = "gregtech";
-    public static final String MODID_LC = "lightningcraft";
-    public static final String MODID_TOP = "theoneprobe";
-    public static final String MODID_PRODIGY = "prodigytech";
-    public static final String MODID_NA = "naturesaura";
-    public static final String MODID_EU2 = "extrautils2";
-    public static final String MODID_PE = "projecte";
+    public static final String MODID_KUBEJS = "kubejs";
     public static final String MODNAME = "Multiblocked";
     public static final Logger LOGGER = LogManager.getLogger(MODNAME);
     public static final ItemGroup TAB_ITEMS = new LDItemGroup("multiblocked", "all", BlueprintTableTileEntity.tableDefinition::getStackForm);
@@ -92,5 +84,9 @@ public class Multiblocked {
     @OnlyIn(Dist.CLIENT)
     public static boolean isSinglePlayer() {
         return Minecraft.getInstance().hasSingleplayerServer();
+    }
+
+    public static boolean isKubeJSLoaded() {
+        return isModLoaded(MODID_KUBEJS);
     }
 }

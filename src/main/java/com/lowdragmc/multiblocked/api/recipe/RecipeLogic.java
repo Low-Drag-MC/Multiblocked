@@ -5,8 +5,12 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
+import com.lowdragmc.multiblocked.api.kubejs.events.RecipeFinishEvent;
+import com.lowdragmc.multiblocked.api.kubejs.events.SetupRecipeEvent;
+import com.lowdragmc.multiblocked.api.kubejs.events.UpdateTickEvent;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
+import dev.latvian.kubejs.script.ScriptType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundNBT;
 
@@ -118,10 +122,13 @@ public class RecipeLogic {
     }
 
     public void setupRecipe(Recipe recipe) {
-        ControllerDefinition definition = controller.getDefinition();
-//        if (definition.setupRecipe != null) {
-//           
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            SetupRecipeEvent event = new SetupRecipeEvent(this, recipe);
+            if (event.post(ScriptType.SERVER, SetupRecipeEvent.ID, controller.getSubID())) {
+                return;
+            }
+            recipe = event.getRecipe();
+        }
         if (recipe.handleRecipeIO(IO.IN, this.controller)) {
             lastRecipe = recipe;
             setStatus(Status.WORKING);
@@ -155,8 +162,9 @@ public class RecipeLogic {
     }
 
     public void onRecipeFinish() {
-//        if (definition.recipeFinish != null) {
-//        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new RecipeFinishEvent(this).post(ScriptType.SERVER, RecipeFinishEvent.ID, controller.getSubID());
+        }
         lastRecipe.handleRecipeIO(IO.OUT, this.controller);
         if (lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller)) {
             setupRecipe(lastRecipe);

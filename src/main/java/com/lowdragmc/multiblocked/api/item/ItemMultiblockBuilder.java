@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.item;
 ;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
@@ -55,7 +56,10 @@ public class ItemMultiblockBuilder extends Item {
                 ItemStack hold = player.getItemInHand(context.getHand());
                 if (isItemMultiblockBuilder(hold) && tileEntity instanceof ControllerTileEntity) {
                     if (isRaw(hold)) {
-                        ((ControllerTileEntity) tileEntity).getPattern().autoBuild(player, new MultiblockState(player.level, context.getClickedPos()));
+                        BlockPattern pattern = ((ControllerTileEntity) tileEntity).getPattern();
+                        if (pattern != null) {
+                            pattern.autoBuild(player, new MultiblockState(player.level, context.getClickedPos()));
+                        }
                         return ActionResultType.SUCCESS;
                     } else {
                         String json = hold.getOrCreateTagElement("pattern").getString("json");

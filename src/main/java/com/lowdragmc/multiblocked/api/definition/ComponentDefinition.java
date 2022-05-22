@@ -70,6 +70,10 @@ public class ComponentDefinition {
         return location.toString();
     }
 
+    public String getID() {
+        return location.getNamespace() + "." + location.getPath();
+    }
+
     public ItemStack getStackForm() {
         return new ItemStack(MbdComponents.COMPONENT_ITEMS_REGISTRY.get(location), 1);
     }

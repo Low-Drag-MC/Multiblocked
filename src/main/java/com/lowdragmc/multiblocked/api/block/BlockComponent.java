@@ -42,7 +42,7 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
     public ComponentDefinition definition;
 
     public BlockComponent(ComponentDefinition definition) {
-        super(definition.properties.createBlock());
+        super(definition.getBlockProperties());
         registerDefaultState(defaultBlockState().setValue(BlockStateProperties.FACING, Direction.NORTH));
         this.setRegistryName(definition.location);
         this.definition = definition;

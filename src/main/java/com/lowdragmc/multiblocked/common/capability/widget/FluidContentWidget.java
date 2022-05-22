@@ -2,21 +2,15 @@ package com.lowdragmc.multiblocked.common.capability.widget;
 
 import com.google.common.collect.Lists;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.PhantomFluidWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TankWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,16 +19,15 @@ public class FluidContentWidget extends ContentWidget<FluidStack> {
 
     @Override
     protected void onContentUpdate() {
-        if (Multiblocked.isClient()) {
-            List<String> tooltips = new ArrayList<>();
-            tooltips.add(content.getFluid().getAttributes().getDisplayName(content).getString());
-            tooltips.add(I18n.get("multiblocked.fluid.amount", content.getAmount(), content.getAmount()));
-            tooltips.add(I18n.get("multiblocked.fluid.temperature", content.getFluid().getAttributes().getTemperature(content)));
-            tooltips.add(I18n.get(content.getFluid().getAttributes().isGaseous(content) ? "multiblocked.fluid.state_gas" : "multiblocked.fluid.state_liquid"));
-            setHoverTooltips(tooltips.stream().reduce((a, b) -> a + "\n" + b).orElse("fluid"));
-        }
         if (fluidTank == null) {
-            addWidget(new TankWidget(fluidTank = new FluidTank(content.getAmount()), 1, 1, false, false).setDrawHoverTips(false));
+            addWidget(new TankWidget(fluidTank = new FluidTank(content.getAmount()), 1, 1, false, false).setOnAddedTooltips((s, l)-> {
+                if (chance < 1) {
+                    l.add(chance == 0 ? new TranslationTextComponent("multiblocked.gui.content.chance_0") : new TranslationTextComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
+                }
+                if (perTick) {
+                    l.add(new TranslationTextComponent("multiblocked.gui.content.per_tick"));
+                }
+            }));
         }
         fluidTank.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.EXECUTE);
         fluidTank.setCapacity(content.getAmount());

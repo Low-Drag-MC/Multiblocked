@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 public class MultiblockState {
     public final static PatternError UNLOAD_ERROR = new PatternStringError("multiblocked.pattern.error.chunk");
+    public final static PatternError UNINIT_ERROR = new PatternStringError("multiblocked.pattern.error.init");
 
     public BlockPos pos;
     public BlockState state;
@@ -46,6 +47,7 @@ public class MultiblockState {
     public MultiblockState(World world, BlockPos controllerPos) {
         this.world = world;
         this.controllerPos = controllerPos;
+        this.error = UNINIT_ERROR;
     }
 
     public void clean() {
@@ -69,9 +71,13 @@ public class MultiblockState {
     }
 
     public ControllerTileEntity getController() {
-        TileEntity tileEntity = world.getBlockEntity(controllerPos);
-        if (tileEntity instanceof ControllerTileEntity) {
-            return lastController = (ControllerTileEntity) tileEntity;
+        if (world.isLoaded(controllerPos)) {
+            TileEntity tileEntity = world.getBlockEntity(controllerPos);
+            if (tileEntity instanceof ControllerTileEntity) {
+                return lastController = (ControllerTileEntity) tileEntity;
+            }
+        } else {
+            error = UNLOAD_ERROR;
         }
         return null;
     }

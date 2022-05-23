@@ -18,6 +18,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
@@ -31,6 +33,15 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
     @Override
     public boolean checkPattern() {
         return getDefinition() != DEFAULT_DEFINITION && super.checkPattern();
+    }
+
+    @Override
+    public void setLevelAndPosition(@Nonnull World world, @Nonnull BlockPos pos) {
+        MultiblockWorldSavedData mwsd = MultiblockWorldSavedData.getOrCreate(world);
+        if (mwsd.mapping.containsKey(pos)) {
+            mwsd.removeMapping(mwsd.mapping.get(pos));
+        }
+        super.setLevelAndPosition(world, pos);
     }
 
     public void setDefinition(ControllerDefinition definition) {

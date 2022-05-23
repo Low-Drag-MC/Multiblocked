@@ -274,6 +274,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     protected void readState(PacketBuffer buffer) {
         if (buffer.readBoolean()) {
             state = new MultiblockState(level, worldPosition);
+            state.setError(null);
             int size = buffer.readVarInt();
             if (size > 0) {
                 ImmutableList.Builder<BlockPos> listBuilder = new ImmutableList.Builder<>();

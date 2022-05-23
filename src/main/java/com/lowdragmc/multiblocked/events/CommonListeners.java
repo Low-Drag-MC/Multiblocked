@@ -3,8 +3,10 @@ package com.lowdragmc.multiblocked.events;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
+import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -21,17 +23,20 @@ public class CommonListeners {
     @SubscribeEvent
     public static void onChunkLoad(ChunkEvent.Load event) {
         IWorld world = event.getWorld();
-        if (!world.isClientSide() && world instanceof World) {
-            MultiblockWorldSavedData.getOrCreate((World) world).getControllerInChunk(event.getChunk().getPos()).forEach(
-                    MultiblockState::onChunkLoad);
+        if (!world.isClientSide() && world instanceof ServerWorld) {
+            ((ServerWorld) world).getServer().tell(new TickDelayedTask(0, () -> MultiblockWorldSavedData.getOrCreate((World) world)
+                    .getControllerInChunk(event.getChunk().getPos())
+                    .forEach(MultiblockState::onChunkLoad)));
         }
     }
 
     @SubscribeEvent
     public static void onChunkUnload(ChunkEvent.Unload event) {
         IWorld world = event.getWorld();
-        if (!world.isClientSide() && world instanceof World) {
-            MultiblockWorldSavedData.getOrCreate((World) world).getControllerInChunk(event.getChunk().getPos()).forEach(MultiblockState::onChunkUnload);
+        if (!world.isClientSide() && world instanceof ServerWorld) {
+            MultiblockWorldSavedData.getOrCreate((World) world)
+                    .getControllerInChunk(event.getChunk().getPos())
+                    .forEach(MultiblockState::onChunkUnload);
         }
     }
 

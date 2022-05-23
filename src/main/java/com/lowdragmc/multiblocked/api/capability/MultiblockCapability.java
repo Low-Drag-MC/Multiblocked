@@ -119,4 +119,8 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
         return deserialize(jsonElement, null, null);
     }
 
+    /**
+     * used for recipe builder via KubeJs.
+     */
+    public abstract T of(Object o);
 }

@@ -6,6 +6,9 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.*;
 import mekanism.api.chemical.gas.GasStack;
+import mekanism.api.chemical.infuse.InfusionStack;
+import mekanism.api.chemical.pigment.PigmentStack;
+import mekanism.api.chemical.slurry.SlurryStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.text.ITextComponent;
@@ -102,6 +105,20 @@ public class RecipeBuilder {
         return this;
     }
 
+    public <T> RecipeBuilder inputs(MultiblockCapability<T> capability, Object... obj) {
+        (perTick ? tickInputBuilder : inputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).add(Arrays.stream(obj)
+                .map(capability::of)
+                .map(o->new Tuple<>(o, chance)).toArray(Tuple[]::new));
+        return this;
+    }
+
+    public <T> RecipeBuilder outputs(MultiblockCapability<T> capability, Object... obj) {
+        (perTick ? tickOutputBuilder : outputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).add(Arrays.stream(obj)
+                .map(capability::of)
+                .map(o->new Tuple<>(o, chance)).toArray(Tuple[]::new));
+        return this;
+    }
+
     public RecipeBuilder inputFE(int forgeEnergy) {
         return input(FEMultiblockCapability.CAP, forgeEnergy);
     }
@@ -140,29 +157,71 @@ public class RecipeBuilder {
         return this;
     }
 
-    public RecipeBuilder inputGas(Object... inputs) {
+    public RecipeBuilder inputGases(Object... inputs) {
         if (Multiblocked.isMekLoaded()) {
             return input(ChemicalMekanismCapability.CAP_GAS, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_GAS::of).toArray(GasStack[]::new));
         }
         return this;
     }
 
-    public RecipeBuilder outputGas(Object... outputs) {
+    public RecipeBuilder outputGases(Object... outputs) {
         if (Multiblocked.isMekLoaded()) {
             return output(ChemicalMekanismCapability.CAP_GAS, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_GAS::of).toArray(GasStack[]::new));
         }
         return this;
     }
 
-    public RecipeBuilder inputMana(int mana) {
+    public RecipeBuilder inputSlurries(Object... inputs) {
         if (Multiblocked.isMekLoaded()) {
+            return input(ChemicalMekanismCapability.CAP_SLURRY, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_SLURRY::of).toArray(SlurryStack[]::new));
+        }
+        return this;
+    }
+
+    public RecipeBuilder outputSlurries(Object... outputs) {
+        if (Multiblocked.isMekLoaded()) {
+            return output(ChemicalMekanismCapability.CAP_SLURRY, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_SLURRY::of).toArray(SlurryStack[]::new));
+        }
+        return this;
+    }
+
+    public RecipeBuilder inputInfusions(Object... inputs) {
+        if (Multiblocked.isMekLoaded()) {
+            return input(ChemicalMekanismCapability.CAP_INFUSE, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_INFUSE::of).toArray(InfusionStack[]::new));
+        }
+        return this;
+    }
+
+    public RecipeBuilder outputInfusions(Object... outputs) {
+        if (Multiblocked.isMekLoaded()) {
+            return output(ChemicalMekanismCapability.CAP_INFUSE, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_INFUSE::of).toArray(InfusionStack[]::new));
+        }
+        return this;
+    }
+
+    public RecipeBuilder inputPigments(Object... inputs) {
+        if (Multiblocked.isMekLoaded()) {
+            return input(ChemicalMekanismCapability.CAP_PIGMENT, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_PIGMENT::of).toArray(PigmentStack[]::new));
+        }
+        return this;
+    }
+
+    public RecipeBuilder outputPigments(Object... outputs) {
+        if (Multiblocked.isMekLoaded()) {
+            return output(ChemicalMekanismCapability.CAP_PIGMENT, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_PIGMENT::of).toArray(PigmentStack[]::new));
+        }
+        return this;
+    }
+
+    public RecipeBuilder inputMana(int mana) {
+        if (Multiblocked.isBotLoaded()) {
             return input(ManaBotaniaCapability.CAP, mana);
         }
         return this;
     }
 
     public RecipeBuilder outputMana(int mana) {
-        if (Multiblocked.isMekLoaded()) {
+        if (Multiblocked.isBotLoaded()) {
             return output(ManaBotaniaCapability.CAP, mana);
         }
         return this;

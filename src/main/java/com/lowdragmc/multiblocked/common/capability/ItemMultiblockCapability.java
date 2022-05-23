@@ -6,11 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.common.capability.trait.ItemCapabilityTrait;
@@ -76,6 +78,16 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
                 BlockInfo.fromBlockState(Blocks.WHITE_SHULKER_BOX.defaultBlockState()),
                 BlockInfo.fromBlockState(Blocks.TRAPPED_CHEST.defaultBlockState())
         };
+    }
+
+    @Override
+    public ItemsIngredient of(Object o) {
+        if (o instanceof ItemsIngredient) {
+            return ((ItemsIngredient) o).copy();
+        } else if (Multiblocked.isKubeJSLoaded()) {
+            return MultiblockedJSPlugin.ItemsIngredientWrapper(o);
+        }
+        return new ItemsIngredient(ItemStack.EMPTY);
     }
 
     @Override

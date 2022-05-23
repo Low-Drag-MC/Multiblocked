@@ -21,6 +21,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -90,6 +91,18 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
             }
         }
         return list.toArray(new BlockInfo[0]);
+    }
+
+    @Override
+    public Integer of(Object o) {
+        if (o instanceof Integer) {
+            return (Integer) o;
+        } else if (o instanceof Number) {
+            return ((Number) o).intValue();
+        } else if (o instanceof CharSequence) {
+            return NumberUtils.toInt(o.toString(), 1);
+        }
+        return 1;
     }
 
     @Override

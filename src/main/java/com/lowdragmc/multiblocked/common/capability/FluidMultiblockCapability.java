@@ -5,14 +5,16 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
+import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
-import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.common.capability.trait.FluidCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.FluidContentWidget;
@@ -93,6 +95,16 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
             }
         }
         return list.toArray(new BlockInfo[0]);
+    }
+
+    @Override
+    public FluidStack of(Object o) {
+        if (o instanceof FluidStack) {
+            return ((FluidStack) o).copy();
+        } else if (Multiblocked.isKubeJSLoaded()) {
+            return MultiblockedJSPlugin.FluidStackWrapper(o);
+        }
+        return FluidStack.EMPTY;
     }
 
     @Override

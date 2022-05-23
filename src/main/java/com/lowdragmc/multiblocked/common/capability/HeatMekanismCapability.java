@@ -17,6 +17,7 @@ import mekanism.api.heat.IHeatHandler;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.tileentity.TileEntity;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -61,6 +62,18 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
                 BlockInfo.fromBlock(MekanismBlocks.FUELWOOD_HEATER.getBlock()),
                 BlockInfo.fromBlock(MekanismBlocks.RESISTIVE_HEATER.getBlock()),
         };
+    }
+
+    @Override
+    public Double of(Object o) {
+        if (o instanceof Double) {
+            return (Double) o;
+        } else if (o instanceof Number) {
+            return ((Number) o).doubleValue();
+        } else if (o instanceof CharSequence) {
+            return NumberUtils.toDouble(o.toString(), 1);
+        }
+        return 1d;
     }
 
     @Override

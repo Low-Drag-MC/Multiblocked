@@ -10,6 +10,7 @@ import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import net.minecraft.tileentity.TileEntity;
+import org.apache.commons.lang3.math.NumberUtils;
 import vazkii.botania.api.mana.IManaReceiver;
 import vazkii.botania.common.block.ModBlocks;
 
@@ -69,6 +70,18 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
     @Override
     public JsonElement serialize(Integer integer, Type type, JsonSerializationContext jsonSerializationContext) {
         return new JsonPrimitive(integer);
+    }
+
+    @Override
+    public Integer of(Object o) {
+        if (o instanceof Integer) {
+            return (Integer) o;
+        } else if (o instanceof Number) {
+            return ((Number) o).intValue();
+        } else if (o instanceof CharSequence) {
+            return NumberUtils.toInt(o.toString(), 1);
+        }
+        return 1;
     }
 
     public static class ManaBotainaCapabilityProxy extends CapabilityProxy<Integer> {

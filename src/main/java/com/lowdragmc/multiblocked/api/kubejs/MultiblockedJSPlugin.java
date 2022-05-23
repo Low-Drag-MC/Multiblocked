@@ -29,15 +29,15 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
 
     @Override
     public void addTypeWrappers(ScriptType type, TypeWrappers typeWrappers) {
-        typeWrappers.register(ItemsIngredient.class, this::ItemsIngredientWrapper);
-        typeWrappers.register(FluidStack.class, this::FluidStackWrapper);
+        typeWrappers.register(ItemsIngredient.class, MultiblockedJSPlugin::ItemsIngredientWrapper);
+        typeWrappers.register(FluidStack.class, MultiblockedJSPlugin::FluidStackWrapper);
     }
 
-    private FluidStack FluidStackWrapper(Object o) {
+    public static FluidStack FluidStackWrapper(Object o) {
         return FluidStackHooksForge.toForge(FluidStackJS.of(o).getFluidStack());
     }
 
-    private ItemsIngredient ItemsIngredientWrapper(Object o) {
+    public static ItemsIngredient ItemsIngredientWrapper(Object o) {
         IngredientJS ingredient = IngredientJS.of(o);
         return new ItemsIngredient(ingredient.createVanillaIngredient());
     }

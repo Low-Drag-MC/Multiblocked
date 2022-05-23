@@ -254,7 +254,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
             Size size = getSize();
             matrixStack.pushPose();
             RenderSystem.disableDepthTest();
-            matrixStack.translate(0 ,0 , 170);
+            matrixStack.translate(0 ,0 , 400);
             matrixStack.scale(0.5f, 0.5f, 1);
             String s = LocalizationUtils.format("multiblocked.gui.content.tips.per_tick_short");
             int color = 0xFFFF00;

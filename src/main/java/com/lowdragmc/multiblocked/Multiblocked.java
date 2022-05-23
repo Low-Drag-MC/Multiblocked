@@ -89,4 +89,16 @@ public class Multiblocked {
     public static boolean isKubeJSLoaded() {
         return isModLoaded(MODID_KUBEJS);
     }
+    public static boolean isMekLoaded() {
+        return isModLoaded(MODID_MEK);
+    }
+    public static boolean isGeoLoaded() {
+        return isModLoaded(MODID_GEO);
+    }
+    public static boolean isBotLoaded() {
+        return isModLoaded(MODID_BOT);
+    }
+    public static boolean isJeiLoaded() {
+        return isModLoaded(MODID_JEI);
+    }
 }

@@ -1,0 +1,1 @@
+com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin

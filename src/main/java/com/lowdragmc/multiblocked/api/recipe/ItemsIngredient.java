@@ -34,7 +34,12 @@ public class ItemsIngredient {
         }
         this.amount = amount;
     }
-    
+
+    public ItemsIngredient(Ingredient ingredient) {
+        this.ingredient = ingredient;
+        this.amount = ingredient.isEmpty() ? 0 : ingredient.getItems()[0].getCount();
+    }
+
     public int getAmount() {
         return amount;
     }
@@ -58,5 +63,15 @@ public class ItemsIngredient {
 
     public String getTag() {
         return tag;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = amount;
+        for (ItemStack stack : ingredient.getItems()) {
+            ResourceLocation name = stack.getItem().getRegistryName();
+            hash += name == null ? 0 : name.hashCode();
+        }
+        return hash;
     }
 }

@@ -91,7 +91,7 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
 
         checkCommonIngredients(recipe, FluidMultiblockCapability.CAP, ingredients, VanillaTypes.FLUID, FluidStack.class);
 
-        if (Multiblocked.isModLoaded(Multiblocked.MODID_MEK)) {
+        if (Multiblocked.isMekLoaded()) {
             checkCommonIngredients(recipe, ChemicalMekanismCapability.CAP_GAS, ingredients, MekanismJEI.TYPE_GAS, GasStack.class);
             checkCommonIngredients(recipe, ChemicalMekanismCapability.CAP_INFUSE, ingredients, MekanismJEI.TYPE_INFUSION, InfusionStack.class);
             checkCommonIngredients(recipe, ChemicalMekanismCapability.CAP_PIGMENT, ingredients, MekanismJEI.TYPE_PIGMENT, PigmentStack.class);

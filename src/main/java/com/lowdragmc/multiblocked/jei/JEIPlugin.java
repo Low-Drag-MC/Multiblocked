@@ -13,6 +13,7 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.IModIngredientRegistration;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
@@ -58,6 +59,11 @@ public class JEIPlugin implements IModPlugin {
             if (recipeMap == RecipeMap.EMPTY) continue;
             registry.addRecipeCategories(new RecipeMapCategory(jeiHelpers, recipeMap));
         }
+    }
+
+    @Override
+    public void registerRecipeCatalysts(@Nonnull IRecipeCatalystRegistration registration) {
+        MultiblockInfoCategory.registerRecipeCatalysts(registration);
     }
 
     @Override

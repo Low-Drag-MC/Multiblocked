@@ -1,10 +1,6 @@
 package com.lowdragmc.multiblocked.common.capability;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
+import com.google.gson.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -16,12 +12,7 @@ import com.lowdragmc.multiblocked.common.capability.trait.ChemicalCapabilityTrai
 import com.lowdragmc.multiblocked.common.capability.widget.ChemicalStackWidget;
 import mekanism.api.Action;
 import mekanism.api.MekanismAPI;
-import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.ChemicalUtils;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.IChemicalTank;
+import mekanism.api.chemical.*;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfuseType;
@@ -37,6 +28,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.registries.IForgeRegistry;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -190,6 +182,21 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
         jsonObj.addProperty("type", chemicalStack.getType().getRegistryName().toString());
         jsonObj.addProperty("amount", chemicalStack.getAmount());
         return jsonObj;
+    }
+
+    public STACK of(Object o) {
+        if (o instanceof ChemicalStack<?> && ((ChemicalStack<?>) o).getType().getClass() == empty.getClass()) {
+            return (STACK) ((ChemicalStack<?>) o).copy();
+        } else if (o instanceof CharSequence) {
+            String s = o.toString();
+            if (!s.isEmpty() && !s.equals("-") && !s.equals("empty") && !s.equals("minecraft:empty")) {
+                String[] s1 = s.split(" ", 2);
+                CHEMICAL chemical = registry.get().getValue(new ResourceLocation(s1[0]));
+                long amount = s1.length == 2 ? NumberUtils.toLong(s1[1], 1) : 1;
+                return createStack.apply(chemical, amount);
+            }
+        }
+        return (STACK) empty.getStack(0);
     }
 
     public static class ChemicalMekanismCapabilityProxy<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends CapCapabilityProxy<IChemicalHandler<CHEMICAL, STACK>, STACK> {

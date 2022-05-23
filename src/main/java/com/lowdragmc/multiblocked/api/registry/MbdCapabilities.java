@@ -27,14 +27,14 @@ public class MbdCapabilities {
         registerCapability(FEMultiblockCapability.CAP);
         registerCapability(ItemMultiblockCapability.CAP);
         registerCapability(FluidMultiblockCapability.CAP);
-        if (Multiblocked.isModLoaded(Multiblocked.MODID_MEK)) {
+        if (Multiblocked.isMekLoaded()) {
             registerCapability(ChemicalMekanismCapability.CAP_GAS);
             registerCapability(ChemicalMekanismCapability.CAP_SLURRY);
             registerCapability(ChemicalMekanismCapability.CAP_INFUSE);
             registerCapability(ChemicalMekanismCapability.CAP_PIGMENT);
             registerCapability(HeatMekanismCapability.CAP);
         }
-        if (Multiblocked.isModLoaded(Multiblocked.MODID_BOT)) {
+        if (Multiblocked.isBotLoaded()) {
             registerCapability(ManaBotaniaCapability.CAP);
         }
     }

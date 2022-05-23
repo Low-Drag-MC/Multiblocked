@@ -32,7 +32,7 @@ import java.io.File;
 
 public class CommonProxy {
     public CommonProxy() {
-        if (Multiblocked.isModLoaded(Multiblocked.MODID_GEO)) {
+        if (Multiblocked.isGeoLoaded()) {
             GeckoLib.initialize();
         }
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();

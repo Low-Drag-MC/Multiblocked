@@ -74,4 +74,12 @@ public class ControllerDefinition extends ComponentDefinition {
     public boolean needUpdateTick() {
         return super.needUpdateTick() || catalyst == null;
     }
+
+    public BlockPattern getBasePattern() {
+        return basePattern;
+    }
+
+    public RecipeMap getRecipeMap() {
+        return recipeMap;
+    }
 }

@@ -1,19 +1,21 @@
 package com.lowdragmc.multiblocked.jei.multipage;
 
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
+import com.lowdragmc.lowdraglib.jei.IGui2IDrawable;
 import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
+import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     public MultiblockInfoCategory(IJeiHelpers helpers) {
         IGuiHelper guiHelper = helpers.getGuiHelper();
         this.background = guiHelper.createBlankDrawable(176, 220);
-        this.icon = guiHelper.createDrawableIngredient(BlueprintTableTileEntity.tableDefinition.getStackForm());
+        this.icon = IGui2IDrawable.toDrawable(new ItemStackTexture(BlueprintTableTileEntity.tableDefinition.getStackForm()), 18, 18);
     }
 
     public static final List<ControllerDefinition> REGISTER = new ArrayList<>();
@@ -44,7 +46,14 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
                 if (definition.recipeMap.categoryTexture == null) {
                     definition.recipeMap.categoryTexture = new ItemStackTexture(definition.getStackForm());
                 }
-                registry.addIngredientInfo(definition.getStackForm(), VanillaTypes.ITEM, new TranslationTextComponent(Multiblocked.MODID + ":" + definition.recipeMap.name));
+            }
+        }
+    }
+
+    public static void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        for (ControllerDefinition definition : REGISTER) {
+            if (definition.recipeMap != null && definition.recipeMap != RecipeMap.EMPTY) {
+                registration.addRecipeCatalyst(definition.getStackForm(), new ResourceLocation(Multiblocked.MODID + ":" + definition.recipeMap.name));
             }
         }
     }

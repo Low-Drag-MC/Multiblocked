@@ -58,9 +58,9 @@ public class Recipe {
         this.text = text;
     }
 
-    public <T> T getData(String key) {
+    public Object getData(String key) {
         if (data.containsKey(key)) {
-            return (T) data.get(key);
+            return data.get(key);
         }
         return null;
     }

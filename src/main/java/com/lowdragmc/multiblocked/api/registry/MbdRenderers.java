@@ -27,7 +27,7 @@ public class MbdRenderers {
         registerRenderer(MBDBlockStateRenderer.INSTANCE);
 //        registerRenderer(TextureParticleRenderer.INSTANCE);
         registerRenderer(GTRenderer.INSTANCE);
-        if (Multiblocked.isModLoaded(Multiblocked.MODID_GEO)) {
+        if (Multiblocked.isGeoLoaded()) {
             registerRenderer(GeoComponentRenderer.INSTANCE);
         }
     }

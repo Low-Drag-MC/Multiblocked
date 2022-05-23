@@ -34,7 +34,7 @@ public class BlueprintTableWidget extends WidgetGroup {
             try {
                 Desktop desktop = Desktop.getDesktop();
                 if (Desktop.isDesktopSupported() && desktop.isSupported(Desktop.Action.BROWSE)) {
-                    desktop.browse(new URI("https://github.com/CleanroomMC/Multiblocked/wiki"));
+                    desktop.browse(new URI("https://github.com/Low-Drag-MC/Multiblocked/wiki"));
                 }
             } catch (Throwable e) {
                 Multiblocked.LOGGER.warn("unable to open the web page: {}", e.getMessage());

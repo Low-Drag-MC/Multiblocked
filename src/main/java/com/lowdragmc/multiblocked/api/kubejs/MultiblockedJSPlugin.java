@@ -30,7 +30,9 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
     @Override
     public void addTypeWrappers(ScriptType type, TypeWrappers typeWrappers) {
         typeWrappers.register(ItemsIngredient.class, MultiblockedJSPlugin::ItemsIngredientWrapper);
-        typeWrappers.register(FluidStack.class, MultiblockedJSPlugin::FluidStackWrapper);
+        if (typeWrappers.getWrapperFactory(FluidStack.class, null) == null) {
+            typeWrappers.register(FluidStack.class, MultiblockedJSPlugin::FluidStackWrapper);
+        }
     }
 
     public static FluidStack FluidStackWrapper(Object o) {

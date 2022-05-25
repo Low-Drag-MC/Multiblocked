@@ -6,16 +6,20 @@ import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -30,6 +34,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -115,12 +120,15 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
 
     @Override
     public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
-        List<ItemStack> drops = super.getDrops(pState, pBuilder);
-//        ComponentTileEntity<?> instance = componentBroken.get();
-//        if (instance != null) {
-//            instance.onDrops(drops, harvesters.get());
-//        }
-        return drops;
+        LootContext context = pBuilder.withParameter(LootParameters.BLOCK_STATE, pState).create(LootParameterSets.BLOCK);
+        Entity entity = context.getParamOrNull(LootParameters.THIS_ENTITY);
+        TileEntity tileEntity = context.getParamOrNull(LootParameters.BLOCK_ENTITY);
+        if (tileEntity instanceof ComponentTileEntity<?> && entity instanceof PlayerEntity) {
+            NonNullList<ItemStack> drops = NonNullList.create();
+            ((ComponentTileEntity<?>) tileEntity).onDrops(drops, (PlayerEntity) entity);
+            return drops;
+        }
+        return Collections.emptyList();
     }
 
     @Override

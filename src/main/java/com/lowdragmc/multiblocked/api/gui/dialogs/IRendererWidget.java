@@ -22,8 +22,8 @@ import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Collections;

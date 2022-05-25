@@ -14,14 +14,17 @@ import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.vector.Matrix4f;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.math.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -64,15 +67,16 @@ public class RecipePage extends PageWidget{
                 new IGuiTexture() {
                     @OnlyIn(Dist.CLIENT)
                     @Override
-                    public void draw(MatrixStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+                    public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
                         float imageU = 185f / 256;
                         float imageV = 0;
                         float imageWidth = 9f / 256;
                         float imageHeight = 143f / 256;
-                        Minecraft.getInstance().textureManager.bind(resourceTexture.imageLocation);
-                        Tessellator tessellator = Tessellator.getInstance();
+                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                        RenderSystem.setShaderTexture(0, resourceTexture.imageLocation);
+                        Tesselator tessellator = Tesselator.getInstance();
                         BufferBuilder bufferbuilder = tessellator.getBuilder();
-                        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+                        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                         Matrix4f mat = stack.last().pose();
                         bufferbuilder.vertex(mat, x, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).endVertex();
                         bufferbuilder.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth, imageV).endVertex();
@@ -83,21 +87,22 @@ public class RecipePage extends PageWidget{
                 }, new IGuiTexture() {
                     @OnlyIn(Dist.CLIENT)
                     @Override
-                    public void draw(MatrixStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
+                    public void draw(PoseStack stack, int mouseX, int mouseY, float x, float y, int width, int height) {
 
                     }
 
                     @OnlyIn(Dist.CLIENT)
                     @Override
-                    public void drawSubArea(MatrixStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
+                    public void drawSubArea(PoseStack stack, float x, float y, int width, int height, float drawnU, float drawnV, float drawnWidth, float drawnHeight) {
                         float imageU = 176f / 256;
                         float imageV = 0;
                         float imageWidth = 9f / 256;
                         float imageHeight = 143f / 256;
-                        Minecraft.getInstance().textureManager.bind(resourceTexture.imageLocation);
-                        Tessellator tessellator = Tessellator.getInstance();
+                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                        RenderSystem.setShaderTexture(0, resourceTexture.imageLocation);
+                        Tesselator tessellator = Tesselator.getInstance();
                         BufferBuilder bufferbuilder = tessellator.getBuilder();
-                        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+                        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                         Matrix4f mat = stack.last().pose();
                         bufferbuilder.vertex(mat, x, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).endVertex();
                         bufferbuilder.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth,  imageV + imageHeight - drawnWidth * imageHeight).endVertex();
@@ -114,7 +119,7 @@ public class RecipePage extends PageWidget{
     }
 
     @Override
-    public void writeInitialData(PacketBuffer buffer) {
+    public void writeInitialData(FriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
         detectAndSendChanges();
         writeRecipe(buffer);
@@ -122,7 +127,7 @@ public class RecipePage extends PageWidget{
     }
 
     @Override
-    public void readInitialData(PacketBuffer buffer) {
+    public void readInitialData(FriendlyByteBuf buffer) {
         super.readInitialData(buffer);
         readRecipe(buffer);
         readStatus(buffer);
@@ -148,17 +153,17 @@ public class RecipePage extends PageWidget{
         }
     }
 
-    private void writeStatus(PacketBuffer buffer) {
+    private void writeStatus(FriendlyByteBuf buffer) {
         buffer.writeEnum(status);
         buffer.writeVarInt(progress);
     }
 
-    private void readStatus(PacketBuffer buffer) {
+    private void readStatus(FriendlyByteBuf buffer) {
         status = buffer.readEnum(RecipeLogic.Status.class);
         progress = buffer.readVarInt();
     }
 
-    private void writeRecipe(PacketBuffer buffer) {
+    private void writeRecipe(FriendlyByteBuf buffer) {
         if (recipe == null) {
             buffer.writeBoolean(false);
         }
@@ -168,7 +173,7 @@ public class RecipePage extends PageWidget{
         }
     }
 
-    private void readRecipe(PacketBuffer buffer) {
+    private void readRecipe(FriendlyByteBuf buffer) {
         if (buffer.readBoolean()) {
             recipe = controller.getDefinition().recipeMap.recipes.get(buffer.readUtf());
             if (recipeWidget != null) {
@@ -188,7 +193,7 @@ public class RecipePage extends PageWidget{
     }
 
     @Override
-    public void readUpdateInfo(int id, PacketBuffer buffer) {
+    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
         if (id == -1) {
             readRecipe(buffer);
         } else if (id == -2) {

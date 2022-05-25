@@ -2,7 +2,7 @@ package com.lowdragmc.multiblocked.api.tile;
 
 import com.google.gson.JsonElement;
 import com.lowdragmc.lowdraglib.LDLMod;
-import com.lowdragmc.lowdraglib.gui.factory.TileEntityUIFactory;
+import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
@@ -20,36 +20,36 @@ import com.lowdragmc.multiblocked.api.kubejs.events.*;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import dev.latvian.kubejs.script.ScriptType;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
@@ -67,7 +67,7 @@ import java.util.function.Consumer;
  *
  * This isn't going to be in-world.
  */
-public abstract class ComponentTileEntity<T extends ComponentDefinition> extends TileEntity implements IInnerCapabilityProvider, IUIHolder {
+public abstract class ComponentTileEntity<T extends ComponentDefinition> extends BlockEntity implements IInnerCapabilityProvider, IUIHolder {
     // is good to write down all CT code here? or move them to @ZenExpansion.
     protected T definition;
 
@@ -75,7 +75,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public Object rendererObject; // used for renderer
 
-    public INBT persistedData; // used for renderer
+    public Tag persistedData; // used for renderer
 
     private UUID owner;
 
@@ -87,8 +87,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     protected Map<MultiblockCapability<?>, CapabilityTrait> traits = new HashMap<>();
 
-    public ComponentTileEntity(T definition) {
-        super(definition.getTileType());
+    public ComponentTileEntity(T definition, BlockPos pos, BlockState state) {
+        super(definition.getTileType(), pos, state);
         this.definition = definition;
         initTrait();
     }
@@ -128,7 +128,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     public String getUnlocalizedName() {
         return "block." + definition.getID();
     }
-    
+
+    @OnlyIn(Dist.CLIENT)
     public String getLocalizedName() {
         return I18n.get(getUnlocalizedName());
     }
@@ -152,7 +153,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     @Nullable
-    public PlayerEntity getOwner() {
+    public Player getOwner() {
         return (owner == null || this.level == null) ? null : this.level.getPlayerByUUID(owner);
     }
 
@@ -160,7 +161,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         this.owner = player;
     }
 
-    public void setOwner(PlayerEntity player) {
+    public void setOwner(Player player) {
         this.owner = player.getUUID();
     }
 
@@ -212,16 +213,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         }
     }
 
-    @Override
-    public void rotate(@Nonnull Rotation rotationIn) {
-        setFrontFacing(rotationIn.rotate(getFrontFacing()));
-    }
-
-    @Override
-    public void mirror(@Nonnull Mirror mirrorIn) {
-        rotate(mirrorIn.getRotation(getFrontFacing()));
-    }
-
     public IMultiblockedRenderer updateCurrentRenderer() {
         IMultiblockedRenderer renderer;
         if (isFormed()) {
@@ -255,10 +246,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         return definition.allowRotate;
     }
 
-//    public boolean canConnectRedstone(Direction facing) {
-//        return definition.getOutputRedstoneSignal != null;
-//    }
-
     public int getOutputRedstoneSignal(Direction facing) {
         if (Multiblocked.isKubeJSLoaded()) {
             OutputRedstoneEvent event = new OutputRedstoneEvent(this, facing);
@@ -271,7 +258,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     public void scheduleChunkForRenderUpdate() {
         if (level != null) {
             BlockState state = getBlockState();
-            level.sendBlockUpdated(getBlockPos(), state, state, Constants.BlockFlags.RERENDER_MAIN_THREAD);
+            level.sendBlockUpdated(getBlockPos(), state, state, 1 << 3);
         }
     }
 
@@ -287,7 +274,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     //************* events *************//
 
-    public void onDrops(NonNullList<ItemStack> drops, PlayerEntity player) {
+    public void onDrops(NonNullList<ItemStack> drops, Player player) {
         if (Multiblocked.isKubeJSLoaded()) {
             if (new DropEvent(this, drops, player).post(ScriptType.SERVER, DropEvent.ID, getSubID())) {
                 return;
@@ -299,21 +286,21 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         drops.add(definition.getStackForm());
     }
 
-    public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult use(Player player, InteractionHand hand, BlockHitResult hit) {
         if (Multiblocked.isKubeJSLoaded()) {
             RightClickEvent event = new RightClickEvent(this, player, hand, hit);
             if (event.post(ScriptType.SERVER, RightClickEvent.ID, getSubID())) {
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
-        if (!player.isCrouching() && hand == Hand.MAIN_HAND) {
-            if (player instanceof ServerPlayerEntity) {
-                return TileEntityUIFactory.INSTANCE.openUI(this, (ServerPlayerEntity) player) ? ActionResultType.SUCCESS : ActionResultType.PASS;
+        if (!player.isCrouching() && hand == InteractionHand.MAIN_HAND) {
+            if (player instanceof ServerPlayer) {
+                return BlockEntityUIFactory.INSTANCE.openUI(this, (ServerPlayer) player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
             } else {
-                return traits.isEmpty() ? ActionResultType.PASS : ActionResultType.SUCCESS;
+                return traits.isEmpty() ? InteractionResult.PASS : InteractionResult.SUCCESS;
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
     
     public void onNeighborChange() {
@@ -359,7 +346,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity PlayerEntity) {
+    public ModularUI createUI(Player PlayerEntity) {
         if (traits.isEmpty()) return null;
         TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
         initTraitUI(tabContainer, PlayerEntity);
@@ -371,20 +358,21 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         return isRemoved();
     }
 
-    protected void initTraitUI(TabContainer tabContainer, PlayerEntity PlayerEntity) {
+    protected void initTraitUI(TabContainer tabContainer, Player PlayerEntity) {
         WidgetGroup group = new WidgetGroup(20, 0, 176, 256);
         tabContainer.addTab(new TabButton(0, tabContainer.containerGroup.widgets.size() * 20, 20, 20)
                         .setTexture(new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0, 1, 0.5),
                                 new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0.5, 1, 0.5)), group);
-        group.addWidget(new ImageWidget(0, 0, 176, 256, new ResourceTexture(JSONUtils.getAsString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png"))));
+        group.addWidget(new ImageWidget(0, 0, 176, 256, new ResourceTexture(
+                GsonHelper.getAsString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png"))));
         if (traits.size() > 0 ) {
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 9; col++) {
-                    group.addWidget(new SlotWidget(PlayerEntity.inventory, col + (row + 1) * 9, 7 + col * 18, 173 + row * 18).setLocationInfo(true, false));
+                    group.addWidget(new SlotWidget(PlayerEntity.getInventory(), col + (row + 1) * 9, 7 + col * 18, 173 + row * 18).setLocationInfo(true, false));
                 }
             }
             for (int slot = 0; slot < 9; slot++) {
-                group.addWidget(new SlotWidget(PlayerEntity.inventory, slot, 7 + slot * 18, 231).setLocationInfo(true, true));
+                group.addWidget(new SlotWidget(PlayerEntity.getInventory(), slot, 7 + slot * 18, 231).setLocationInfo(true, true));
             }
         }
         for (CapabilityTrait trait : traits.values()) {
@@ -392,12 +380,16 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         }
     }
 
-    public final void writeTraitData(CapabilityTrait trait, int internalId, Consumer<PacketBuffer> dataWriter) {
+    public final void writeTraitData(CapabilityTrait trait, int internalId, Consumer<FriendlyByteBuf> dataWriter) {
         this.writeCustomData(3, (buffer) -> {
             buffer.writeUtf(trait.capability.name);
             buffer.writeVarInt(internalId);
             dataWriter.accept(buffer);
         });
+    }
+
+    public void rotate(Rotation rotationIn) {
+        setFrontFacing(rotationIn.rotate(getFrontFacing()));
     }
 
     //************* data sync *************//
@@ -414,21 +406,21 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     protected final List<UpdateEntry> updateEntries = new ArrayList<>();
 
-    public void writeInitialSyncData(PacketBuffer buf) {
+    public void writeInitialSyncData(FriendlyByteBuf buf) {
         buf.writeUtf(status);
         if (Multiblocked.isKubeJSLoaded()) {
             new WriteInitialDataEvent(this, buf).post(ScriptType.SERVER, WriteInitialDataEvent.ID, getSubID());
         }
     }
 
-    public void receiveInitialSyncData(PacketBuffer buf) {
+    public void receiveInitialSyncData(FriendlyByteBuf buf) {
         status = buf.readUtf();
         if (Multiblocked.isKubeJSLoaded()) {
             new ReadInitialDataEvent(this, buf).post(ScriptType.CLIENT, ReadInitialDataEvent.ID, getSubID());
         }
     }
 
-    public void receiveCustomData(int dataId, PacketBuffer buf) {
+    public void receiveCustomData(int dataId, FriendlyByteBuf buf) {
         if (dataId == 1) {
             status = buf.readUtf();
             scheduleChunkForRenderUpdate();
@@ -444,33 +436,33 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     
     @Override
-    public final void deserializeNBT(@Nonnull CompoundNBT nbt) {
+    public final void deserializeNBT(@Nonnull CompoundTag nbt) {
         super.deserializeNBT(nbt);
     }
 
     @Override
-    public final CompoundNBT serializeNBT() {
+    public final CompoundTag serializeNBT() {
         return super.serializeNBT();
     }
 
     @Override
-    public void setLevelAndPosition(@Nonnull World world, @Nonnull BlockPos pos) {
-        super.setLevelAndPosition(world, pos);
+    public void setLevel(@Nonnull Level world) {
+        super.setLevel(world);
         if (needAlwaysUpdate()) {
             MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
         }
     }
 
     @Override
-    public void load(@Nonnull BlockState blockState, @Nonnull CompoundNBT compound) {
-        super.load(blockState, compound);
+    public void load(@Nonnull CompoundTag compound) {
+        super.load(compound);
         if (needAlwaysUpdate()) {
             MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
         }
         if (compound.contains("owner")) {
             this.owner = compound.getUUID("owner");
         }
-        CompoundNBT traitTag = compound.getCompound("trait");
+        CompoundTag traitTag = compound.getCompound("trait");
         for (Map.Entry<MultiblockCapability<?>, CapabilityTrait> entry : traits.entrySet()) {
             entry.getValue().readFromNBT(traitTag.getCompound(entry.getKey().name));
         }
@@ -479,18 +471,17 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         }
     }
 
-    @Nonnull
     @Override
-    public CompoundNBT save(@Nonnull CompoundNBT compound) {
-        super.save(compound);
+    public void saveAdditional(@Nonnull CompoundTag compound) {
+        super.saveAdditional(compound);
         compound.putString("loc", definition.location.toString());
         if (this.owner != null) {
             compound.putUUID("owner", this.owner);
         }
         compound.putString("mbd_def", definition.location.toString());
-        CompoundNBT traitTag = new CompoundNBT();
+        CompoundTag traitTag = new CompoundTag();
         for (Map.Entry<MultiblockCapability<?>, CapabilityTrait> entry : traits.entrySet()) {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             entry.getValue().writeToNBT(tag);
             traitTag.put(entry.getKey().name, tag);
         }
@@ -498,12 +489,11 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         if (persistedData != null) {
             compound.put("persisted", persistedData);
         }
-        return compound;
     }
 
-    public void writeCustomData(int discriminator, Consumer<PacketBuffer> dataWriter) {
+    public void writeCustomData(int discriminator, Consumer<FriendlyByteBuf> dataWriter) {
         ByteBuf backedBuffer = Unpooled.buffer();
-        dataWriter.accept(new PacketBuffer(backedBuffer));
+        dataWriter.accept(new FriendlyByteBuf(backedBuffer));
         byte[] updateData = Arrays.copyOfRange(backedBuffer.array(), 0, backedBuffer.writerIndex());
         updateEntries.add(new UpdateEntry(discriminator, updateData));
         BlockState state = getBlockState();
@@ -513,55 +503,55 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        CompoundNBT updateTag = new CompoundNBT();
-        ListNBT tagList = new ListNBT();
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        CompoundTag updateTag = new CompoundTag();
+        ListTag tagList = new ListTag();
         for (UpdateEntry updateEntry : updateEntries) {
-            CompoundNBT entryTag = new CompoundNBT();
+            CompoundTag entryTag = new CompoundTag();
             entryTag.putInt("i", updateEntry.discriminator);
             entryTag.putByteArray("d", updateEntry.updateData);
             tagList.add(entryTag);
         }
         this.updateEntries.clear();
         updateTag.put("d", tagList);
-        return new SUpdateTileEntityPacket(getBlockPos(), 0, updateTag);
+        return ClientboundBlockEntityDataPacket.create(this, entity -> updateTag);
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        CompoundNBT updateTag = pkt.getTag();
-        ListNBT tagList = updateTag.getList("d", Constants.NBT.TAG_COMPOUND);
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+        CompoundTag updateTag = pkt.getTag();
+        ListTag tagList = updateTag.getList("d", Tag.TAG_COMPOUND);
         for (int i = 0; i < tagList.size(); i++) {
-            CompoundNBT entryTag = tagList.getCompound(i);
+            CompoundTag entryTag = tagList.getCompound(i);
             int discriminator = entryTag.getInt("i");
             byte[] updateData = entryTag.getByteArray("d");
             ByteBuf backedBuffer = Unpooled.copiedBuffer(updateData);
-            receiveCustomData(discriminator, new PacketBuffer(backedBuffer));
+            receiveCustomData(discriminator, new FriendlyByteBuf(backedBuffer));
         }
     }
 
     @Nonnull
     @Override
-    public CompoundNBT getUpdateTag() {
-        CompoundNBT updateTag = super.getUpdateTag();
+    public CompoundTag getUpdateTag() {
+        CompoundTag updateTag = super.getUpdateTag();
         ByteBuf backedBuffer = Unpooled.buffer();
-        writeInitialSyncData(new PacketBuffer(backedBuffer));
+        writeInitialSyncData(new FriendlyByteBuf(backedBuffer));
         byte[] updateData = Arrays.copyOfRange(backedBuffer.array(), 0, backedBuffer.writerIndex());
         updateTag.putByteArray("d", updateData);
         return updateTag;
     }
 
     @Override
-    public void handleUpdateTag(BlockState state, @Nonnull CompoundNBT tag) {
-        super.handleUpdateTag(state, tag);
+    public void handleUpdateTag(@Nonnull CompoundTag tag) {
+        super.handleUpdateTag(tag);
         byte[] updateData = tag.getByteArray("d");
         ByteBuf backedBuffer = Unpooled.copiedBuffer(updateData);
-        receiveInitialSyncData(new PacketBuffer(backedBuffer));
+        receiveInitialSyncData(new FriendlyByteBuf(backedBuffer));
     }
 
     @Override
     @Nonnull
-    public AxisAlignedBB getRenderBoundingBox() {
+    public AABB getRenderBoundingBox() {
         return getRenderer().isGlobalRenderer(this) ? INFINITE_EXTENT_AABB : super.getRenderBoundingBox();
     }
 }

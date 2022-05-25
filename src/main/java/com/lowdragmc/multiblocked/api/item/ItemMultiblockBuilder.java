@@ -5,18 +5,18 @@ import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -48,11 +48,11 @@ public class ItemMultiblockBuilder extends Item {
     }
 
     @Override
-    public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
-        PlayerEntity player = context.getPlayer();
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
+        Player player = context.getPlayer();
         if (player != null) {
             if (!player.level.isClientSide) {
-                TileEntity tileEntity = player.level.getBlockEntity(context.getClickedPos());
+                BlockEntity tileEntity = player.level.getBlockEntity(context.getClickedPos());
                 ItemStack hold = player.getItemInHand(context.getHand());
                 if (isItemMultiblockBuilder(hold) && tileEntity instanceof ControllerTileEntity) {
                     if (isRaw(hold)) {
@@ -60,7 +60,7 @@ public class ItemMultiblockBuilder extends Item {
                         if (pattern != null) {
                             pattern.autoBuild(player, new MultiblockState(player.level, context.getClickedPos()));
                         }
-                        return ActionResultType.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     } else {
                         String json = hold.getOrCreateTagElement("pattern").getString("json");
                         String controller = hold.getOrCreateTagElement("pattern").getString("controller");
@@ -68,28 +68,28 @@ public class ItemMultiblockBuilder extends Item {
                             if (controller.equals(((ControllerTileEntity) tileEntity).getDefinition().location.toString())) {
                                 JsonBlockPattern jsonBlockPattern = Multiblocked.GSON.fromJson(json, JsonBlockPattern.class);
                                 jsonBlockPattern.build().autoBuild(player, new MultiblockState(player.level, context.getClickedPos()));
-                                return ActionResultType.SUCCESS;
+                                return InteractionResult.SUCCESS;
                             }
                         }
                     }
                 }
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     @ParametersAreNonnullByDefault
-    public void appendHoverText(ItemStack stack, @Nullable World level, List<ITextComponent> tooltip, ITooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         if (isItemMultiblockBuilder(stack)) {
             if (isRaw(stack)) {
-                tooltip.add(new StringTextComponent("auto build"));
+                tooltip.add(new TextComponent("auto build"));
             } else {
                 ResourceLocation location = new ResourceLocation(stack.getOrCreateTagElement("pattern").getString("controller"));
-                tooltip.add(new StringTextComponent("pattern build"));
-                tooltip.add(new StringTextComponent(String.format("Controller: %s", I18n.get(location.getPath() + ".name"))));
+                tooltip.add(new TextComponent("pattern build"));
+                tooltip.add(new TextComponent(String.format("Controller: %s", I18n.get(location.getPath() + ".name"))));
             }
         }
     }

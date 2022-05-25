@@ -3,14 +3,15 @@ package com.lowdragmc.multiblocked.api.block;
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
 /**
@@ -18,6 +19,7 @@ import java.util.List;
  * Date: 2022/04/23
  * Description:
  */
+@ParametersAreNonnullByDefault
 public class ItemComponent extends BlockItem implements IItemRendererProvider {
 
     public ItemComponent(BlockComponent block) {
@@ -36,7 +38,7 @@ public class ItemComponent extends BlockItem implements IItemRendererProvider {
     }
 
     @Override
-    public void appendHoverText(@Nonnull ItemStack pStack, @Nullable World pLevel, @Nonnull List<ITextComponent> pTooltip, @Nonnull ITooltipFlag pFlag) {
+    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltip, TooltipFlag pFlag) {
         super.appendHoverText(pStack, pLevel, pTooltip, pFlag);
     }
 

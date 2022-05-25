@@ -1,10 +1,14 @@
-#version 120
+#version 150
 // Author @patriciogv - 2015
 // http://patriciogonzalezvivo.com
 
 uniform vec2 iResolution;
 uniform float iTime;
 const vec3 b_color = vec3(.7, .1, .4);
+
+in vec2 texCoord;
+
+out vec4 fragColor;
 
 float random (in vec2 _st) {
     return fract(sin(dot(_st.xy,
@@ -48,7 +52,7 @@ float fbm ( in vec2 _st) {
     return v;
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord) {
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 st = fragCoord.xy/iResolution.xy*3.;
     // st += st * abs(sin(iTime*0.1)*3.0);
     vec3 color = vec3(0.0);
@@ -80,5 +84,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord) {
 
 void main() {
 //    gl_FragColor.rgba = vec4(1.,0.,0.,1.);
-    mainImage(gl_FragColor.rgba, vec2(gl_TexCoord[0].x * iResolution.x, gl_TexCoord[0].y * iResolution.y));
+    mainImage(fragColor, vec2(texCoord.x * iResolution.x, texCoord.y * iResolution.y));
 }

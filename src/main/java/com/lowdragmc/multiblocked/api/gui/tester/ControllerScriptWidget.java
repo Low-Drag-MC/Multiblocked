@@ -15,7 +15,6 @@ import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.gui.widget.TextBoxWidget;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
@@ -23,8 +22,8 @@ import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -118,7 +117,7 @@ public class ControllerScriptWidget extends PageWidget {
     }
 
     @Override
-    public void handleClientAction(int id, PacketBuffer buffer) {
+    public void handleClientAction(int id, FriendlyByteBuf buffer) {
         if (id == -1) {
             controller.setDefinition((ControllerDefinition)MbdComponents.DEFINITION_REGISTRY.get(new ResourceLocation(buffer.readUtf(Short.MAX_VALUE))));
         } else {

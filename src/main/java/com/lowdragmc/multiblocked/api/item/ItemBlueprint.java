@@ -1,19 +1,18 @@
 package com.lowdragmc.multiblocked.api.item;
 
 import com.lowdragmc.multiblocked.Multiblocked;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.level.Level;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -32,7 +31,7 @@ public class ItemBlueprint extends Item {
 
     @Nullable
     public static BlockPos[] getPos(ItemStack stack) {
-        CompoundNBT tag = stack.getOrCreateTagElement("blueprint");
+        CompoundTag tag = stack.getOrCreateTagElement("blueprint");
         if (!tag.contains("minX")) return null;
         return new BlockPos[]{
                 new BlockPos(tag.getInt("minX"), tag.getInt("minY"), tag.getInt("minZ")),
@@ -42,7 +41,7 @@ public class ItemBlueprint extends Item {
 
 
     public static void addPos(ItemStack stack, BlockPos pos) {
-        CompoundNBT tag = stack.getOrCreateTagElement("blueprint");
+        CompoundTag tag = stack.getOrCreateTagElement("blueprint");
         if (!tag.contains("minX") || tag.getInt("minX") > pos.getX()) {
             tag.putInt("minX", pos.getX());
         }
@@ -66,7 +65,7 @@ public class ItemBlueprint extends Item {
     }
 
     public static void removePos(ItemStack stack) {
-        CompoundNBT tag = stack.getOrCreateTagElement("blueprint");
+        CompoundTag tag = stack.getOrCreateTagElement("blueprint");
         tag.remove("minX");
         tag.remove("maxX");
         tag.remove("minY");
@@ -96,8 +95,8 @@ public class ItemBlueprint extends Item {
     }
 
     @Override
-    public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
-        PlayerEntity player = context.getPlayer();
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
+        Player player = context.getPlayer();
         if (player != null) {
             if (!player.isCrouching()) {
                 addPos(stack, context.getClickedPos());
@@ -105,14 +104,14 @@ public class ItemBlueprint extends Item {
                 removePos(stack);
                 setRaw(stack);
             }
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public ActionResult<ItemStack> use(World pLevel, PlayerEntity player, Hand pHand) {
-        if (player.isCrouching() && pHand == Hand.MAIN_HAND) {
+    public InteractionResultHolder<ItemStack> use(Level pLevel, Player player, InteractionHand pHand) {
+        if (player.isCrouching() && pHand == InteractionHand.MAIN_HAND) {
             ItemStack stack = player.getItemInHand(pHand);
             removePos(stack);
             setRaw(stack);

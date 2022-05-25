@@ -4,20 +4,19 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.kubejs.events.PartAddedEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.PartRemovedEvent;
-import com.lowdragmc.multiblocked.api.kubejs.events.StatusChangedEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.UpdateRendererEvent;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import dev.latvian.kubejs.script.ScriptType;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
+import dev.latvian.mods.kubejs.script.ScriptType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.ChunkPos;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -34,14 +33,14 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
 
     public Set<BlockPos> controllerPos = new HashSet<>();
 
-    public PartTileEntity(T definition) {
-        super(definition);
+    public PartTileEntity(T definition, BlockPos pos, BlockState state) {
+        super(definition, pos, state);
     }
 
     @Override
     public boolean isFormed() {
         for (BlockPos blockPos : controllerPos) {
-            TileEntity controller = level.getBlockEntity(blockPos);
+            BlockEntity controller = level.getBlockEntity(blockPos);
             if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
                 return true;
             }
@@ -74,7 +73,7 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public List<ControllerTileEntity> getControllers() {
         List<ControllerTileEntity> result = new ArrayList<>();
         for (BlockPos blockPos : controllerPos) {
-            TileEntity controller = level.getBlockEntity(blockPos);
+            BlockEntity controller = level.getBlockEntity(blockPos);
             if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
                 result.add((ControllerTileEntity) controller);
             }
@@ -105,19 +104,19 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     }
 
     @Override
-    public void writeInitialSyncData(PacketBuffer buf) {
+    public void writeInitialSyncData(FriendlyByteBuf buf) {
         super.writeInitialSyncData(buf);
         writeControllersToBuffer(buf);
     }
 
     @Override
-    public void receiveInitialSyncData(PacketBuffer buf) {
+    public void receiveInitialSyncData(FriendlyByteBuf buf) {
         super.receiveInitialSyncData(buf);
         readControllersFromBuffer(buf);
     }
 
     @Override
-    public void receiveCustomData(int dataId, PacketBuffer buf) {
+    public void receiveCustomData(int dataId, FriendlyByteBuf buf) {
         if (dataId == -1) {
             readControllersFromBuffer(buf);
         } else {
@@ -126,8 +125,8 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     }
 
     @Override
-    public void load(@Nonnull BlockState state, @Nonnull CompoundNBT compound) {
-        super.load(state, compound);
+    public void load(@Nonnull CompoundTag compound) {
+        super.load(compound);
         for (MultiblockState multiblockState : MultiblockWorldSavedData.getOrCreate(level).getControllerInChunk(new ChunkPos(getBlockPos()))) {
             if(multiblockState.isPosInCache(getBlockPos())) {
                 controllerPos.add(multiblockState.controllerPos);
@@ -135,14 +134,14 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
         }
     }
 
-    private void writeControllersToBuffer(PacketBuffer buffer) {
+    private void writeControllersToBuffer(FriendlyByteBuf buffer) {
         buffer.writeVarInt(controllerPos.size());
         for (BlockPos pos : controllerPos) {
             buffer.writeBlockPos(pos);
         }
     }
 
-    private void readControllersFromBuffer(PacketBuffer buffer) {
+    private void readControllersFromBuffer(FriendlyByteBuf buffer) {
         int size = buffer.readVarInt();
         controllerPos.clear();
         for (int i = size; i > 0; i--) {
@@ -152,8 +151,8 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
 
     public static class PartSimpleTileEntity extends PartTileEntity<PartDefinition> {
 
-        public PartSimpleTileEntity(PartDefinition definition) {
-            super(definition);
+        public PartSimpleTileEntity(PartDefinition definition, BlockPos pos, BlockState state) {
+            super(definition, pos, state);
         }
     }
 

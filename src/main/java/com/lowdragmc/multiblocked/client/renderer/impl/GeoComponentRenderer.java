@@ -12,25 +12,24 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.block.BlockState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Atlases;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -95,7 +94,7 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public void renderItem(ItemStack stack, ItemCameraTransforms.TransformType transformType, boolean leftHand, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, IBakedModel bakedModel) {
+    public void renderItem(ItemStack stack, ItemTransforms.TransformType transformType, boolean leftHand, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, BakedModel bakedModel) {
         if (itemFactory == null) {
             itemFactory = new ComponentFactory(null, this);
         }
@@ -109,9 +108,13 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
         matrixStack.popPose();
     }
 
-    @OnlyIn(Dist.CLIENT)
+
     @Override
-    public boolean renderModel(BlockState state, BlockPos pos, IBlockDisplayReader blockReader, MatrixStack matrixStack, IVertexBuilder vertexBuilder, boolean checkSides, Random rand, IModelData modelData) {
+    public boolean renderModel(BlockState state, BlockPos pos,
+                               BlockAndTintGetter blockReader,
+                               PoseStack poseStack,
+                               VertexConsumer vertexBuilder, boolean checkSides,
+                               Random rand, IModelData modelData) {
         return false;
     }
 
@@ -125,11 +128,11 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     @Override
     @OnlyIn(Dist.CLIENT)
     public TextureAtlasSprite getParticleTexture() {
-        return Minecraft.getInstance().getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(new ResourceLocation(Multiblocked.MODID, modelName));
+        return Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(new ResourceLocation(Multiblocked.MODID, modelName));
     }
 
     @Override
-    public boolean isGlobalRenderer(@Nonnull TileEntity te) {
+    public boolean isGlobalRenderer(@Nonnull BlockEntity te) {
         return isGlobal;
     }
 
@@ -140,7 +143,7 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
 
     @Override
     public IMultiblockedRenderer fromJson(Gson gson, JsonObject jsonObject) {
-        return new GeoComponentRenderer(jsonObject.get("modelName").getAsString(), JSONUtils.getAsBoolean(jsonObject, "isGlobal", false));
+        return new GeoComponentRenderer(jsonObject.get("modelName").getAsString(), GsonHelper.getAsBoolean(jsonObject, "isGlobal", false));
     }
 
     @Override
@@ -185,7 +188,7 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     }
 
     @Override
-    public boolean hasTESR(TileEntity tileEntity) {
+    public boolean hasTESR(BlockEntity tileEntity) {
         return true;
     }
 
@@ -201,7 +204,7 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     }
 
     @Override
-    public void render(TileEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+    public void render(BlockEntity te, float partialTicks, PoseStack stack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         if (te instanceof ComponentTileEntity<?> && ((ComponentTileEntity<?>) te).rendererObject instanceof  ComponentFactory) {
             ComponentTileEntity<?> controller = (ComponentTileEntity<?>) te;
             ComponentFactory factory = (ComponentFactory) controller.rendererObject;
@@ -238,15 +241,15 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
         }
     }
 
-    void render(GeoModel model, MatrixStack matrixStackIn, IRenderTypeBuffer buffers, int packedLightIn) {
-        IVertexBuilder currentBuffer = buffers.getBuffer(RenderType.entityCutout(getTextureLocation(null)));
+    void render(GeoModel model, PoseStack matrixStackIn, MultiBufferSource buffers, int packedLightIn) {
+        VertexConsumer currentBuffer = buffers.getBuffer(RenderType.entityCutout(getTextureLocation(null)));
         for (GeoBone group : model.topLevelBones) {
             currentBuffer = renderRecursively(group, matrixStackIn, buffers, currentBuffer, packedLightIn);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
-    public IVertexBuilder renderRecursively(GeoBone bone, MatrixStack stack, IRenderTypeBuffer buffers, IVertexBuilder currentBuffer, int packedLightIn) {
+    public VertexConsumer renderRecursively(GeoBone bone, PoseStack stack, MultiBufferSource buffers, VertexConsumer currentBuffer, int packedLightIn) {
         if (bone.name.equals("emissive")) {
             packedLightIn = 0xf000f0;
         }

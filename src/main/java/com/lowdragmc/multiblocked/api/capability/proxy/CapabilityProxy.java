@@ -5,8 +5,8 @@ import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.List;
@@ -21,15 +21,15 @@ public abstract class CapabilityProxy<K> {
     public Direction facing;
     private long latestPeriodID;
 
-    private TileEntity tileEntity;
+    private BlockEntity tileEntity;
 
-    public CapabilityProxy(MultiblockCapability<? super K> capability, TileEntity tileEntity) {
+    public CapabilityProxy(MultiblockCapability<? super K> capability, BlockEntity tileEntity) {
         this.capability = capability;
         this.tileEntity = tileEntity;
         this.facing = Direction.UP;
     }
 
-    public TileEntity getTileEntity() {
+    public BlockEntity getTileEntity() {
         if (tileEntity != null && tileEntity.isRemoved()) {
             tileEntity = tileEntity.getLevel().getBlockEntity(tileEntity.getBlockPos());
         }
@@ -37,7 +37,7 @@ public abstract class CapabilityProxy<K> {
     }
 
     public <C> C getCapability(Capability<C> capability) {
-        TileEntity tileEntity = getTileEntity();
+        BlockEntity tileEntity = getTileEntity();
         return tileEntity == null ? null : tileEntity instanceof IInnerCapabilityProvider ? ((IInnerCapabilityProvider) tileEntity).getInnerCapability(capability, facing).orElse(null) : tileEntity.getCapability(capability, facing).orElse(null);
     }
 

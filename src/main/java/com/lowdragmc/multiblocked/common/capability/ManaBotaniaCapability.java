@@ -5,11 +5,11 @@ import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
-import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
+import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.commons.lang3.math.NumberUtils;
 import vazkii.botania.api.mana.IManaReceiver;
 import vazkii.botania.common.block.ModBlocks;
@@ -32,8 +32,8 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
-        return tileEntity instanceof IManaReceiver;
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull BlockEntity tileEntity) {
+        return !getCapability(BotaniaForgeCapabilities.MANA_RECEIVER, tileEntity).isEmpty();
     }
 
     @Override
@@ -42,7 +42,8 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
     }
 
     @Override
-    public ManaBotainaCapabilityProxy createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public ManaBotainaCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         return new ManaBotainaCapabilityProxy(tileEntity);
     }
 
@@ -84,14 +85,10 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
         return 1;
     }
 
-    public static class ManaBotainaCapabilityProxy extends CapabilityProxy<Integer> {
+    public static class ManaBotainaCapabilityProxy extends CapCapabilityProxy<IManaReceiver, Integer> {
 
-        public ManaBotainaCapabilityProxy(TileEntity tileEntity) {
-            super(ManaBotaniaCapability.CAP, tileEntity);
-        }
-
-        public IManaReceiver getCapability() {
-            return (IManaReceiver)getTileEntity();
+        public ManaBotainaCapabilityProxy(BlockEntity tileEntity) {
+            super(ManaBotaniaCapability.CAP, tileEntity, BotaniaForgeCapabilities.MANA_RECEIVER);
         }
 
         @Override

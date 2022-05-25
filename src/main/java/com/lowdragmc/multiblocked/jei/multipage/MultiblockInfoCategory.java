@@ -8,16 +8,20 @@ import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,6 +63,12 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     }
 
     @Override
+    @ParametersAreNonnullByDefault
+    public void setRecipe(IRecipeLayoutBuilder builder, MultiblockInfoWrapper recipe, IFocusGroup focuses) {
+        super.setRecipe(builder, recipe, focuses);
+    }
+
+    @Override
     public void setIngredients(@Nonnull MultiblockInfoWrapper recipe, IIngredients ingredients) {
         ingredients.setInputs(VanillaTypes.ITEM, recipe.getWidget().allItemStackInputs);
         ingredients.setOutput(VanillaTypes.ITEM, recipe.definition.getStackForm());
@@ -78,8 +88,8 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
 
     @Nonnull
     @Override
-    public String getTitle() {
-        return I18n.get("multiblocked.jei.multiblock_info");
+    public Component getTitle() {
+        return new TranslatableComponent("multiblocked.jei.multiblock_info");
     }
 
     @Nonnull

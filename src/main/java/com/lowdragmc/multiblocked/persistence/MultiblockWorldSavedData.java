@@ -8,19 +8,18 @@ import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.block.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import java.lang.ref.WeakReference;
@@ -38,11 +37,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-public class MultiblockWorldSavedData extends WorldSavedData {
+public class MultiblockWorldSavedData extends SavedData {
 
     // ********************************* dummy ********************************* //
 
-    private static final MultiblockWorldSavedData DUMMY = new MultiblockWorldSavedData("dummy"){
+    private static final MultiblockWorldSavedData DUMMY = new MultiblockWorldSavedData(){
         @Override
         public void addMapping(MultiblockState state) {
         }
@@ -70,15 +69,15 @@ public class MultiblockWorldSavedData extends WorldSavedData {
         }
     }
 
-    private static WeakReference<World> worldRef;
+    private static WeakReference<Level> worldRef;
 
-    public static MultiblockWorldSavedData getOrCreate(World world) {
+    public static MultiblockWorldSavedData getOrCreate(Level world) {
         if (world == null || world instanceof DummyWorld) {
             return DUMMY;
         }
-        if (world instanceof ServerWorld) {
+        if (world instanceof ServerLevel) {
             worldRef = new WeakReference<>(world);
-            MultiblockWorldSavedData mbwsd = ((ServerWorld) world).getDataStorage().computeIfAbsent(() -> new MultiblockWorldSavedData(Multiblocked.MODNAME), Multiblocked.MODNAME);
+            MultiblockWorldSavedData mbwsd = ((ServerLevel) world).getDataStorage().computeIfAbsent(MultiblockWorldSavedData::new, MultiblockWorldSavedData::new, Multiblocked.MODNAME);
             worldRef = null;
             return mbwsd;
         }
@@ -89,11 +88,15 @@ public class MultiblockWorldSavedData extends WorldSavedData {
     public final Map<ChunkPos, Set<MultiblockState>> chunkPosMapping;
     public final Map<BlockPos, ComponentTileEntity<?>> loading;
 
-    public MultiblockWorldSavedData(String name) { // Also constructed Reflectively by MapStorage
-        super(name);
+    public MultiblockWorldSavedData() {
         this.mapping = new Object2ObjectOpenHashMap<>();
         this.chunkPosMapping = new HashMap<>();
         this.loading = new Object2ObjectOpenHashMap<>();
+    }
+
+    public MultiblockWorldSavedData(CompoundTag tag) {
+        this();
+        load(tag);
     }
 
     public static void clearDisabled() {
@@ -162,11 +165,11 @@ public class MultiblockWorldSavedData extends WorldSavedData {
 
      @OnlyIn(Dist.CLIENT)
     private static void updateRenderChunk(Collection<BlockPos> poses) {
-         ClientWorld world = Minecraft.getInstance().level;
+         ClientLevel world = Minecraft.getInstance().level;
         if (world != null) {
             for (BlockPos pos : poses) {
                 BlockState state = world.getBlockState(pos);
-                world.sendBlockUpdated(pos, state, state, Constants.BlockFlags.RERENDER_MAIN_THREAD);
+                world.sendBlockUpdated(pos, state, state, 1 << 3);
             }
         }
     }
@@ -186,12 +189,11 @@ public class MultiblockWorldSavedData extends WorldSavedData {
         return false;
     }
 
-    @Override
-    public void load(CompoundNBT nbt) {
+    public void load(CompoundTag nbt) {
         for (String key : nbt.getAllKeys()) {
             BlockPos pos = BlockPos.of(Long.parseLong(key));
             MultiblockState state = new MultiblockState(worldRef.get(), pos);
-            state.deserialize(new PacketBuffer(Unpooled.copiedBuffer(nbt.getByteArray(key))));
+            state.deserialize(new FriendlyByteBuf(Unpooled.copiedBuffer(nbt.getByteArray(key))));
             this.mapping.put(pos, state);
             for (BlockPos blockPos : state.getCache()) {
                 chunkPosMapping.computeIfAbsent(new ChunkPos(blockPos), c->new HashSet<>()).add(state);
@@ -201,10 +203,10 @@ public class MultiblockWorldSavedData extends WorldSavedData {
 
     @Nonnull
     @Override
-    public CompoundNBT save(@Nonnull CompoundNBT compound) {
+    public CompoundTag save(@Nonnull CompoundTag compound) {
         this.mapping.forEach((pos, state) -> {
             ByteBuf byteBuf = Unpooled.buffer();
-            state.serialize(new PacketBuffer(byteBuf));
+            state.serialize(new FriendlyByteBuf(byteBuf));
             compound.putByteArray(String.valueOf(pos.asLong()), Arrays.copyOfRange(byteBuf.array(), 0, byteBuf.writerIndex()));
         });
         return compound;

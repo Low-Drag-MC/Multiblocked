@@ -9,5 +9,5 @@ public enum IO {
     BOTH,
     NONE;
 
-    public static IO[] VALUES = IO.values();
+    public static final IO[] VALUES = IO.values();
 }

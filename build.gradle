@@ -13,22 +13,18 @@ buildscript {
 }
 
 repositories {
-    flatDir {
-        dir 'libs'
-    }
+//    flatDir {
+//        dir 'libs'
+//    }
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     maven { url 'https://dvs1.progwml6.com/files/maven' }
+//    maven {
+//        url 'https://cfa2.cursemaven.com'
+//    }
     maven {
-        url = "https://maven.architectury.dev"
+        url "https://www.cursemaven.com"
         content {
-            includeGroup "me.shedaniel"
-        }
-    }
-
-    maven {
-        url = "https://maven.saps.dev/minecraft"
-        content {
-            includeGroup "dev.latvian.mods"
+            includeGroup "curse.maven"
         }
     }
 }
@@ -45,7 +41,7 @@ version = "${minecraft_version}-${mod_version}"
 group = 'com.github.low-drag-mc'
 archivesBaseName = "${mod_name}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
@@ -179,21 +175,21 @@ dependencies {
     }
 
     // KubeJS
-    implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
-    implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
-    implementation fg.deobf("me.shedaniel:architectury-forge:${architectury_version}")
-
-    //geckolib
-    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.71')
+    compileOnly fg.deobf("curse.maven:rhino-416294:${rhino_file}")
+    compileOnly fg.deobf("curse.maven:architecturyforge-419699:${architectury_file}")
+    compileOnly fg.deobf("curse.maven:kubejs-238086:${kubejs_file}")
 
     //botania
-    implementation fg.deobf("blank:botania-1.16.5:420.2")
+    compileOnly fg.deobf("curse.maven:rhino-225643:${botania_file}")
     //mekanism
-    implementation fg.deobf("blank:mekanism-1.16.5:10.1.2.457")
+    compileOnly fg.deobf("curse.maven:rhino-268560:${mekanism_file}")
     // patchouli
-    implementation fg.deobf("blank:patchouli-1.16.4:53.2")
+    compileOnly fg.deobf("curse.maven:rhino-306770:${patchouli_file}")
     // curios
-    implementation fg.deobf("blank:curios-forge-1.16.5:4.0.5.3")
+    compileOnly fg.deobf("curse.maven:rhino-309927:${curios_file}")
+
+    //geckolib
+    implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.18')
 
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")

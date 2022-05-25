@@ -1,9 +1,7 @@
 package com.lowdragmc.multiblocked.api.pattern;
 
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -47,24 +45,13 @@ public class MultiblockShapeInfo {
             return where(symbol, BlockInfo.fromBlockState(blockState));
         }
 
-        //TODO
-//        public Builder where(char symbol, MetaTileEntity tileEntity, EnumFacing frontSide) {
-//            MetaTileEntityHolder holder = new MetaTileEntityHolder();
-//            holder.setMetaTileEntity(tileEntity);
-//            holder.getMetaTileEntity().setFrontFacing(frontSide);
-//            return where(symbol, new BlockInfo(MetaBlocks.MACHINE.getDefaultState(), holder));
-//        }
-
-        //TODO
         /**
          * @param partSupplier Should supply either a MetaTileEntity or an IBlockState.
          */
-        public Builder where(char symbol, Supplier<?> partSupplier, Direction frontSideIfTE) {
+        public Builder where(char symbol, Supplier<?> partSupplier) {
             Object part = partSupplier.get();
             if (part instanceof BlockState) {
                 return where(symbol, (BlockState) part);
-//            } else if (part instanceof MetaTileEntity) {
-//                return where(symbol, (MetaTileEntity) part, frontSideIfTE);
             } else throw new IllegalArgumentException("Supplier must supply either a MetaTileEntity or an IBlockState! Actual: " + part.getClass());
         }
 
@@ -76,16 +63,6 @@ public class MultiblockShapeInfo {
                     String columnEntry = aisleEntry[y];
                     for (int x = 0; x < columnEntry.length(); x++) {
                         BlockInfo info = symbolMap.getOrDefault(columnEntry.charAt(x), BlockInfo.EMPTY);
-                        TileEntity tileEntity = info.getTileEntity();
-                        //TODO
-//                        if (tileEntity != null) {
-//                            MetaTileEntityHolder holder = (MetaTileEntityHolder) tileEntity;
-//                            final MetaTileEntity mte = holder.getMetaTileEntity();
-//                            holder = new MetaTileEntityHolder();
-//                            holder.setMetaTileEntity(mte);
-//                            holder.getMetaTileEntity().setFrontFacing(mte.getFrontFacing());
-//                            info = new BlockInfo(info.getBlockState(), holder);
-//                        }
                         blockInfos[x][y][z] = info;
                     }
                 }

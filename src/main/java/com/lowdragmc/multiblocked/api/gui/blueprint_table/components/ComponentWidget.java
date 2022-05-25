@@ -32,9 +32,9 @@ import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -96,7 +96,7 @@ public class ComponentWidget<T extends ComponentDefinition> extends
                     dialog.addWidget(new ImageWidget(0, 0, 384, 256, new ColorRectTexture(0xaf000000)));
                     ImageWidget imageWidget;
                     dialog.addWidget(imageWidget = new ImageWidget(xOffset, 0, 176, 256, null));
-                    imageWidget.setImage(new ResourceTexture(JSONUtils.getAsString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png")));
+                    imageWidget.setImage(new ResourceTexture(GsonHelper.getAsString(definition.traits, "background", "multiblocked:textures/gui/custom_gui.png")));
                     dialog.addWidget(new ButtonWidget(xOffset - 20,10, 20, 20, new ResourceTexture("multiblocked:textures/gui/option.png"), cd2 -> {
                         new ResourceTextureWidget(dialog, texture -> {
                             if (texture != null) {

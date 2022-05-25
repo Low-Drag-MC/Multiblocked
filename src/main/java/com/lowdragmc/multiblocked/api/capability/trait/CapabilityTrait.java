@@ -5,12 +5,12 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.NonNullList;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -38,7 +38,8 @@ public abstract class CapabilityTrait implements IInnerCapabilityProvider {
         this.component = component;
     }
 
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable Direction facing) {
+    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable
+    Direction facing) {
         return getCapability(capability, facing).isPresent();
     }
     
@@ -61,13 +62,13 @@ public abstract class CapabilityTrait implements IInnerCapabilityProvider {
         }
     }
 
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
     }
 
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
     }
 
-    public void receiveCustomData(int id, PacketBuffer buffer) {
+    public void receiveCustomData(int id, FriendlyByteBuf buffer) {
     }
 
     public boolean receiveClientEvent(int id, int type) {
@@ -80,11 +81,11 @@ public abstract class CapabilityTrait implements IInnerCapabilityProvider {
 
     public void onChunkUnload() {}
 
-    public final void writeCustomData(int id, Consumer<PacketBuffer> writer) {
+    public final void writeCustomData(int id, Consumer<FriendlyByteBuf> writer) {
         this.component.writeTraitData(this, id, writer);
     }
 
-    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, PlayerEntity player) {
+    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
 
     }
 
@@ -92,7 +93,7 @@ public abstract class CapabilityTrait implements IInnerCapabilityProvider {
         
     }
 
-    public void onDrops(NonNullList<ItemStack> drops, PlayerEntity player) {
+    public void onDrops(NonNullList<ItemStack> drops, Player player) {
 
     }
 }

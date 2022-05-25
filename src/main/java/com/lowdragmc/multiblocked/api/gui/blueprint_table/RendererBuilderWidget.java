@@ -1,6 +1,5 @@
 package com.lowdragmc.multiblocked.api.gui.blueprint_table;
 
-import com.lowdragmc.lowdraglib.client.shader.Shaders;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
@@ -12,9 +11,9 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.gui.dialogs.IRendererWidget;
 import com.lowdragmc.multiblocked.api.gui.dialogs.IShaderWidget;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
 
 public class RendererBuilderWidget extends WidgetGroup {
     public final ShaderTexture shaderTexture;

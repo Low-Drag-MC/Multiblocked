@@ -4,15 +4,13 @@ package com.lowdragmc.multiblocked.api.recipe;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
-import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeFinishEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.SetupRecipeEvent;
-import com.lowdragmc.multiblocked.api.kubejs.events.UpdateTickEvent;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import dev.latvian.kubejs.script.ScriptType;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 
@@ -180,7 +178,7 @@ public class RecipeLogic {
         this.controller.markAsDirty();
     }
 
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         lastRecipe = compound.contains("recipe") ? controller.getDefinition().recipeMap.recipes.get(compound.getString("recipe")) : null;
         if (lastRecipe != null) {
             status = compound.contains("status") ? Status.values()[compound.getInt("status")] : Status.WORKING;
@@ -188,7 +186,7 @@ public class RecipeLogic {
         }
     }
 
-    public CompoundNBT writeToNBT(CompoundNBT compound) {
+    public CompoundTag writeToNBT(CompoundTag compound) {
         if (lastRecipe != null && status != Status.IDLE) {
             compound.putString("recipe", lastRecipe.uid);
             compound.putInt("status", status.ordinal());
@@ -201,7 +199,7 @@ public class RecipeLogic {
         WORKING("working"),
         SUSPEND("suspend");
 
-        public String name;
+        public final String name;
         Status(String name) {
             this.name = name;
         }

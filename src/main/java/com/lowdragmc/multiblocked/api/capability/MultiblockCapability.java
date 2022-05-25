@@ -13,10 +13,10 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nonnull;
@@ -48,7 +48,8 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
     /**
      * detect whether this block has capability
      */
-    public abstract boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity);
+    public abstract boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity);
 
     /**
      * deep copy of this content. recipe need it for searching and such things
@@ -58,7 +59,8 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
     /**
      * create a proxy of this block.
      */
-    public abstract CapabilityProxy<? extends T> createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity);
+    public abstract CapabilityProxy<? extends T> createProxy(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity);
 
     /**
      * Create a Widget of given contents
@@ -89,7 +91,8 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
         return null;
     }
 
-    public <C> Set<C> getCapability(Capability<C> capability, @Nonnull TileEntity tileEntity) {
+    public <C> Set<C> getCapability(Capability<C> capability, @Nonnull
+    BlockEntity tileEntity) {
         Set<C> found = new LinkedHashSet<>();
         for (Direction facing : Direction.values()) {
             tileEntity.getCapability(capability, facing).ifPresent(found::add);

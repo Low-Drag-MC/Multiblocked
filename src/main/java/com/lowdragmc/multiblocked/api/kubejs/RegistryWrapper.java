@@ -5,7 +5,7 @@ import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * @author KilaBash

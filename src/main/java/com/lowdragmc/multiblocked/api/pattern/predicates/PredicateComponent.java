@@ -6,20 +6,15 @@ import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
-import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
-import net.minecraft.util.ResourceLocation;
-import org.apache.commons.lang3.ArrayUtils;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.File;
 import java.util.Arrays;
@@ -29,7 +24,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class PredicateComponent extends SimplePredicate {
-    public ResourceLocation location = new ResourceLocation("mod_id", "component_id");
+    public ResourceLocation
+            location = new ResourceLocation("mod_id", "component_id");
     public ComponentDefinition definition;
 
     public PredicateComponent() {
@@ -53,18 +49,14 @@ public class PredicateComponent extends SimplePredicate {
         predicate = state -> state.getTileEntity() instanceof ComponentTileEntity<?> && ((ComponentTileEntity<?>) state.getTileEntity()).getDefinition().location.equals(location);
         candidates = () -> {
             if (MbdComponents.COMPONENT_BLOCKS_REGISTRY.containsKey(location)) {
-                return new BlockInfo[]{new BlockInfo(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(location).defaultBlockState(), MbdComponents.DEFINITION_REGISTRY.get(location).createNewTileEntity())};
+                return new BlockInfo[]{new BlockInfo(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(location).defaultBlockState(), true)};
             } else {
                 if (definition == null) return new BlockInfo[0];
-                if (definition instanceof ControllerDefinition){
-                    ControllerTileTesterEntity te = new ControllerTileTesterEntity(ControllerTileTesterEntity.DEFAULT_DEFINITION);
-                    te.setDefinition((ControllerDefinition) definition);
-                    return new BlockInfo[]{new BlockInfo(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(ControllerTileTesterEntity.DEFAULT_DEFINITION.location).defaultBlockState(), te)};
-                } else {
-                    DummyComponentTileEntity te = new DummyComponentTileEntity(MbdComponents.DummyComponentBlock.definition);
-                    te.setDefinition(definition);
-                    return new BlockInfo[]{new BlockInfo(MbdComponents.DummyComponentBlock.defaultBlockState(), te)};
-                }
+                return new BlockInfo[]{new BlockInfo(MbdComponents.DummyComponentBlock.defaultBlockState(), be -> {
+                    if (be instanceof DummyComponentTileEntity dummy) {
+                        dummy.setDefinition(definition);
+                    }
+                })};
             }
         };
         return this;

@@ -1,6 +1,6 @@
 package com.lowdragmc.multiblocked.api.pattern.error;
 
-import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.language.I18n;
 
 public class PatternStringError extends PatternError{
     public final String translateKey;

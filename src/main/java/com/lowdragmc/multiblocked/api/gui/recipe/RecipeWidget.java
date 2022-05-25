@@ -11,7 +11,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.util.Tuple;
 
 import java.util.Map;

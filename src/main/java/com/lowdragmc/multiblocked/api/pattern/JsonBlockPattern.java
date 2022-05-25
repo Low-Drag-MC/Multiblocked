@@ -3,16 +3,14 @@ package com.lowdragmc.multiblocked.api.pattern;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateBlocks;
 import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateStates;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import java.lang.reflect.Array;
 import java.util.HashMap;
@@ -38,7 +36,7 @@ public class JsonBlockPattern {
         symbolMap.computeIfAbsent('@', key -> new HashSet<>()).add("controller"); // controller
     }
 
-    public JsonBlockPattern(World world, ResourceLocation location, BlockPos controllerPos, Direction facing, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    public JsonBlockPattern(Level world, ResourceLocation location, BlockPos controllerPos, Direction facing, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         this();
         pattern = new String[1 + maxX - minX][ 1 + maxY - minY];
         if (facing == Direction.WEST) {

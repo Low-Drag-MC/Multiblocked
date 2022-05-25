@@ -17,9 +17,9 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.client.ClientProxy;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidStack;
@@ -46,7 +46,8 @@ public class Multiblocked {
     public static final String MODID_KUBEJS = "kubejs";
     public static final String MODNAME = "Multiblocked";
     public static final Logger LOGGER = LogManager.getLogger(MODNAME);
-    public static final ItemGroup TAB_ITEMS = new LDItemGroup("multiblocked", "all", BlueprintTableTileEntity.tableDefinition::getStackForm);
+    public static final CreativeModeTab
+            TAB_ITEMS = new LDItemGroup("multiblocked", "all", BlueprintTableTileEntity.tableDefinition::getStackForm);
     public static final Random RNG = new Random();
     public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
     public static final Gson GSON = new GsonBuilder()

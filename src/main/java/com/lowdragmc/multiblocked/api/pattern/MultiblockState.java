@@ -11,12 +11,12 @@ import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.lowdragmc.multiblocked.network.s2c.SPacketRemoveDisabledRendering;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.block.BlockState;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -30,21 +30,21 @@ public class MultiblockState {
 
     public BlockPos pos;
     public BlockState state;
-    public TileEntity tileEntity;
+    public BlockEntity tileEntity;
     public boolean tileEntityInitialized;
     public PatternMatchContext matchContext;
     public Map<SimplePredicate, Integer> globalCount;
     public TraceabilityPredicate predicate;
     public IO io;
     public PatternError error;
-    public final World world;
+    public final Level world;
     public final BlockPos controllerPos;
     public ControllerTileEntity lastController;
 
     // persist
     public LongOpenHashSet cache;
 
-    public MultiblockState(World world, BlockPos controllerPos) {
+    public MultiblockState(Level world, BlockPos controllerPos) {
         this.world = world;
         this.controllerPos = controllerPos;
         this.error = UNINIT_ERROR;
@@ -72,7 +72,7 @@ public class MultiblockState {
 
     public ControllerTileEntity getController() {
         if (world.isLoaded(controllerPos)) {
-            TileEntity tileEntity = world.getBlockEntity(controllerPos);
+            BlockEntity tileEntity = world.getBlockEntity(controllerPos);
             if (tileEntity instanceof ControllerTileEntity) {
                 return lastController = (ControllerTileEntity) tileEntity;
             }
@@ -106,7 +106,7 @@ public class MultiblockState {
     }
 
     @Nullable
-    public TileEntity getTileEntity() {
+    public BlockEntity getTileEntity() {
         if (this.tileEntity == null && !this.tileEntityInitialized) {
             this.tileEntity = this.world.getBlockEntity(this.pos);
             this.tileEntityInitialized = true;
@@ -120,16 +120,16 @@ public class MultiblockState {
     }
 
     public BlockState getOffsetState(Direction face) {
-        if (pos instanceof BlockPos.Mutable) {
-            ((BlockPos.Mutable) pos).move(face);
+        if (pos instanceof BlockPos.MutableBlockPos) {
+            ((BlockPos.MutableBlockPos) pos).move(face);
             BlockState blockState = world.getBlockState(pos);
-            ((BlockPos.Mutable) pos).move(face.getOpposite());
+            ((BlockPos.MutableBlockPos) pos).move(face.getOpposite());
             return blockState;
         }
         return world.getBlockState(this.pos.relative(face));
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return world;
     }
 
@@ -182,7 +182,7 @@ public class MultiblockState {
             }
         } catch (Throwable e) { // if controller loading failed.
             MultiblockWorldSavedData.getOrCreate(world).removeMapping(this);
-            Multiblocked.LOGGER.error("An error while loading the controller world: {} pos: {}, {}", world.dimensionType().getFileSuffix(), controllerPos, e);
+            Multiblocked.LOGGER.error("An error while loading the controller world: {} pos: {}, {}", world.dimensionType(), controllerPos, e);
         }
     }
 
@@ -198,7 +198,7 @@ public class MultiblockState {
         }
     }
 
-    public void deserialize(PacketBuffer buffer) {
+    public void deserialize(FriendlyByteBuf buffer) {
         int size = buffer.readVarInt();
         cache = new LongOpenHashSet();
         for (int i = 0; i < size; i++) {
@@ -206,7 +206,7 @@ public class MultiblockState {
         }
     }
 
-    public void serialize(PacketBuffer buffer) {
+    public void serialize(FriendlyByteBuf buffer) {
         buffer.writeVarInt(cache.size());
         for (Long aLong : cache) {
             buffer.writeVarLong(aLong);

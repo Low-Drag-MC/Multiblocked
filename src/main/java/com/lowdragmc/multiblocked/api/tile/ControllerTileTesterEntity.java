@@ -14,20 +14,19 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDIModelRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 
 public class ControllerTileTesterEntity extends ControllerTileEntity {
     public final static ControllerDefinition DEFAULT_DEFINITION = new ControllerDefinition(new ResourceLocation("multiblocked:controller_tester"), ControllerTileTesterEntity::new);
 
-    public ControllerTileTesterEntity(ControllerDefinition definition) {
-        super(definition);
+    public ControllerTileTesterEntity(ControllerDefinition definition, BlockPos pos, BlockState state) {
+        super(definition, pos, state);
     }
 
     @Override
@@ -36,12 +35,12 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
     }
 
     @Override
-    public void setLevelAndPosition(@Nonnull World world, @Nonnull BlockPos pos) {
+    public void setLevel(@Nonnull Level world) {
         MultiblockWorldSavedData mwsd = MultiblockWorldSavedData.getOrCreate(world);
-        if (mwsd.mapping.containsKey(pos)) {
-            mwsd.removeMapping(mwsd.mapping.get(pos));
+        if (mwsd.mapping.containsKey(getBlockPos())) {
+            mwsd.removeMapping(mwsd.mapping.get(getBlockPos()));
         }
-        super.setLevelAndPosition(world, pos);
+        super.setLevel(world);
     }
 
     public void setDefinition(ControllerDefinition definition) {
@@ -75,7 +74,7 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity entityPlayer) {
+    public ModularUI createUI(Player entityPlayer) {
         if (Multiblocked.isClient() && Multiblocked.isSinglePlayer()) {
             TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
             new ControllerScriptWidget(this, tabContainer);
@@ -91,11 +90,6 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
             return new ModularUI(196, 256, this, entityPlayer).widget(tabContainer);
         }
         return null;
-    }
-
-    @Override
-    public void load(@Nonnull BlockState blockState, @Nonnull CompoundNBT compound) {
-        super.load(blockState, compound);
     }
 
     public static void registerTestController() {

@@ -1,7 +1,7 @@
 package com.lowdragmc.multiblocked.api.kubejs.events;
 
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import dev.latvian.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.EventJS;
 
 public class UpdateTickEvent extends EventJS {
     public static final String ID = "mbd.update_tick";

@@ -4,13 +4,13 @@ import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
-import dev.latvian.kubejs.KubeJSPlugin;
-import dev.latvian.kubejs.fluid.FluidStackJS;
-import dev.latvian.kubejs.item.ingredient.IngredientJS;
-import dev.latvian.kubejs.script.BindingsEvent;
-import dev.latvian.kubejs.script.ScriptType;
+import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
+import dev.latvian.mods.kubejs.KubeJSPlugin;
+import dev.latvian.mods.kubejs.fluid.FluidStackJS;
+import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
+import dev.latvian.mods.kubejs.script.BindingsEvent;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
-import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
 import net.minecraftforge.fluids.FluidStack;
 
 /**

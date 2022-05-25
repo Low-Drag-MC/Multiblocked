@@ -3,9 +3,9 @@ package com.lowdragmc.multiblocked.api.registry;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.item.ItemBlueprint;
 import com.lowdragmc.multiblocked.api.item.ItemMultiblockBuilder;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class MbdItems {
@@ -18,8 +18,8 @@ public class MbdItems {
     }
 
     public static void registerModelsProperties() {
-        ItemModelsProperties.register(BLUEPRINT, new ResourceLocation(Multiblocked.MODID, "raw"), (itemStack, clientWorld, entity) -> ItemBlueprint.isRaw(itemStack) ? 0 : 1);
-        ItemModelsProperties.register(BUILDER, new ResourceLocation(Multiblocked.MODID, "raw"), (itemStack, clientWorld, entity) -> ItemMultiblockBuilder.isRaw(itemStack) ? 0 : 1);
+        ItemProperties.register(BLUEPRINT, new ResourceLocation(Multiblocked.MODID, "raw"), (itemStack, clientWorld, entity, seed) -> ItemBlueprint.isRaw(itemStack) ? 0 : 1);
+        ItemProperties.register(BUILDER, new ResourceLocation(Multiblocked.MODID, "raw"), (itemStack, clientWorld, entity, seed) -> ItemMultiblockBuilder.isRaw(itemStack) ? 0 : 1);
     }
 //
 //    @SuppressWarnings("ConstantConditions")

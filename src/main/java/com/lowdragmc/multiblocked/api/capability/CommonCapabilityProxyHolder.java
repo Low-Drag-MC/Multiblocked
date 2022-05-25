@@ -5,17 +5,17 @@ import com.google.common.collect.Tables;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.EnumMap;
 
 public class CommonCapabilityProxyHolder implements ICapabilityProxyHolder{
     protected Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities;
 
-    public CommonCapabilityProxyHolder(World world, BlockPos pos, MultiblockCapability<?>... capability) {
-        TileEntity te = world.getBlockEntity(pos);
+    public CommonCapabilityProxyHolder(Level world, BlockPos pos, MultiblockCapability<?>... capability) {
+        BlockEntity te = world.getBlockEntity(pos);
         if (te != null) {
             capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
             for (MultiblockCapability<?> cap : capability) {

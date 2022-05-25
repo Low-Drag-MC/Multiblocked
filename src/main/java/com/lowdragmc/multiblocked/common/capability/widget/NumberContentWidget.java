@@ -13,10 +13,10 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
 
 import javax.annotation.Nullable;
 
@@ -125,7 +125,7 @@ public class NumberContentWidget extends ContentWidget<Number> {
     }
 
     @Override
-    public void drawHookBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawHookBackground(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         Position position = getPosition();
         Size size = getSize();
         if (contentTexture != null) {
@@ -135,7 +135,7 @@ public class NumberContentWidget extends ContentWidget<Number> {
         matrixStack.scale(0.5f, 0.5f, 1);
         RenderSystem.disableDepthTest();
         String s = TextFormattingUtil.formatLongToCompactString(content.intValue(), 4);
-        FontRenderer fontRenderer = Minecraft.getInstance().font;
+        Font fontRenderer = Minecraft.getInstance().font;
         fontRenderer.drawShadow(matrixStack, s, (position.x + (size.width / 3f)) * 2 - fontRenderer.width(s) + 21, (position.y + (size.height / 3f) + 6) * 2, 0xFFFFFF);
         matrixStack.popPose();
     }

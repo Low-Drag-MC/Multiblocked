@@ -25,23 +25,23 @@ import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.IItemHandler;
@@ -208,7 +208,7 @@ public class PatternWidget extends WidgetGroup {
                 candidates[i] = new SlotWidget(itemHandler, i, 9 + (i / 6) * 18, 33 + (i % 6) * 18, false, false)
                         .setItemHook(this::itemHook)
                         .setBackgroundTexture(new ColorRectTexture(0x4fffffff))
-                        .setOnAddedTooltips((slot, list) -> predicateTips.get(finalI).forEach(tip -> list.add(new StringTextComponent(tip))));
+                        .setOnAddedTooltips((slot, list) -> predicateTips.get(finalI).forEach(tip -> list.add(new TextComponent(tip))));
                 addWidget(candidates[i]);
             }
             updateClientSlots();
@@ -248,12 +248,11 @@ public class PatternWidget extends WidgetGroup {
     }
 
     @Override
-    public void drawInBackground(@Nonnull MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         int x = getPosition().x;
         int y = getPosition().y;
         int width = getSize().width;
         int height = getSize().height;
-        RenderSystem.enableAlphaTest();
         RenderSystem.enableBlend();
         BACKGROUND.draw(matrixStack, mouseX, mouseY, x, y, width, height);
         super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
@@ -270,20 +269,21 @@ public class PatternWidget extends WidgetGroup {
             for (int y = 0; y < aisle.length; y++) {
                 BlockInfo[] column = aisle[y];
                 for (int z = 0; z < column.length; z++) {
-                    TileEntity tileEntity = column[z].getTileEntity();
                     BlockState blockState = column[z].getBlockState();
-                    if (tileEntity == null && blockState.getBlock().hasTileEntity(blockState)) {
-                        tileEntity = blockState.getBlock().createTileEntity(blockState, world);
+                    BlockPos pos = multiPos.offset(x, y, z);
+                    if (column[z].getBlockEntity(pos) instanceof ControllerTileEntity) {
+
+                        controllerBase = (ControllerTileEntity) column[z].getBlockEntity(world, pos);
                     }
-                    if (tileEntity instanceof ControllerTileEntity) {
-                        controllerBase = (ControllerTileEntity) tileEntity;
-                    }
-                    blockMap.put(multiPos.offset(x, y, z), new BlockInfo(blockState, tileEntity));
+                    blockMap.put(pos, BlockInfo.fromBlockState(blockState));
                 }
             }
         }
 
         world.addBlocks(blockMap);
+        if (controllerBase != null) {
+            world.setBlockEntity(controllerBase);
+        }
 
         Map<ItemStackKey, PartInfo> parts = gatherBlockDrops(blockMap);
         blockDrops.addAll(parts.keySet());
@@ -326,10 +326,10 @@ public class PatternWidget extends WidgetGroup {
         Map<ItemStackKey, PartInfo> partsMap = new HashMap<>();
         for (Map.Entry<BlockPos, BlockInfo> entry : blocks.entrySet()) {
             BlockPos pos = entry.getKey();
-            BlockState blockState = ((World) PatternWidget.world).getBlockState(pos);
-            ItemStack itemStack = blockState.getBlock().getPickBlock(blockState,
-                    BlockRayTraceResult.miss(
-                    new Vector3d(0.5, 1, 0.5).add(pos.getX(), pos.getY(), pos.getZ()),
+            BlockState blockState = ((Level) PatternWidget.world).getBlockState(pos);
+            ItemStack itemStack = blockState.getBlock().getCloneItemStack(blockState,
+                    BlockHitResult.miss(
+                    new Vec3(0.5, 1, 0.5).add(pos.getX(), pos.getY(), pos.getZ()),
                     Direction.UP,
                     pos), PatternWidget.world, pos, Minecraft.getInstance().player);
 
@@ -354,10 +354,10 @@ public class PatternWidget extends WidgetGroup {
         PartInfo(final ItemStackKey itemStackKey, final BlockInfo blockInfo) {
             this.itemStackKey = itemStackKey;
             this.blockId = Block.getId(blockInfo.getBlockState());
-            TileEntity tileEntity = blockInfo.getTileEntity();
-            if (tileEntity != null) {
-                this.isTile = true;
-                if (tileEntity instanceof ControllerTileEntity)
+            this.isTile = blockInfo.hasBlockEntity();
+
+            if (blockInfo.getBlockState().getBlock() instanceof BlockComponent component) {
+                if (component.definition instanceof ControllerDefinition)
                     this.isController = true;
             }
         }

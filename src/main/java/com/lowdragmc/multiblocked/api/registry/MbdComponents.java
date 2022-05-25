@@ -2,7 +2,6 @@ package com.lowdragmc.multiblocked.api.registry;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.lowdragmc.lowdraglib.utils.EnumHelper;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
@@ -12,22 +11,19 @@ import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.ComponentTESR;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class MbdComponents {
@@ -60,7 +56,7 @@ public class MbdComponents {
         COMPONENT_BLOCKS_REGISTRY.values().forEach(registry::register);
     }
     
-    public static void registerTileEntity(IForgeRegistry<TileEntityType<?>> registry) {
+    public static void registerTileEntity(IForgeRegistry<BlockEntityType<?>> registry) {
         for (BlockComponent block : COMPONENT_BLOCKS_REGISTRY.values()) {
             block.definition.registerTileEntity(block, registry);
         }
@@ -94,11 +90,14 @@ public class MbdComponents {
     public static void clientLastWork() {
         // set block render layer
         for (BlockComponent block : MbdComponents.COMPONENT_BLOCKS_REGISTRY.values()) {
-            RenderTypeLookup.setRenderLayer(block, renderType -> true);
+            ItemBlockRenderTypes.setRenderLayer(block, renderType -> true);
         }
+    }
+
+    public static void registerBlockEntityRenderer(EntityRenderersEvent.RegisterRenderers event) {
         // register tesr
         for (ComponentDefinition definition : DEFINITION_REGISTRY.values()) {
-            ClientRegistry.bindTileEntityRenderer(definition.getTileType(), ComponentTESR::new);
+            event.registerBlockEntityRenderer(definition.getTileType(), ComponentTESR::new);
         }
     }
 }

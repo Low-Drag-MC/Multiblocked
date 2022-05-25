@@ -2,11 +2,11 @@ package com.lowdragmc.multiblocked.network.s2c;
 
 import com.lowdragmc.lowdraglib.networking.IPacket;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public class SPacketRemoveDisabledRendering implements IPacket {
     private BlockPos controllerPos;
@@ -19,12 +19,12 @@ public class SPacketRemoveDisabledRendering implements IPacket {
     }
 
     @Override
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeVarLong(controllerPos.asLong());
     }
 
     @Override
-    public void decode(PacketBuffer buf) {
+    public void decode(FriendlyByteBuf buf) {
         this.controllerPos = BlockPos.of(buf.readVarLong());
     }
 

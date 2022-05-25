@@ -56,7 +56,7 @@ public class TraceabilityPredicate {
      */
     public TraceabilityPredicate addTooltips(String... tips) {
         if (tips.length > 0) {
-            List<String> tooltips = Arrays.stream(tips).collect(Collectors.toList());
+            List<String> tooltips = Arrays.stream(tips).toList();
             common.forEach(predicate -> {
                 if (predicate.candidates == null) return;
                 if (predicate.toolTips == null) {

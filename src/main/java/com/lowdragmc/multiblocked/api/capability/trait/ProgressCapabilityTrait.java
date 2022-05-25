@@ -22,8 +22,8 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -46,9 +46,9 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
             jsonElement = new JsonObject();
         }
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        width = JSONUtils.getAsInt(jsonObject, "width", 60);
-        height = JSONUtils.getAsInt(jsonObject, "height", 18);
-        texture = JSONUtils.getAsString(jsonObject, "texture", "multiblocked:textures/gui/energy_bar.png");
+        width = GsonHelper.getAsInt(jsonObject, "width", 60);
+        height = GsonHelper.getAsInt(jsonObject, "height", 18);
+        texture = GsonHelper.getAsString(jsonObject, "texture", "multiblocked:textures/gui/energy_bar.png");
     }
 
     @Override
@@ -65,7 +65,7 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
     protected abstract double getProgress();
     
     @Override
-    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, PlayerEntity player) {
+    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
         super.createUI(component, group, player);
         group.addWidget(new ProgressWidget(
                 this::getProgress,

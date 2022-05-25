@@ -16,7 +16,7 @@ import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.registries.MekanismBlocks;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
@@ -37,7 +37,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull BlockEntity tileEntity) {
         return !getCapability(Capabilities.HEAT_HANDLER_CAPABILITY, tileEntity).isEmpty();
     }
 
@@ -47,7 +47,8 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
     }
 
     @Override
-    public HeatMekanismCapabilityProxy createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public HeatMekanismCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         return new HeatMekanismCapabilityProxy(tileEntity);
     }
 
@@ -88,7 +89,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
 
     public static class HeatMekanismCapabilityProxy extends CapCapabilityProxy<IHeatHandler, Double> {
 
-        public HeatMekanismCapabilityProxy(TileEntity tileEntity) {
+        public HeatMekanismCapabilityProxy(BlockEntity tileEntity) {
             super(HeatMekanismCapability.CAP, tileEntity, Capabilities.HEAT_HANDLER_CAPABILITY);
         }
 

@@ -8,17 +8,19 @@ import com.lowdragmc.multiblocked.api.gui.tester.PartScriptWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDIModelRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class PartTileTesterEntity extends PartTileEntity<PartDefinition> {
     public final static PartDefinition DEFAULT_DEFINITION = new PartDefinition(new ResourceLocation("multiblocked:part_tester"), PartTileTesterEntity::new);
 
-    public PartTileTesterEntity(PartDefinition definition) {
-        super(definition);
+    public PartTileTesterEntity(PartDefinition definition, BlockPos pos, BlockState state) {
+        super(definition, pos, state);
     }
 
     public void setDefinition(PartDefinition definition) {
@@ -41,13 +43,13 @@ public class PartTileTesterEntity extends PartTileEntity<PartDefinition> {
     }
 
     @Override
-    public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult use(Player player, InteractionHand hand, BlockHitResult hit) {
         super.use(player, hand, hit);
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity entityPlayer) {
+    public ModularUI createUI(Player entityPlayer) {
         if (Multiblocked.isClient() && Multiblocked.isSinglePlayer()) {
             TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
             new PartScriptWidget(this, tabContainer);

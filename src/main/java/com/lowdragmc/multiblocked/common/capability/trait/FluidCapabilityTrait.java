@@ -13,15 +13,14 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.trait.MultiCapabilityTrait;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -57,7 +56,7 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
         int i = 0;
         for (JsonElement element : jsonArray) {
             JsonObject jsonObject = element.getAsJsonObject();
-            tankCapability[i] = JSONUtils.getAsInt(jsonObject, "tC", 1000);
+            tankCapability[i] = GsonHelper.getAsInt(jsonObject, "tC", 1000);
             i++;
         }
         handler = new FluidTankList(capabilityIO, Arrays.stream(tankCapability).mapToObj(FluidTank::new).toArray(FluidTank[]::new));
@@ -88,7 +87,7 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
                     int need = already.getCapacity() - already.getFluidAmount();
                     if (need > 0) {
                         for (Direction facing : getIOFacing()) {
-                            TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
+                            BlockEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 AtomicBoolean r = new AtomicBoolean(false);
                                 te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing.getOpposite()).ifPresent(handler -> {
@@ -107,7 +106,7 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
                     FluidStack fluidStack = already.getFluid();
                     if (already.getFluidAmount() > 0) {
                         for (Direction facing : getIOFacing()) {
-                            TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
+                            BlockEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 AtomicBoolean r = new AtomicBoolean(false);
                                 te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing.getOpposite()).ifPresent(handler -> {
@@ -149,19 +148,19 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         super.readFromNBT(compound);
         handler.deserializeNBT(compound.getCompound("_"));
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
         compound.put("_", handler.serializeNBT());
     }
 
     @Override
-    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, PlayerEntity player) {
+    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
         super.createUI(component, group, player);
         if (handler != null) {
             for (int i = 0; i < guiIO.length; i++) {
@@ -259,7 +258,7 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
         }
     }
 
-    public class FluidTankList implements IFluidHandler, INBTSerializable<CompoundNBT> {
+    public class FluidTankList implements IFluidHandler, INBTSerializable<CompoundTag> {
         public IO[] cIOs;
         protected final List<FluidTank> fluidTanks;
         private boolean inner;
@@ -410,17 +409,17 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
         }
 
         @Override
-        public CompoundNBT serializeNBT() {
-            CompoundNBT fluidInventory = new CompoundNBT();
+        public CompoundTag serializeNBT() {
+            CompoundTag fluidInventory = new CompoundTag();
             fluidInventory.putInt("TankAmount", this.getTanks());
 
-            ListNBT tanks = new ListNBT();
+            ListTag tanks = new ListTag();
             for (int i = 0; i < this.getTanks(); i++) {
-                CompoundNBT writeTag;
+                CompoundTag writeTag;
                 FluidTank fluidTank = fluidTanks.get(i);
                 if (fluidTank != null) {
-                    writeTag = fluidTank.writeToNBT(new CompoundNBT());
-                } else writeTag = new CompoundNBT();
+                    writeTag = fluidTank.writeToNBT(new CompoundTag());
+                } else writeTag = new CompoundTag();
 
                 tanks.add(writeTag);
             }
@@ -429,13 +428,13 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
         }
 
         @Override
-        public void deserializeNBT(CompoundNBT nbt) {
-            ListNBT tanks = nbt.getList("Tanks", Constants.NBT.TAG_COMPOUND);
+        public void deserializeNBT(CompoundTag nbt) {
+            ListTag tanks = nbt.getList("Tanks", Tag.TAG_COMPOUND);
             for (int i = 0; i < Math.min(fluidTanks.size(), nbt.getInt("TankAmount")); i++) {
-                INBT nbtTag = tanks.get(i);
+                Tag nbtTag = tanks.get(i);
                 FluidTank fluidTank = fluidTanks.get(i);
                 if (fluidTank != null) {
-                    fluidTank.readFromNBT((CompoundNBT) nbtTag);
+                    fluidTank.readFromNBT((CompoundTag) nbtTag);
                 }
             }
         }

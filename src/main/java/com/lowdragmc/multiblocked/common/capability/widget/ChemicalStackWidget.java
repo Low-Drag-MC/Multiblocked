@@ -10,7 +10,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -18,11 +18,10 @@ import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.math.MathUtils;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.render.MekanismRenderer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.FriendlyByteBuf;
 
 import javax.annotation.Nonnull;
 
@@ -52,7 +51,7 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
         if (isRemote() && content != null) {
             String chemical = LocalizationUtils.format(CAP.getUnlocalizedName());
             this.setHoverTooltips(
-                    TextFormatting.AQUA + content.getType().getTextComponent().getString() + TextFormatting.RESET,
+                    ChatFormatting.AQUA + content.getType().getTextComponent().getString() + ChatFormatting.RESET,
                     handler == null ?
                     LocalizationUtils.format("multiblocked.gui.trait.mek.amount", chemical, content.getAmount()) :
                     LocalizationUtils.format("multiblocked.gui.trait.mek.amount2", chemical, content.getAmount(), lastCapability));
@@ -79,19 +78,19 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
     }
 
     @Override
-    public void writeInitialData(PacketBuffer buffer) {
+    public void writeInitialData(FriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
         writeTank(buffer);
     }
 
     @Override
-    public void readInitialData(PacketBuffer buffer) {
+    public void readInitialData(FriendlyByteBuf buffer) {
         super.readInitialData(buffer);
         readTank(buffer);
     }
 
     @Override
-    public void readUpdateInfo(int id, PacketBuffer buffer) {
+    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
         if (id == -3) {
             readTank(buffer);
         } else {
@@ -99,19 +98,19 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
         }
     }
 
-    private void writeTank(PacketBuffer buffer) {
+    private void writeTank(FriendlyByteBuf buffer) {
         buffer.writeVarLong(lastCapability);
         lastStack.writeToPacket(buffer);
     }
 
-    private void readTank(PacketBuffer buffer) {
+    private void readTank(FriendlyByteBuf buffer) {
         lastCapability = buffer.readVarLong();
         lastStack = CAP.readFromBuffer.apply(buffer);
         setContent(lastStack);
     }
 
     @Override
-    public void drawHookBackground(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void drawHookBackground(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         if (content != null) {
             Position pos = getPosition();
             Size size = getSize();
@@ -121,13 +120,13 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
             drawChemical(stack, pos.x + 1, pos.y + 1, 18, 18, content);
             stack.scale(0.5f, 0.5f, 1);
             String s = TextFormattingUtil.formatLongToCompactStringBuckets(content.getAmount(), 3);
-            FontRenderer fontRenderer = minecraft.font;
+            Font fontRenderer = minecraft.font;
             fontRenderer.drawShadow(stack, s, (pos.x + (size.width / 3f)) * 2 - fontRenderer.width(s) + 21, (pos.y + (size.height / 3f) + 6) * 2, 0xFFFFFF);
             stack.popPose();
         }
     }
 
-    public static void drawChemical(MatrixStack matrix, int xPosition, int yPosition, int width, int height, @Nonnull ChemicalStack<?> stack) {
+    public static void drawChemical(PoseStack matrix, int xPosition, int yPosition, int width, int height, @Nonnull ChemicalStack<?> stack) {
         int desiredHeight = MathUtils.clampToInt(height);
         if (desiredHeight < 1) {
             desiredHeight = 1;

@@ -11,7 +11,7 @@ import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.HeatMekanismCapability;
 import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.ManaBotaniaCapability;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 

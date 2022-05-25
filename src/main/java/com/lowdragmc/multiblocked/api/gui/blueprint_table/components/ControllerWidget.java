@@ -34,11 +34,11 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
-import net.minecraft.block.Blocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -176,7 +176,7 @@ public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
                         char symbol = pattern[i][j].charAt(k);
                         BlockPos pos = jsonPattern.getActualPosOffset(k - centerOffset[2], j - centerOffset[1], i - centerOffset[0], Direction.NORTH).offset(offset, offset, offset);
                         world.addBlock(pos, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock.defaultBlockState()));
-                        DummyComponentTileEntity  tileEntity = (DummyComponentTileEntity) world.getBlockEntity(pos);
+                        DummyComponentTileEntity tileEntity = (DummyComponentTileEntity) world.getBlockEntity(pos);
                         ComponentDefinition definition = null;
                         assert tileEntity != null;
                         boolean disableFormed = false;
@@ -198,11 +198,11 @@ public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
                         if (definition != null) {
                             tileEntity.setDefinition(definition);
                             if (disableFormed) {
-                                definition.formedRenderer = new MBDBlockStateRenderer(Blocks.AIR.defaultBlockState());
+                                definition.formedRenderer = new MBDBlockStateRenderer(
+                                        Blocks.AIR.defaultBlockState());
                             }
                         }
                         tileEntity.isFormed = isFormed;
-                        tileEntity.setLevelAndPosition(world, pos);
                         posSet.add(pos);
                         tiles.add(tileEntity);
                     }

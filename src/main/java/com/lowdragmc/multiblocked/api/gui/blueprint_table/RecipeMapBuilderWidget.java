@@ -17,7 +17,6 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;

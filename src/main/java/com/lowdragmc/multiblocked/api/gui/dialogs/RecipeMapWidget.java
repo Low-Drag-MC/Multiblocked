@@ -24,7 +24,7 @@ import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -149,7 +149,7 @@ public class RecipeMapWidget extends DialogWidget {
 
         @Override
         @OnlyIn(Dist.CLIENT)
-        public void drawInBackground(@Nonnull MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
             super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
             if (inputs.isEmpty() && outputs.isEmpty()) updateIOContentWidgets();
             List<ContentWidget<?>> in = inputs.values().stream().flatMap(Collection::stream).collect(Collectors.toList());

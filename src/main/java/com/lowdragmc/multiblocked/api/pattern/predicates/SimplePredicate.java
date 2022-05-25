@@ -22,12 +22,12 @@ import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
 import com.lowdragmc.multiblocked.api.pattern.error.PatternStringError;
 import com.lowdragmc.multiblocked.api.pattern.error.SinglePredicateError;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 public class SimplePredicate {
     public static SimplePredicate ANY = new SimplePredicate("any", x -> true, null);
-    public static SimplePredicate AIR = new SimplePredicate("air", blockWorldState -> blockWorldState.getBlockState().getBlock().isAir(blockWorldState.getBlockState(), blockWorldState.getWorld(), blockWorldState.getPos()), null);
+    public static SimplePredicate AIR = new SimplePredicate("air", blockWorldState -> blockWorldState.getWorld().isEmptyBlock(blockWorldState.getPos()), null);
     
     public Supplier<BlockInfo[]> candidates;
     public Predicate<MultiblockState> predicate;
@@ -140,9 +140,9 @@ public class SimplePredicate {
             }
         }
         if (nbtParser != null && !blockWorldState.world.isClientSide) {
-            TileEntity te = blockWorldState.getTileEntity();
+            BlockEntity te = blockWorldState.getTileEntity();
             if (te != null) {
-                CompoundNBT nbt = te.serializeNBT();
+                CompoundTag nbt = te.serializeNBT();
                 if (Pattern.compile(nbtParser).matcher(nbt.toString()).find()) {
                     return true;
                 }
@@ -281,13 +281,14 @@ public class SimplePredicate {
     }
 
     public void fromJson(Gson gson, JsonObject jsonObject) {
-        disableRenderFormed = JSONUtils.getAsBoolean(jsonObject, "disableRenderFormed", disableRenderFormed);
-        minCount = JSONUtils.getAsInt(jsonObject, "minCount", minCount);
-        maxCount = JSONUtils.getAsInt(jsonObject, "maxCount", maxCount);
-        previewCount = JSONUtils.getAsInt(jsonObject, "previewCount", previewCount);
-        io = JSONUtils.getAsString(jsonObject, "io", "").equals("null") ? null : IO.valueOf(JSONUtils.getAsString(jsonObject, "io", IO.BOTH.name()));
-        nbtParser = JSONUtils.getAsString(jsonObject, "nbtParser", nbtParser);
-        customTips = JSONUtils.getAsString(jsonObject, "customTips", customTips);
+        disableRenderFormed = GsonHelper.getAsBoolean(jsonObject, "disableRenderFormed", disableRenderFormed);
+        minCount = GsonHelper.getAsInt(jsonObject, "minCount", minCount);
+        maxCount = GsonHelper.getAsInt(jsonObject, "maxCount", maxCount);
+        previewCount = GsonHelper.getAsInt(jsonObject, "previewCount", previewCount);
+        io = GsonHelper.getAsString(jsonObject, "io", "").equals("null") ? null : IO.valueOf(
+                GsonHelper.getAsString(jsonObject, "io", IO.BOTH.name()));
+        nbtParser = GsonHelper.getAsString(jsonObject, "nbtParser", nbtParser);
+        customTips = GsonHelper.getAsString(jsonObject, "customTips", customTips);
     }
     
 }

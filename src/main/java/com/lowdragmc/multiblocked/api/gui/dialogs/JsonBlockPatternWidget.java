@@ -44,16 +44,19 @@ import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
@@ -297,7 +300,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
             case ' ' : return 0xff4EEDF7;
             case '-' : return 0xff1E2DF7;
             default: {
-                return TextFormatting.values()[(symbol - 'A') % 16].getColor() | 0xff000000;
+                return ChatFormatting.values()[(symbol - 'A') % 16].getColor() | 0xff000000;
             }
         }
     }
@@ -489,7 +492,6 @@ public class JsonBlockPatternWidget extends DialogWidget {
                         assert tileEntity != null;
                         tileEntity.init(c, JsonBlockPatternWidget.this, i, j, k);
                         tileEntity.setDefinition((PartDefinition) symbolBlock.definition);
-                        tileEntity.setLevelAndPosition(world, pos);
                         posSet.add(pos);
                         tiles.put(pos, tileEntity);
                         tileEntity.updateRenderer();
@@ -510,32 +512,30 @@ public class JsonBlockPatternWidget extends DialogWidget {
 
         @Override
         public void renderBlockOverLay(WorldSceneRenderer renderer) {
-            Tessellator tessellator = Tessellator.getInstance();
+            Tesselator tessellator = Tesselator.getInstance();
             BufferBuilder buffer = tessellator.getBuilder();
             RenderSystem.enableBlend();
             RenderSystem.disableTexture();
 
             if (viewMode == 1) { // render pattern style
-                RenderUtils.useLightMap(240, 240, () -> {
-                    if (selected != null) {
-                        for (SymbolTileEntity tile : sameSymbol) {
-                            drawSymbolTE(tessellator, buffer, tile, getColor(tile.symbol), 1);
-                        }
+                if (selected != null) {
+                    for (SymbolTileEntity tile : sameSymbol) {
+                        drawSymbolTE(tessellator, buffer, tile, getColor(tile.symbol), 1);
                     }
+                }
 
-                    if (selected != null) {
-                        RenderSystem.depthMask(false);
-                    }
-                    for (SymbolTileEntity tile : tiles.values()) {
-                        if (aisleRender > -1 && tile.a != aisleRender) continue;
-                        if (sameSymbol.contains(tile)) continue;
-                        float dd = Math.abs(System.currentTimeMillis() % 3000);
-                        drawSymbolTE(tessellator, buffer, tile, getColor(tile.symbol), selected == null ? 1 : ((((dd > 1500) ? (3000 - dd) : dd) / 1500f) * 0.3f));
-                    }
-                    if (selected != null) {
-                        RenderSystem.depthMask(true);
-                    }
-                });
+                if (selected != null) {
+                    RenderSystem.depthMask(false);
+                }
+                for (SymbolTileEntity tile : tiles.values()) {
+                    if (aisleRender > -1 && tile.a != aisleRender) continue;
+                    if (sameSymbol.contains(tile)) continue;
+                    float dd = Math.abs(System.currentTimeMillis() % 3000);
+                    drawSymbolTE(tessellator, buffer, tile, getColor(tile.symbol), selected == null ? 1 : ((((dd > 1500) ? (3000 - dd) : dd) / 1500f) * 0.3f));
+                }
+                if (selected != null) {
+                    RenderSystem.depthMask(true);
+                }
             }
 
             super.renderBlockOverLay(renderer);
@@ -557,9 +557,9 @@ public class JsonBlockPatternWidget extends DialogWidget {
                     if (pos.getZ() < minPos[2]) minPos[2] = pos.getZ();
                 }
                 RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-
-                buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-                RenderUtils.renderCubeFace(new MatrixStack(), buffer, minPos[0] - 0.01f, minPos[1] - 0.01f, minPos[2] - 0.01f, maxPos[0] + 1.01f, maxPos[1] + 1.01f, maxPos[2] + 1.01f, 0.3f, 0.5f, 0.7f, 1);
+                RenderSystem.setShader(GameRenderer::getPositionColorShader);
+                buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                RenderUtils.renderCubeFace(new PoseStack(), buffer, minPos[0] - 0.01f, minPos[1] - 0.01f, minPos[2] - 0.01f, maxPos[0] + 1.01f, maxPos[1] + 1.01f, maxPos[2] + 1.01f, 0.3f, 0.5f, 0.7f, 1);
                 tessellator.end();
 
                 RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -568,16 +568,16 @@ public class JsonBlockPatternWidget extends DialogWidget {
 
         }
 
-        private void drawSymbolTE(Tessellator tessellator, BufferBuilder buffer, SymbolTileEntity tile, int color, float a) {
+        private void drawSymbolTE(Tesselator tessellator, BufferBuilder buffer, SymbolTileEntity tile, int color, float a) {
             float r = ((color & 0xFF0000) >> 16) / 255f;
             float g = ((color & 0xFF00) >> 8) / 255f;
             float b = ((color & 0xFF)) / 255f;
             float scale = 0.8f;
-            MatrixStack matrixStack = new MatrixStack();
+            PoseStack matrixStack = new PoseStack();
             matrixStack.translate((tile.getBlockPos().getX() + 0.5), (tile.getBlockPos().getY() + 0.5), (tile.getBlockPos().getZ() + 0.5));
             matrixStack.scale(scale, scale, scale);
-
-            buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             RenderBufferUtils.renderCubeFace(matrixStack, buffer, -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, r, g, b, a, true);
             tessellator.end();
 
@@ -675,7 +675,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
 
         @Override
         @OnlyIn(Dist.CLIENT)
-        public void drawInBackground(@Nonnull MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
             super.drawInBackground(matrixStack, mouseX, mouseY, partialTicks);
             if (isSelected) {
                 DrawerHelper.drawBorder(matrixStack, getPosition().x + 1, getPosition().y + 1, getSize().width - 2, getSize().height - 2, 0xff00aa00, 1);
@@ -720,7 +720,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
 
         @Override
         @OnlyIn(Dist.CLIENT)
-        public void drawInBackground(@Nonnull MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
             Position position = getPosition();
             Size size = getSize();
             DrawerHelper.drawBorder(matrixStack, position.x, position.y, size.width, size.height, sceneWidget.selected != null && sceneWidget.selected.symbol == c ? 0xff00ff00 : -1, 1);
@@ -734,8 +734,8 @@ public class JsonBlockPatternWidget extends DialogWidget {
         public JsonBlockPatternWidget widget;
         public int a,b,c;
 
-        public SymbolTileEntity(PartDefinition definition) {
-            super(definition);
+        public SymbolTileEntity(PartDefinition definition, BlockPos pos, BlockState state) {
+            super(definition, pos, state);
         }
 
         public void init(char symbol, JsonBlockPatternWidget widget, int a, int b, int c) {

@@ -15,11 +15,11 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.Rectangle2d;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ArrayUtils;
@@ -67,11 +67,11 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
         if (ingredientContent == null || !ingredient.getClass().equals(ingredientContent.getClass())) {
             return Collections.emptyList();
         }
-        Rectangle2d rectangle = toRectangleBox();
+        Rect2i rectangle = toRectangleBox();
         return Lists.newArrayList(new Target() {
             @Nonnull
             @Override
-            public Rectangle2d getArea() {
+            public Rect2i getArea() {
                 return rectangle;
             }
 
@@ -211,7 +211,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public final void drawInBackground(@Nonnull MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public final void drawInBackground(@Nonnull PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         Position position = getPosition();
         Size size = getSize();
         if (background != null) {
@@ -227,13 +227,13 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
         }
     }
 
-    protected void drawHookBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    protected void drawHookBackground(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 
     }
 
 
     @OnlyIn(Dist.CLIENT)
-    public void drawChance(MatrixStack matrixStack) {
+    public void drawChance(PoseStack matrixStack) {
         if (chance == 1) return;
         Position pos = getPosition();
         Size size = getSize();
@@ -242,13 +242,13 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
         matrixStack.scale(0.5f, 0.5f, 1);
         String s = chance == 0 ? LocalizationUtils.format("multiblocked.gui.content.chance_0_short") : String.format("%.1f", chance * 100) + "%";
         int color = chance == 0 ? 0xff0000 : 0xFFFF00;
-        FontRenderer fontRenderer = Minecraft.getInstance().font;
+        Font fontRenderer = Minecraft.getInstance().font;
         fontRenderer.drawShadow(matrixStack, s, (pos.x + (size.width / 3f)) * 2 - fontRenderer.width(s) + 23, (pos.y + (size.height / 3f) + 6) * 2 - size.height, color);
         matrixStack.popPose();
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void drawTick(MatrixStack matrixStack) {
+    public void drawTick(PoseStack matrixStack) {
         if (perTick) {
             Position pos = getPosition();
             Size size = getSize();
@@ -258,14 +258,14 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
             matrixStack.scale(0.5f, 0.5f, 1);
             String s = LocalizationUtils.format("multiblocked.gui.content.tips.per_tick_short");
             int color = 0xFFFF00;
-            FontRenderer fontRenderer = Minecraft.getInstance().font;
+            Font fontRenderer = Minecraft.getInstance().font;
             fontRenderer.drawShadow(matrixStack, s, (pos.x + (size.width / 3f)) * 2 - fontRenderer.width(s) + 23, (pos.y + (size.height / 3f) + 6) * 2 - size.height + (chance == 1 ? 0 : 10), color);
             matrixStack.popPose();
         }
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void drawHoverOverlay(MatrixStack matrixStack, int mouseX, int mouseY) {
+    public void drawHoverOverlay(PoseStack matrixStack, int mouseX, int mouseY) {
         if (isMouseOverElement(mouseX, mouseY)) {
             RenderSystem.colorMask(true, true, true, false);
             DrawerHelper.drawSolidRect(matrixStack, getPosition().x + 1, getPosition().y + 1, 18, 18, -2130706433);

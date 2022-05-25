@@ -8,15 +8,15 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.trait.MultiCapabilityTrait;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -46,7 +46,7 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
     }
 
     @Override
-    public void onDrops(NonNullList<ItemStack> drops, PlayerEntity player) {
+    public void onDrops(NonNullList<ItemStack> drops, Player player) {
         for (int i = 0; i < handler.getSlots(); i++) {
             ItemStack stack = handler.getStackInSlot(i);
             if (!stack.isEmpty()) {
@@ -56,11 +56,11 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         super.readFromNBT(compound);
-        ListNBT tagList = compound.getCompound("_").getList("Items", Constants.NBT.TAG_COMPOUND);
+        ListTag tagList = compound.getCompound("_").getList("Items", Tag.TAG_COMPOUND);
         for (int i = 0; i < tagList.size(); i++) {
-            CompoundNBT itemTags = tagList.getCompound(i);
+            CompoundTag itemTags = tagList.getCompound(i);
             int slot = itemTags.getInt("Slot");
             if (slot >= 0 && slot < handler.getSlots()) {
                 handler.setStackInSlot(slot, ItemStack.of(itemTags));
@@ -69,13 +69,13 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
         compound.put("_", handler.serializeNBT());
     }
 
     @Override
-    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, PlayerEntity player) {
+    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
         super.createUI(component, group, player);
         if (handler != null) {
             for (int i = 0; i < handler.getSlots(); i++) {
@@ -98,7 +98,7 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
                     int need = this.handler.getSlotLimit(i) - already.getCount();
                     if (need > 0) {
                         for (Direction facing : getIOFacing()) {
-                            TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
+                            BlockEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite()).orElse(null);
                                 if (handler != null) {
@@ -118,7 +118,7 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
                     ItemStack already = this.handler.getStackInSlot(i);
                     if (!already.isEmpty()) {
                         for (Direction facing : getIOFacing()) {
-                            TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
+                            BlockEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 IItemHandler handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite()).orElse(null);
                                 if (handler != null) {

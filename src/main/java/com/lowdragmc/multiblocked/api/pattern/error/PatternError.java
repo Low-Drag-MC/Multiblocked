@@ -3,10 +3,10 @@ package com.lowdragmc.multiblocked.api.pattern.error;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -21,7 +21,7 @@ public class PatternError {
         this.worldState = worldState;
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return worldState.getWorld();
     }
 

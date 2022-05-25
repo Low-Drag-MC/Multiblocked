@@ -12,7 +12,7 @@ import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.File;
 import java.util.function.Supplier;

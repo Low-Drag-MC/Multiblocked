@@ -17,25 +17,25 @@ import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.block.BlockState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.model.BlockModel;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.IUnbakedModel;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
@@ -94,7 +94,7 @@ public class GTRenderer extends MBDIModelRenderer {
     @Override
     @OnlyIn(Dist.CLIENT)
     public TextureAtlasSprite getParticleTexture() {
-        return Minecraft.getInstance().getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(baseTexture);
+        return Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(baseTexture);
     }
 
     @Override
@@ -109,39 +109,39 @@ public class GTRenderer extends MBDIModelRenderer {
         return false;
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean renderModel(BlockState state, BlockPos pos,
-                               IBlockDisplayReader blockReader,
-                               MatrixStack matrixStack,
-                               IVertexBuilder vertexBuilder, boolean checkSides,
+                               BlockAndTintGetter blockReader,
+                               PoseStack poseStack,
+                               VertexConsumer vertexBuilder, boolean checkSides,
                                Random rand, IModelData modelData) {
-        TileEntity te = blockReader.getBlockEntity(pos);
+        BlockEntity te = blockReader.getBlockEntity(pos);
         if (formedAsController && te instanceof PartTileEntity) {
             PartTileEntity<?> part = (PartTileEntity<?>) te;
             for (ControllerTileEntity controller : part.getControllers()) {
                 if (controller.isFormed() && controller.getRenderer() instanceof GTRenderer) {
-                    IBakedModel model = getModel(((GTRenderer) controller.getRenderer()).baseTexture).bake(
-                            ModelLoader.instance(),
-                            ModelLoader.defaultTextureGetter(),
+                    BakedModel model = getModel(((GTRenderer) controller.getRenderer()).baseTexture).bake(
+                            ForgeModelBakery.instance(),
+                            ForgeModelBakery.defaultTextureGetter(),
                             ModelFactory.getRotation(part.getFrontFacing()),
                             modelLocation);
                     if (model == null) return false;
                     model = new CustomBakedModel(model);
                     if (!((CustomBakedModel)model).shouldRenderInLayer(state, rand)) return false;
-                    BlockRendererDispatcher brd = Minecraft.getInstance().getBlockRenderer();
-                    return brd.getModelRenderer().renderModel(blockReader, model, state, pos, matrixStack, vertexBuilder, checkSides, rand, state.getSeed(pos), OverlayTexture.NO_OVERLAY, modelData);
+                    BlockRenderDispatcher brd = Minecraft.getInstance().getBlockRenderer();
+                    return brd.getModelRenderer().tesselateBlock(blockReader, model, state, pos, poseStack, vertexBuilder, checkSides, rand, state.getSeed(pos), OverlayTexture.NO_OVERLAY, modelData);
                 }
             }
         }
-        return super.renderModel(state, pos, blockReader, matrixStack, vertexBuilder, checkSides, rand, modelData);
+        return super.renderModel(state, pos, blockReader, poseStack, vertexBuilder, checkSides, rand, modelData);
     }
 
 
 
     @OnlyIn(Dist.CLIENT)
-    protected IUnbakedModel getModel(ResourceLocation baseTexture) {
-        IUnbakedModel model = ModelFactory.getUnBakedModel(new ResourceLocation(Multiblocked.MODID, "block/cube_2_layer"));
+    protected UnbakedModel getModel(ResourceLocation baseTexture) {
+        UnbakedModel model = ModelFactory.getUnBakedModel(new ResourceLocation(Multiblocked.MODID, "block/cube_2_layer"));
         if (model instanceof BlockModel) {
             ((BlockModel) model).textureMap.put("bot_down", ModelFactory.parseBlockTextureLocationOrReference(baseTexture.toString()));
             ((BlockModel) model).textureMap.put("bot_up", ModelFactory.parseBlockTextureLocationOrReference(baseTexture.toString()));
@@ -171,7 +171,7 @@ public class GTRenderer extends MBDIModelRenderer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected IUnbakedModel getModel() {
+    protected UnbakedModel getModel() {
         return getModel(baseTexture);
     }
 

@@ -34,21 +34,18 @@ import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -93,13 +90,13 @@ public class TemplateBuilderWidget extends WidgetGroup {
             JsonBlockPattern pattern = null;
             if (ItemBlueprint.isRaw(selected)) {
                 BlockPos[] poses = ItemBlueprint.getPos(selected);
-                World world = table.getLevel();
+                Level world = table.getLevel();
                 if (poses != null && world.hasChunksAt(poses[0], poses[1])) {
                     ControllerTileEntity controller = null;
                     for (int x = poses[0].getX(); x <= poses[1].getX(); x++) {
                         for (int y = poses[0].getY(); y <= poses[1].getY(); y++) {
                             for (int z = poses[0].getZ(); z <= poses[1].getZ(); z++) {
-                                TileEntity te = world.getBlockEntity(new BlockPos(x, y, z));
+                                BlockEntity te = world.getBlockEntity(new BlockPos(x, y, z));
                                 if (te instanceof ControllerTileEntity) {
                                     controller = (ControllerTileEntity) te;
                                 }
@@ -148,17 +145,17 @@ public class TemplateBuilderWidget extends WidgetGroup {
     }
 
     @Override
-    public void readUpdateInfo(int id, PacketBuffer buffer) {
+    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
         super.readUpdateInfo(id, buffer);
     }
 
     @Override
-    public void handleClientAction(int id, PacketBuffer buffer) {
+    public void handleClientAction(int id, FriendlyByteBuf buffer) {
         if (id == -1) {
             int slotIndex = buffer.readVarInt();
             String json = buffer.readUtf(Short.MAX_VALUE);
             String controller = buffer.readUtf(Short.MAX_VALUE);
-            TileEntity tileEntity = table.getLevel().getBlockEntity(table.getBlockPos().relative(Direction.UP).relative(table.getFrontFacing().getOpposite()).relative(table.getFrontFacing().getClockWise()));
+            BlockEntity tileEntity = table.getLevel().getBlockEntity(table.getBlockPos().relative(Direction.UP).relative(table.getFrontFacing().getOpposite()).relative(table.getFrontFacing().getClockWise()));
             if (tileEntity != null) {
                 tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
                     if (handler.getSlots() > slotIndex) {
@@ -178,9 +175,9 @@ public class TemplateBuilderWidget extends WidgetGroup {
     }
 
     @Override
-    public void writeInitialData(PacketBuffer buffer) {
+    public void writeInitialData(FriendlyByteBuf buffer) {
         super.writeInitialData(buffer);
-        TileEntity tileEntity = table.getLevel().getBlockEntity(table.getBlockPos().relative(Direction.UP).relative(table.getFrontFacing().getOpposite()).relative(table.getFrontFacing().getClockWise()));
+        BlockEntity tileEntity = table.getLevel().getBlockEntity(table.getBlockPos().relative(Direction.UP).relative(table.getFrontFacing().getOpposite()).relative(table.getFrontFacing().getClockWise()));
         Map<Integer, ItemStack> caught = new Int2ObjectOpenHashMap<>();
         if (tileEntity != null) {
             tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler->{
@@ -200,7 +197,7 @@ public class TemplateBuilderWidget extends WidgetGroup {
     }
 
     @Override
-    public void readInitialData(PacketBuffer buffer) {
+    public void readInitialData(FriendlyByteBuf buffer) {
         super.readInitialData(buffer);
         this.addWidget(containers = new DraggableScrollableWidgetGroup(200, 120, 150, 98));
         containers.setClientSideWidget();
@@ -242,8 +239,8 @@ public class TemplateBuilderWidget extends WidgetGroup {
     private String status() {
         return LocalizationUtils.format("multiblocked.gui.builder.template.status") + " " +
                 (selected == null ? "" : ItemBlueprint.isRaw(selected) ?
-                        TextFormatting.YELLOW + LocalizationUtils.format("multiblocked.gui.builder.template.raw") :
-                        TextFormatting.GREEN + LocalizationUtils.format("multiblocked.gui.builder.template.pattern"));
+                        ChatFormatting.YELLOW + LocalizationUtils.format("multiblocked.gui.builder.template.raw") :
+                        ChatFormatting.GREEN + LocalizationUtils.format("multiblocked.gui.builder.template.pattern"));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -257,7 +254,7 @@ public class TemplateBuilderWidget extends WidgetGroup {
                 templateButton.setVisible(true);
                 if (ItemBlueprint.isRaw(itemStack)) {
                     BlockPos[] poses = ItemBlueprint.getPos(itemStack);
-                    World world = table.getLevel();
+                    Level world = table.getLevel();
                     sceneWidget.createScene(world);
                     if (poses != null && world.hasChunksAt(poses[0], poses[1])) {
                         Set<BlockPos> rendered = new HashSet<>();
@@ -307,7 +304,6 @@ public class TemplateBuilderWidget extends WidgetGroup {
                                     tileEntity.setDefinition(definition);
                                 }
                                 tileEntity.isFormed = false;
-                                tileEntity.setLevelAndPosition(world, pos);
                                 rendered.add(pos);
                             }
                         }

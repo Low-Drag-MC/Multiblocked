@@ -2,13 +2,13 @@ package com.lowdragmc.multiblocked.core.mixins;
 
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import net.minecraft.block.BlockState;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,12 +18,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(World.class)
-public abstract class WorldMixin implements IWorld {
+@Mixin(Level.class)
+public abstract class WorldMixin implements LevelAccessor {
 
     @Shadow @Final public boolean isClientSide;
 
@@ -31,16 +30,12 @@ public abstract class WorldMixin implements IWorld {
 
     @Shadow public abstract boolean isLoaded(BlockPos pPos);
 
-    @Shadow protected boolean updatingBlockEntities;
-
-    @Shadow @Nullable protected abstract TileEntity getPendingBlockEntityAt(BlockPos p_189508_1_);
-
-    @Inject(method = "tickBlockEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/IProfiler;pop()V", ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void afterUpdatingEntities(CallbackInfo ci, IProfiler iprofiler) {
-        iprofiler.popPush("multiblocked_update");
-        if (!((World) (Object) this).isClientSide) {
+    @Inject(method = "tickBlockEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void afterUpdatingEntities(CallbackInfo ci, ProfilerFiller profilerfiller) {
+        profilerfiller.popPush("multiblocked_update");
+        if (!((Level) (Object) this).isClientSide) {
             List<ComponentTileEntity<?>> isRemoved = null;
-            MultiblockWorldSavedData mbds = MultiblockWorldSavedData.getOrCreate((World) (Object) this);
+            MultiblockWorldSavedData mbds = MultiblockWorldSavedData.getOrCreate((Level) (Object) this);
             for (ComponentTileEntity<?> loading : mbds.getLoadings()) {
                 if (loading.isRemoved()) {
                     if (isRemoved == null) {
@@ -59,37 +54,21 @@ public abstract class WorldMixin implements IWorld {
         }
     }
 
-    private Chunk getChunkNow(int pX, int pZ) {
+    private ChunkAccess getChunkNow(int pX, int pZ) {
         return this.getChunkSource().getChunkNow(pX, pZ);
     }
 
     @Inject(method = "getBlockEntity", at = @At(value = "HEAD"), cancellable = true)
-    private void getTileEntity(BlockPos pos, CallbackInfoReturnable<TileEntity> cir) {
+    private void getTileEntity(BlockPos pos, CallbackInfoReturnable<BlockEntity> cir) {
         if (!this.isClientSide && Thread.currentThread() != this.thread && MultiblockWorldSavedData.isThreadService() && isLoaded(pos)) {
-            TileEntity tileentity = null;
-            if (this.updatingBlockEntities) {
-                tileentity = this.getPendingBlockEntityAt(pos);
-            }
-
-            if (tileentity == null) {
-                Chunk chunk = this.getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-                if (chunk != null) {
-                    tileentity = chunk.getBlockEntity(pos, Chunk.CreateEntityType.IMMEDIATE);
-                }
-            }
-
-            if (tileentity == null) {
-                tileentity = this.getPendingBlockEntityAt(pos);
-            }
-
-            cir.setReturnValue(tileentity);
+            cir.setReturnValue(getExistingBlockEntity(pos));
         }
     }
 
     @Inject(method = "getBlockState", at = @At(value = "HEAD"), cancellable = true)
     private void getBlockState(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
         if (!this.isClientSide && Thread.currentThread() != this.thread && MultiblockWorldSavedData.isThreadService() && isLoaded(pos)) {
-            Chunk chunk = this.getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+            ChunkAccess chunk = this.getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk != null) {
                 cir.setReturnValue(chunk.getBlockState(pos));
             }

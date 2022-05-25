@@ -14,9 +14,9 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.error.PatternStringError;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.block.Blocks;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -56,7 +56,7 @@ public class PredicateAnyCapability extends SimplePredicate {
 
     private static boolean checkCapability(IO io, MultiblockCapability<?> capability, MultiblockState state) {
         if (io != null) {
-            TileEntity tileEntity = state.getTileEntity();
+            BlockEntity tileEntity = state.getTileEntity();
             if (tileEntity != null && capability.isBlockHasCapability(io, tileEntity)) {
                 Map<Long, EnumMap<IO, Set<MultiblockCapability<?>>>> capabilities = state.getMatchContext().getOrCreate("capabilities", Long2ObjectOpenHashMap::new);
                 capabilities.computeIfAbsent(state.getPos().asLong(), l-> new EnumMap<>(IO.class))
@@ -96,7 +96,7 @@ public class PredicateAnyCapability extends SimplePredicate {
 
     @Override
     public void fromJson(Gson gson, JsonObject jsonObject) {
-        capability = JSONUtils.getAsString(jsonObject, "capability", "");
+        capability = GsonHelper.getAsString(jsonObject, "capability", "");
         super.fromJson(gson, jsonObject);
     }
 }

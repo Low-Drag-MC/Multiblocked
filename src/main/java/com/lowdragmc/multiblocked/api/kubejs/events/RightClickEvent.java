@@ -1,19 +1,19 @@
 package com.lowdragmc.multiblocked.api.kubejs.events;
 
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import dev.latvian.kubejs.event.EventJS;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockRayTraceResult;
+import dev.latvian.mods.kubejs.event.EventJS;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class RightClickEvent extends EventJS {
     public static final String ID = "mbd.right_click";
     private final ComponentTileEntity<?> component;
-    private final PlayerEntity player;
-    private final Hand hand;
-    private final BlockRayTraceResult hit;
+    private final Player player;
+    private final InteractionHand hand;
+    private final BlockHitResult hit;
 
-    public RightClickEvent(ComponentTileEntity<?> component, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public RightClickEvent(ComponentTileEntity<?> component, Player player, InteractionHand hand, BlockHitResult hit) {
         this.component = component;
         this.player = player;
         this.hand = hand;
@@ -24,15 +24,15 @@ public class RightClickEvent extends EventJS {
         return component;
     }
 
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
-    public Hand getHand() {
+    public InteractionHand getHand() {
         return hand;
     }
 
-    public BlockRayTraceResult getHit() {
+    public BlockHitResult getHit() {
         return hit;
     }
 

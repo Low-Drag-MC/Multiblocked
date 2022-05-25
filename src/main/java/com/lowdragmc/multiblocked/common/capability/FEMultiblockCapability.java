@@ -7,7 +7,6 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
-import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
@@ -16,8 +15,10 @@ import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.common.capability.trait.FECapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -42,7 +43,8 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         return !getCapability(CapabilityEnergy.ENERGY, tileEntity).isEmpty();
     }
 
@@ -52,7 +54,8 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     }
 
     @Override
-    public FECapabilityProxy createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public FECapabilityProxy createProxy(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         return new FECapabilityProxy(tileEntity);
     }
 
@@ -74,16 +77,15 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     @Override
     public BlockInfo[] getCandidates() {
         List<BlockInfo> list = new ArrayList<>();
-        TrackedDummyWorld dummyWorld = new TrackedDummyWorld();
         for (Block block : ForgeRegistries.BLOCKS.getValues()) {
             if (block.getRegistryName() != null) {
                 String path = block.getRegistryName().getPath();
                 if (path.contains("energy") || path.contains("rf")) {
                     try {
-                        if (block.hasTileEntity(block.defaultBlockState())) {
-                            TileEntity tileEntity = block.createTileEntity(block.defaultBlockState(), dummyWorld);
+                        if (block instanceof EntityBlock entityBlock) {
+                            BlockEntity tileEntity = entityBlock.newBlockEntity(BlockPos.ZERO, block.defaultBlockState());
                             if (tileEntity != null && isBlockHasCapability(IO.BOTH, tileEntity)) {
-                                list.add(new BlockInfo(block.defaultBlockState(), tileEntity));
+                                list.add(new BlockInfo(block.defaultBlockState(), true));
                             }
                         }
                     } catch (Throwable ignored) { }
@@ -117,7 +119,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
 
     public static class FECapabilityProxy extends CapCapabilityProxy<IEnergyStorage, Integer> {
 
-        public FECapabilityProxy(TileEntity tileEntity) {
+        public FECapabilityProxy(BlockEntity tileEntity) {
             super(FEMultiblockCapability.CAP, tileEntity, CapabilityEnergy.ENERGY);
         }
 

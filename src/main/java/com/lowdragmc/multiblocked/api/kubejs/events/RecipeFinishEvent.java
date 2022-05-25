@@ -1,7 +1,7 @@
 package com.lowdragmc.multiblocked.api.kubejs.events;
 
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
-import dev.latvian.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.EventJS;
 
 public class RecipeFinishEvent extends EventJS {
     public static final String ID = "mbd.recipe_finish";

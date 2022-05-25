@@ -12,13 +12,15 @@ import com.lowdragmc.multiblocked.api.pattern.Predicates;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDIModelRenderer;
 import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BlueprintTableTileEntity extends ControllerTileEntity{
 
-    public BlueprintTableTileEntity(ControllerDefinition definition) {
-        super(definition);
+    public BlueprintTableTileEntity(ControllerDefinition definition, BlockPos pos, BlockState state) {
+        super(definition, pos, state);
     }
 
     @Override
@@ -32,7 +34,7 @@ public class BlueprintTableTileEntity extends ControllerTileEntity{
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity entityPlayer) {
+    public ModularUI createUI(Player entityPlayer) {
         if (isFormed()) {
             return new ModularUI(384, 256, this, entityPlayer).widget(new BlueprintTableWidget(this));
         } else {

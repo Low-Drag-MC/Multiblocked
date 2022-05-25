@@ -6,29 +6,31 @@ import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.registries.IForgeRegistry;
+import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.EnumMap;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Definition of a component.
  */
 public class ComponentDefinition {
-    private TileEntityType<? extends ComponentTileEntity<?>> tileType;
+    private BlockEntityType<? extends ComponentTileEntity<?>> tileType;
     public final ResourceLocation location;
-    public transient final Function<ComponentDefinition, ? extends ComponentTileEntity<?>> teSupplier;
-    public transient final EnumMap<Direction, List<AxisAlignedBB>> baseAABB;
-    public transient final EnumMap<Direction, List<AxisAlignedBB>> formedAABB;
+    public transient final TriFunction<ComponentDefinition, BlockPos, BlockState, ? extends ComponentTileEntity<?>> teSupplier;
+    public transient final EnumMap<Direction, List<AABB>> baseAABB;
+    public transient final EnumMap<Direction, List<AABB>> formedAABB;
     public JsonObject traits;
     public boolean allowRotate;
     public boolean showInJei;
@@ -36,7 +38,7 @@ public class ComponentDefinition {
     public IMultiblockedRenderer formedRenderer;
     public IMultiblockedRenderer workingRenderer;
 
-    public ComponentDefinition(ResourceLocation location, Function<ComponentDefinition, ? extends ComponentTileEntity<?>> teSupplier) {
+    public ComponentDefinition(ResourceLocation location, TriFunction<ComponentDefinition, BlockPos, BlockState, ? extends ComponentTileEntity<?>> teSupplier) {
         this.location = location;
         this.teSupplier = teSupplier;
         this.baseRenderer = null;
@@ -47,16 +49,16 @@ public class ComponentDefinition {
         traits = new JsonObject();
     }
 
-    public ComponentTileEntity<?> createNewTileEntity(){
-        return tileType != null ? tileType.create() : null;
+    public ComponentTileEntity<?> createNewTileEntity(BlockPos pos, BlockState state){
+        return tileType != null ? tileType.create(pos, state) : null;
     }
 
-    public TileEntityType<? extends ComponentTileEntity<?>> getTileType() {
+    public BlockEntityType<? extends ComponentTileEntity<?>> getTileType() {
         return tileType;
     }
 
-    public void registerTileEntity(Block block, IForgeRegistry<TileEntityType<?>> registry) {
-        tileType = TileEntityType.Builder.of(()-> teSupplier.apply(this), block).build(null);
+    public void registerTileEntity(Block block, IForgeRegistry<BlockEntityType<?>> registry) {
+        tileType = BlockEntityType.Builder.of((pos, state) -> teSupplier.apply(this, pos, state), block).build(null);
         tileType.setRegistryName(location);
         registry.register(tileType);
     }
@@ -101,7 +103,7 @@ public class ComponentDefinition {
     // ******* properties ******* //
     public CustomProperties properties = new CustomProperties();
 
-    public AbstractBlock.Properties getBlockProperties() {
+    public BlockBehaviour.Properties getBlockProperties() {
         return this.properties.createBlock();
     }
 

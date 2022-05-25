@@ -8,8 +8,8 @@ import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateBlocks;
 import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
 import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateStates;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class Predicates {
 

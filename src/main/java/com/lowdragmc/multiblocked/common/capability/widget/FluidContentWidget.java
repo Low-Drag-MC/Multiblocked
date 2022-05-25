@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
@@ -22,10 +22,10 @@ public class FluidContentWidget extends ContentWidget<FluidStack> {
         if (fluidTank == null) {
             addWidget(new TankWidget(fluidTank = new FluidTank(content.getAmount()), 1, 1, false, false).setOnAddedTooltips((s, l)-> {
                 if (chance < 1) {
-                    l.add(chance == 0 ? new TranslationTextComponent("multiblocked.gui.content.chance_0") : new TranslationTextComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
+                    l.add(chance == 0 ? new TranslatableComponent("multiblocked.gui.content.chance_0") : new TranslatableComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
                 }
                 if (perTick) {
-                    l.add(new TranslationTextComponent("multiblocked.gui.content.per_tick"));
+                    l.add(new TranslatableComponent("multiblocked.gui.content.per_tick"));
                 }
             }));
         }
@@ -45,11 +45,11 @@ public class FluidContentWidget extends ContentWidget<FluidStack> {
             return Collections.emptyList();
         }
 
-        Rectangle2d rectangle = toRectangleBox();
+        Rect2i rectangle = toRectangleBox();
         return Lists.newArrayList(new Target() {
             @Nonnull
             @Override
-            public Rectangle2d getArea() {
+            public Rect2i getArea() {
                 return rectangle;
             }
 

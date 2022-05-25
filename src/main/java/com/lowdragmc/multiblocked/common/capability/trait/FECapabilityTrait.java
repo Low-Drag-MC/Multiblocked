@@ -9,9 +9,9 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.trait.ProgressCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.FEMultiblockCapability;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -38,9 +38,9 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
             jsonElement = new JsonObject();
         }
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        capacity = JSONUtils.getAsInt(jsonObject, "capacity", 10000);
-        maxReceive = JSONUtils.getAsInt(jsonObject, "maxReceive", 500);
-        maxExtract = JSONUtils.getAsInt(jsonObject, "maxExtract", 500);
+        capacity = GsonHelper.getAsInt(jsonObject, "capacity", 10000);
+        maxReceive = GsonHelper.getAsInt(jsonObject, "maxReceive", 500);
+        maxExtract = GsonHelper.getAsInt(jsonObject, "maxExtract", 500);
         handler = new EnergyStorage(capacity, maxReceive, maxExtract);
     }
 
@@ -64,7 +64,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         super.readFromNBT(compound);
         if (compound.contains("_")) {
             handler = new EnergyStorage(capacity, maxReceive, maxExtract, Math.min(compound.getInt("_"), capacity));
@@ -72,7 +72,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
         compound.putInt("_", handler.getEnergyStored());
     }

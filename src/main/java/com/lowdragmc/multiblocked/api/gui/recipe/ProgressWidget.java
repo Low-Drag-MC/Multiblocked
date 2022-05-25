@@ -5,8 +5,8 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.network.PacketBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -50,7 +50,7 @@ public class ProgressWidget extends Widget {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void drawInBackground(@Nonnull MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void drawInBackground(@Nonnull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         Position pos = getPosition();
         Size size = getSize();
         if (emptyBarArea != null) {
@@ -78,7 +78,7 @@ public class ProgressWidget extends Widget {
     }
 
     @Override
-    public void readUpdateInfo(int id, PacketBuffer buffer) {
+    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
         if (id == 0) {
             this.lastProgressValue = buffer.readDouble();
             if (dynamicHoverTips != null) {

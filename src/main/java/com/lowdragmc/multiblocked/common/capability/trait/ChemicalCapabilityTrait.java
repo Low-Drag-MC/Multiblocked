@@ -13,22 +13,22 @@ import com.lowdragmc.multiblocked.api.capability.trait.MultiCapabilityTrait;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
 import com.lowdragmc.multiblocked.common.capability.widget.ChemicalStackWidget;
-import mcp.MethodsReturnNonnullByDefault;
 import mekanism.api.Action;
+import mekanism.api.AutomationType;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalTankBuilder;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.IChemicalTank;
-import mekanism.api.inventory.AutomationType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -65,7 +65,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
         int i = 0;
         for (JsonElement element : jsonArray) {
             JsonObject jsonObject = element.getAsJsonObject();
-            tankCapability[i] = JSONUtils.getAsLong(jsonObject, "tankCapability", 1000L);
+            tankCapability[i] = GsonHelper.getAsLong(jsonObject, "tankCapability", 1000L);
             handlers.set(i, tankBuilder.createAllValid(tankCapability[i], this::markAsDirty));
             i++;
         }
@@ -96,7 +96,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
                     long need = already.getCapacity() - already.getStored();
                     if (need > 0) {
                         for (Direction facing : getIOFacing()) {
-                            TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
+                            BlockEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 AtomicBoolean r = new AtomicBoolean(false);
                                 te.getCapability(getCap().capability, facing.getOpposite()).ifPresent(handler -> {
@@ -113,7 +113,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
                 } else if (capabilityIO[i] == IO.OUT){
                     if (already.getStored() > 0) {
                         for (Direction facing : getIOFacing()) {
-                            TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
+                            BlockEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 AtomicBoolean r = new AtomicBoolean(false);
                                 te.getCapability(getCap().capability, facing.getOpposite()).ifPresent(handler -> {
@@ -155,18 +155,18 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         super.readFromNBT(compound);
-        ListNBT listNBT = compound.getList("_", Constants.NBT.TAG_COMPOUND);
+        ListTag listNBT = compound.getList("_", Tag.TAG_COMPOUND);
         for (int i = 0; i < Math.min(listNBT.size(), handlers.size()); i++) {
             handlers.get(i).deserializeNBT(listNBT.getCompound(i));
         }
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
-        ListNBT listNBT = new ListNBT();
+        ListTag listNBT = new ListTag();
         for (TANK handler : handlers) {
             listNBT.add(handler.serializeNBT());
         }
@@ -174,7 +174,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
     }
 
     @Override
-    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, PlayerEntity player) {
+    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
         super.createUI(component, group, player);
         if (handlers != null) {
             for (int i = 0; i < handlers.size(); i++) {

@@ -2,7 +2,7 @@ package com.lowdragmc.multiblocked.api.kubejs.events;
 
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import dev.latvian.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.EventJS;
 
 public class UpdateRendererEvent extends EventJS {
     public static final String ID = "mbd.update_renderer";

@@ -23,16 +23,14 @@ import com.lowdragmc.multiblocked.api.gui.blueprint_table.components.PartWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import jdk.nashorn.internal.ir.Block;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -128,7 +126,8 @@ public class PartBuilderWidget extends WidgetGroup {
                         }
                     }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.settings"))
                     .addWidget(new ImageWidget(32, 0, 100, 20, new TextTexture(file.getName().replace(".json", "")).setWidth(100).setType(TextTexture.TextType.ROLL)))
-                    .addWidget(new ImageWidget(4, 2, 18, 18, new ItemStackTexture(Items.PAPER)));
+                    .addWidget(new ImageWidget(4, 2, 18, 18, new ItemStackTexture(
+                            Items.PAPER)));
             files.add(widgetGroup);
             containers.addWidget(widgetGroup);
         }

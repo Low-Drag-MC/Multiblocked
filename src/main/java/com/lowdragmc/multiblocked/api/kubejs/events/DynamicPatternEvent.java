@@ -2,7 +2,7 @@ package com.lowdragmc.multiblocked.api.kubejs.events;
 
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import dev.latvian.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.EventJS;
 
 public class DynamicPatternEvent extends EventJS {
     public static final String ID = "mbd.dynamic_pattern";

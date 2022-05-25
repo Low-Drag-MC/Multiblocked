@@ -9,9 +9,9 @@ import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
-import net.minecraft.item.ItemStack;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.util.Arrays;
@@ -29,7 +29,7 @@ public class RecipeBuilder {
     public final Map<MultiblockCapability<?>, ImmutableList.Builder<Tuple<Object, Float>>> tickOutputBuilder = new HashMap<>();
     public final Map<String, Object> data = new HashMap<>();
     protected int duration;
-    protected ITextComponent text;
+    protected TextComponent text;
     protected boolean perTick;
     protected String fixedName;
     protected float chance;
@@ -75,7 +75,7 @@ public class RecipeBuilder {
     }
 
 
-    public RecipeBuilder text(ITextComponent text) {
+    public RecipeBuilder text(TextComponent text) {
         this.text = text;
         return this;
     }

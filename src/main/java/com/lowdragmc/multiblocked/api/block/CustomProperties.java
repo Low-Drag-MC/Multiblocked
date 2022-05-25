@@ -1,12 +1,10 @@
 package com.lowdragmc.multiblocked.api.block;
 
-import com.lowdragmc.multiblocked.Multiblocked;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
 
 /**
  * Author: KilaBash
@@ -40,8 +38,9 @@ public class CustomProperties {
         this.stackSize = 64;
     }
 
-    public AbstractBlock.Properties createBlock() {
-        AbstractBlock.Properties properties = AbstractBlock.Properties.of(Material.METAL);
+    public BlockBehaviour.Properties createBlock() {
+        BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(
+                Material.METAL);
         if (!isOpaque) {
             properties.noOcclusion();
         }
@@ -50,19 +49,19 @@ public class CustomProperties {
         }
         properties.strength(destroyTime, explosionResistance)
                 .sound(SoundType.STONE)
-                .harvestLevel(harvestLevel)
+//                .harvestLevel(harvestLevel)
                 .speedFactor(speedFactor)
                 .jumpFactor(jumpFactor)
                 .friction(friction)
-                .lightLevel(s->lightEmissive)
-                .harvestTool(ToolType.PICKAXE);
+                .lightLevel(s->lightEmissive);
+//                .harvestTool(ToolType.PICKAXE);
         return properties;
     }
 
     public Item.Properties createItem() {
         Item.Properties properties = new Item.Properties().stacksTo(stackSize);
         if (tabGroup != null) {
-            for (ItemGroup tab : ItemGroup.TABS) {
+            for (CreativeModeTab tab : CreativeModeTab.TABS) {
                 if (tab.getRecipeFolderName().equals(tabGroup)) {
                     properties.tab(tab);
                     break;

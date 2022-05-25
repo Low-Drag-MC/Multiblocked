@@ -26,15 +26,15 @@ import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -73,7 +73,7 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
             if (pos != null && facing != null && selected != null && facing.getAxis() != Direction.Axis.Y) {
                 BlockPos[] poses = ItemBlueprint.getPos(selected);
                 if (poses != null) {
-                    World world = table.getLevel();
+                    Level world = table.getLevel();
                     ResourceLocation location = new ResourceLocation("mod_id:component_id");
                     ControllerDefinition controllerDefinition = new ControllerDefinition(location);
                     controllerDefinition.baseRenderer = new MBDBlockStateRenderer(world.getBlockState(pos));
@@ -94,8 +94,8 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
     }
 
     @Override
-    public void writeInitialData(PacketBuffer buffer) {
-        TileEntity tileEntity = table.getLevel().getBlockEntity(table.getBlockPos().relative(Direction.UP).relative(table.getFrontFacing().getOpposite()).relative(table.getFrontFacing().getClockWise()));
+    public void writeInitialData(FriendlyByteBuf buffer) {
+        BlockEntity tileEntity = table.getLevel().getBlockEntity(table.getBlockPos().relative(Direction.UP).relative(table.getFrontFacing().getOpposite()).relative(table.getFrontFacing().getClockWise()));
         Map<Integer, ItemStack> caught = new Int2ObjectOpenHashMap<>();
         if (tileEntity != null) {
             tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
@@ -210,7 +210,6 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
                                     assert tileEntity != null;
                                     tileEntity.setDefinition(((PredicateComponent) predicate).definition);
                                     tileEntity.isFormed = false;
-                                    tileEntity.setLevelAndPosition(world, pos);
                                     posSet.add(pos);
                                     break;
                                 } else if (predicate != null && predicate.candidates != null) {
@@ -235,7 +234,7 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
     }
 
     @Override
-    public void readInitialData(PacketBuffer buffer) {
+    public void readInitialData(FriendlyByteBuf buffer) {
         super.readInitialData(buffer);
         updateList();
     }

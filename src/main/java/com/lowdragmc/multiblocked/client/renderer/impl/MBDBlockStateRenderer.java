@@ -8,7 +8,7 @@ import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Supplier;
 

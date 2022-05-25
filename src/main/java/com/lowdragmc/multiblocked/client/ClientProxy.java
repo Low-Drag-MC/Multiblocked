@@ -6,11 +6,12 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.registry.MbdItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.resources.IPackNameDecorator;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -19,7 +20,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ClientProxy extends CommonProxy {
 
     public ClientProxy() {
-        Minecraft.getInstance().getResourcePackRepository().addPackFinder(new CustomResourcePack(Multiblocked.location, IPackNameDecorator.DEFAULT, Multiblocked.MODID, "Multiblocked Extended Resources", 6));
+        Minecraft.getInstance().getResourcePackRepository().addPackFinder(new CustomResourcePack(Multiblocked.location, PackSource.DEFAULT, Multiblocked.MODID, "Multiblocked Extended Resources", 6));
     }
 
     @SubscribeEvent
@@ -31,8 +32,13 @@ public class ClientProxy extends CommonProxy {
     }
 
     @SubscribeEvent
+    public void onRegisterRenderer(EntityRenderersEvent.RegisterRenderers event) {
+        MbdComponents.registerBlockEntityRenderer(event);
+    }
+
+    @SubscribeEvent
     public void registerTextures(TextureStitchEvent.Pre event) {
-        if (event.getMap().location().equals(AtlasTexture.LOCATION_BLOCKS)) {
+        if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
             event.addSprite(new ResourceLocation("multiblocked:void"));
             event.addSprite(new ResourceLocation("multiblocked:blocks/gregtech_base"));
             event.addSprite(new ResourceLocation("multiblocked:blocks/gregtech_front"));

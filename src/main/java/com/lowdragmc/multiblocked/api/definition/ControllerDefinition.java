@@ -4,16 +4,17 @@ package com.lowdragmc.multiblocked.api.definition;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
-import java.util.function.Function;
 
 /**
  * Definition of a controller, which define its structure, logic, recipe chain and so on.
@@ -34,8 +35,8 @@ public class ControllerDefinition extends ComponentDefinition {
         this(location, ControllerTileEntity::new);
     }
 
-    public ControllerDefinition(ResourceLocation location, Function<ControllerDefinition, ? extends ComponentTileEntity<?>> teSupplier) {
-        super(location, d -> teSupplier.apply((ControllerDefinition) d));
+    public ControllerDefinition(ResourceLocation location, TriFunction<ControllerDefinition, BlockPos, BlockState, ? extends ControllerTileEntity> teSupplier) {
+        super(location, (d, p, s) -> teSupplier.apply((ControllerDefinition) d, p, s));
         this.recipeMap = RecipeMap.EMPTY;
     }
 

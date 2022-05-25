@@ -11,8 +11,8 @@ import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;

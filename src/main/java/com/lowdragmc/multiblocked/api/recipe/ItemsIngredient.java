@@ -1,11 +1,11 @@
 package com.lowdragmc.multiblocked.api.recipe;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Ingredient;
 
 public class ItemsIngredient {
     public final Ingredient ingredient;
@@ -22,9 +22,9 @@ public class ItemsIngredient {
     }
 
     public ItemsIngredient(String tag, int amount) {
-        ITag<Item> itag = null;
+        TagKey<Item> itag = null;
         try {
-            itag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tag.toLowerCase()));
+            itag = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tag.toLowerCase()));
         } catch (Exception ignored) {}
         this.tag = tag;
         if (itag != null) {

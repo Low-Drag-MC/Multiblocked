@@ -1,8 +1,8 @@
 package com.lowdragmc.multiblocked.api.kubejs.events;
 
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import dev.latvian.kubejs.event.EventJS;
-import net.minecraft.util.Direction;
+import dev.latvian.mods.kubejs.event.EventJS;
+import net.minecraft.core.Direction;
 
 public class OutputRedstoneEvent extends EventJS {
     public static final String ID = "mbd.output_redstone";

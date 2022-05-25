@@ -1,10 +1,10 @@
 package com.lowdragmc.multiblocked.network.s2c;
 
 import com.lowdragmc.lowdraglib.networking.IPacket;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
 
 public class SPacketCommand implements IPacket {
     private String cmd;
@@ -17,12 +17,12 @@ public class SPacketCommand implements IPacket {
     }
 
     @Override
-    public void encode(PacketBuffer buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeUtf(cmd);
     }
 
     @Override
-    public void decode(PacketBuffer buf) {
+    public void decode(FriendlyByteBuf buf) {
         this.cmd = buf.readUtf();
     }
 

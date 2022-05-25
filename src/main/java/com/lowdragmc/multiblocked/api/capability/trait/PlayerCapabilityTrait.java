@@ -19,10 +19,10 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -45,7 +45,7 @@ public abstract class PlayerCapabilityTrait extends CapabilityTrait {
     }
 
     @Nullable
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return component.getOwner();
     }
 
@@ -55,14 +55,14 @@ public abstract class PlayerCapabilityTrait extends CapabilityTrait {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         super.readFromNBT(compound);
         playerName = compound.getString("player");
         getPlayerName();
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
         compound.putString("player", getPlayerName());
     }
@@ -73,10 +73,10 @@ public abstract class PlayerCapabilityTrait extends CapabilityTrait {
             jsonElement = new JsonObject();
         }
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        x = JSONUtils.getAsInt(jsonObject, "x", 5);
-        y = JSONUtils.getAsInt(jsonObject, "y", 5);
-        width = JSONUtils.getAsInt(jsonObject, "width", 60);
-        height = JSONUtils.getAsInt(jsonObject, "height", 18);
+        x = GsonHelper.getAsInt(jsonObject, "x", 5);
+        y = GsonHelper.getAsInt(jsonObject, "y", 5);
+        width = GsonHelper.getAsInt(jsonObject, "width", 60);
+        height = GsonHelper.getAsInt(jsonObject, "height", 18);
         textType = JsonUtil.getEnumOr(jsonObject, "textType", TextTexture.TextType.class, TextTexture.TextType.LEFT);
     }
 
@@ -92,17 +92,17 @@ public abstract class PlayerCapabilityTrait extends CapabilityTrait {
     }
 
     @Override
-    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, PlayerEntity player) {
+    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
         super.createUI(component, group, player);
         group.addWidget(new ImageWidget(x, y, width, height, new TextTexture("").setSupplier(()->playerName).setWidth(width).setType(textType)) {
             @Override
-            public void writeInitialData(PacketBuffer buffer) {
+            public void writeInitialData(FriendlyByteBuf buffer) {
                 super.writeInitialData(buffer);
                 buffer.writeUtf(getPlayerName());
             }
 
             @Override
-            public void readInitialData(PacketBuffer buffer) {
+            public void readInitialData(FriendlyByteBuf buffer) {
                 super.readInitialData(buffer);
                 playerName = buffer.readUtf(Short.MAX_VALUE);
             }

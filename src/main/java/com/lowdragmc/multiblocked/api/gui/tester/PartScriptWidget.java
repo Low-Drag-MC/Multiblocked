@@ -18,8 +18,8 @@ import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileTesterEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -102,7 +102,7 @@ public class PartScriptWidget extends PageWidget {
     }
 
     @Override
-    public void handleClientAction(int id, PacketBuffer buffer) {
+    public void handleClientAction(int id, FriendlyByteBuf buffer) {
         if (id == -1) {
             part.setDefinition((PartDefinition) MbdComponents.DEFINITION_REGISTRY.get(new ResourceLocation(buffer.readUtf(Short.MAX_VALUE))));
         } else {

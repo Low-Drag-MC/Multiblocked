@@ -21,8 +21,9 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -55,8 +56,8 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
 
     @Nonnull
     @Override
-    public String getTitle() {
-        return I18n.get(recipeMap.getUnlocalizedName());
+    public Component getTitle() {
+        return new TranslatableComponent(recipeMap.getUnlocalizedName());
     }
 
     @Nonnull

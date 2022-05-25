@@ -19,8 +19,8 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.JsonUtil;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
-import net.minecraft.util.Direction;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.core.Direction;
+import net.minecraft.util.GsonHelper;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
@@ -55,9 +55,9 @@ public abstract class MultiCapabilityTrait extends CapabilityTrait {
             JsonObject jsonObject = element.getAsJsonObject();
             capabilityIO[i] = JsonUtil.getEnumOr(jsonObject, "cIO", IO.class, IO.BOTH);
             guiIO[i] = JsonUtil.getEnumOr(jsonObject, "gIO", IO.class, IO.BOTH);
-            x[i] = JSONUtils.getAsInt(jsonObject, "x", 5);
-            y[i] = JSONUtils.getAsInt(jsonObject, "y", 5);
-            autoIO[i] = JSONUtils.getAsBoolean(jsonObject, "autoIO", false);
+            x[i] = GsonHelper.getAsInt(jsonObject, "x", 5);
+            y[i] = GsonHelper.getAsInt(jsonObject, "y", 5);
+            autoIO[i] = GsonHelper.getAsBoolean(jsonObject, "autoIO", false);
             i++;
         }
     }

@@ -23,9 +23,9 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.registries.MekanismBlocks;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -108,7 +108,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     public final BiFunction<CHEMICAL, Long, STACK> createStack;
     public final Supplier<BlockInfo[]> candidates;
     public final ChemicalTankBuilder<CHEMICAL, STACK, ? extends IChemicalTank<CHEMICAL, STACK>> tankBuilder;
-    public final Function<PacketBuffer, STACK> readFromBuffer;
+    public final Function<FriendlyByteBuf, STACK> readFromBuffer;
 
     private ChemicalMekanismCapability(String key, int color,
                                        Capability<? extends IChemicalHandler<CHEMICAL, STACK>> capability,
@@ -116,7 +116,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                                        Supplier<IForgeRegistry<CHEMICAL>> registry,
                                        BiFunction<CHEMICAL, Long, STACK> createStack,
                                        ChemicalTankBuilder<CHEMICAL, STACK, ? extends IChemicalTank<CHEMICAL, STACK>> tankBuilder,
-                                       Function<PacketBuffer, STACK> readFromBuffer,
+                                       Function<FriendlyByteBuf, STACK> readFromBuffer,
                                        Supplier<BlockInfo[]> candidates) {
         super(key, color);
         this.capability = (Capability<IChemicalHandler<CHEMICAL, STACK>>) capability;
@@ -134,7 +134,8 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         return !getCapability(Capabilities.GAS_HANDLER_CAPABILITY, tileEntity).isEmpty();
     }
 
@@ -144,7 +145,8 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     }
 
     @Override
-    public ChemicalMekanismCapabilityProxy<CHEMICAL, STACK> createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public ChemicalMekanismCapabilityProxy<CHEMICAL, STACK> createProxy(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         return new ChemicalMekanismCapabilityProxy<>(this, tileEntity);
     }
 
@@ -170,7 +172,8 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     @Override
     public STACK deserialize(JsonElement jsonElement, Type jsonType, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        ResourceLocation type = new ResourceLocation(jsonElement.getAsJsonObject().get("type").getAsString());
+        ResourceLocation
+                type = new ResourceLocation(jsonElement.getAsJsonObject().get("type").getAsString());
         long amount = jsonElement.getAsJsonObject().get("amount").getAsLong();
         CHEMICAL chemical = ChemicalUtils.readChemicalFromRegistry(type, empty, registry.get());
         return createStack.apply(chemical, amount);
@@ -201,7 +204,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     public static class ChemicalMekanismCapabilityProxy<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends CapCapabilityProxy<IChemicalHandler<CHEMICAL, STACK>, STACK> {
 
-        public ChemicalMekanismCapabilityProxy(ChemicalMekanismCapability<CHEMICAL, STACK> cap, TileEntity tileEntity) {
+        public ChemicalMekanismCapabilityProxy(ChemicalMekanismCapability<CHEMICAL, STACK> cap, BlockEntity tileEntity) {
             super(cap, tileEntity, cap.capability);
         }
 

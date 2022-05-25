@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[36,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="[40,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license="The MIT License (MIT)"
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 
@@ -18,7 +18,7 @@ description='''Multiblocked, a mod for custom multiblock.'''
 [[dependencies.multiblocked]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[36,)" #mandatory
+    versionRange="[40,)" #mandatory
     ordering="NONE"
     side="BOTH"
 # Here's another dependency
@@ -26,7 +26,7 @@ description='''Multiblocked, a mod for custom multiblock.'''
     modId="multiblocked"
     mandatory=true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange="[1.16.5,1.17)"
+    versionRange="[1.18.2,1.19)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.multiblocked]]

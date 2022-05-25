@@ -17,14 +17,13 @@ import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.tags.ITagCollection;
-import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.commons.lang3.ArrayUtils;
@@ -51,10 +50,10 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
             itemHandler = new CycleItemStackHandler(stacks);
             addWidget(new SlotWidget(itemHandler, 0, 1, 1, false, false).setDrawOverlay(false).setOnAddedTooltips((s, l)-> {
                 if (chance < 1) {
-                    l.add(chance == 0 ? new TranslationTextComponent("multiblocked.gui.content.chance_0") : new TranslationTextComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
+                    l.add(chance == 0 ? new TranslatableComponent("multiblocked.gui.content.chance_0") : new TranslatableComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
                 }
                 if (perTick) {
-                    l.add(new TranslationTextComponent("multiblocked.gui.content.per_tick"));
+                    l.add(new TranslatableComponent("multiblocked.gui.content.per_tick"));
                 }
             }));
         }
@@ -99,13 +98,13 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         phantomSlotWidget.setChangeListener(() -> {
             ItemStack newStack = handler.getStackInSlot(0);
             if (newStack.isEmpty()) return;
-            ITagCollection<Item> tags = TagCollectionManager.getInstance().getItems();
-            Collection<ResourceLocation> ids = tags.getMatchingTags(newStack.getItem());
+            Collection<ResourceLocation> ids = newStack.getTags().map(TagKey::location).toList();
             if (ids.size() > 0) {
                 String tagString = ids.stream().findAny().get().toString();
                 content = new ItemsIngredient(tagString, content.getAmount());
                 tag.setCurrentString(tagString);
-                phantomSlotWidget.setHoverTooltips(LocalizationUtils.format("multiblocked.gui.trait.item.ore_dict") + ": " + ids.stream().map(ResourceLocation::toString).reduce("", (a, b) -> a + "\n" + b));
+                phantomSlotWidget.setHoverTooltips(LocalizationUtils.format("multiblocked.gui.trait.item.ore_dict") + ": " + ids.stream().map(
+                        ResourceLocation::toString).reduce("", (a, b) -> a + "\n" + b));
             } else {
                 content = new ItemsIngredient("", content.getAmount());
                 tag.setCurrentString("");

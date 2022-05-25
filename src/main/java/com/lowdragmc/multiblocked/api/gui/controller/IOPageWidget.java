@@ -19,16 +19,16 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -163,7 +163,7 @@ public class IOPageWidget extends PageWidget {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private World getWorld() {
+    private Level getWorld() {
         return Minecraft.getInstance().level;
     }
 
@@ -171,17 +171,15 @@ public class IOPageWidget extends PageWidget {
     private void setupSceneWidget(SceneWidget sceneWidget) {
         sceneWidget.getRenderer().setAfterWorldRender(renderer -> {
             sceneWidget.renderBlockOverLay(renderer);
-            RenderUtils.useLightMap(240, 240, () -> {
-                RenderSystem.disableCull();
-                int inner = 0;
-                for (Map.Entry<MultiblockCapability<?>, Tuple<IO, Direction>> entry : capabilitySettings.entrySet()) {
-                    if (entry.getValue() != null) {
-                        sceneWidget.drawFacingBorder(new MatrixStack(), new BlockPosFace(pos, entry.getValue().getB()), entry.getKey().color, inner);
-                        inner++;
-                    }
+            RenderSystem.disableCull();
+            int inner = 0;
+            for (Map.Entry<MultiblockCapability<?>, Tuple<IO, Direction>> entry : capabilitySettings.entrySet()) {
+                if (entry.getValue() != null) {
+                    sceneWidget.drawFacingBorder(new PoseStack(), new BlockPosFace(pos, entry.getValue().getB()), entry.getKey().color, inner);
+                    inner++;
                 }
-                RenderSystem.enableCull();
-            });
+            }
+            RenderSystem.enableCull();
         });
     }
 
@@ -319,7 +317,7 @@ public class IOPageWidget extends PageWidget {
     }
 
     @Override
-    public void readUpdateInfo(int id, PacketBuffer buffer) {
+    public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
         if (id == -1) {
             int size = buffer.readVarInt();
             for (int i = size; i > 0; i--) {
@@ -335,7 +333,7 @@ public class IOPageWidget extends PageWidget {
     }
 
     @Override
-    public void handleClientAction(int id, PacketBuffer buffer) {
+    public void handleClientAction(int id, FriendlyByteBuf buffer) {
         if (id == -1) {
             MultiblockCapability<?> capability = MbdCapabilities.get(buffer.readUtf());
             Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities = controller.getCapabilitiesProxy();
@@ -348,7 +346,7 @@ public class IOPageWidget extends PageWidget {
             }
             if (buffer.readBoolean()) {
                 IO io = buffer.readEnum(IO.class);
-                TileEntity entity = controller.getLevel().getBlockEntity(pos);
+                BlockEntity entity = controller.getLevel().getBlockEntity(pos);
                 if (entity != null && capability.isBlockHasCapability(io, entity)) {
                     if (!capabilities.contains(io, capability)) {
                         capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());
@@ -363,7 +361,7 @@ public class IOPageWidget extends PageWidget {
             MultiblockCapability<?> capability = MbdCapabilities.get(buffer.readUtf());
             Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities = controller.getCapabilitiesProxy();
             IO io = buffer.readEnum(IO.class);
-            TileEntity entity = controller.getLevel().getBlockEntity(pos);
+            BlockEntity entity = controller.getLevel().getBlockEntity(pos);
             if (entity != null && capability.isBlockHasCapability(io, entity)) {
                 if (!capabilities.contains(io, capability)) {
                     capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());

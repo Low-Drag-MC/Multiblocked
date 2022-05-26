@@ -59,7 +59,8 @@ public class BlueprintRegionRenderer {
             tessellator.end();
 
 
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+            buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
             RenderSystem.lineWidth(3);
 
             RenderBufferUtils.renderCubeFrame(stack, buffer, poses[0].getX(), poses[0].getY(), poses[0].getZ(), poses[1].getX() + 1, poses[1].getY() + 1, poses[1].getZ() + 1, 0.0f, 0.0f, 1f, 0.5f);

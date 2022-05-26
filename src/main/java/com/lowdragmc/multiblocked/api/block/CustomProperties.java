@@ -15,7 +15,6 @@ public class CustomProperties {
     public boolean isOpaque;
     public float destroyTime;
     public float explosionResistance;
-    public int harvestLevel;
     public int lightEmissive;
     public float speedFactor;
     public float jumpFactor;
@@ -26,9 +25,8 @@ public class CustomProperties {
 
     public CustomProperties() {
         this.isOpaque = true;
-        this.destroyTime = 5f;
+        this.destroyTime = 1.5f;
         this.explosionResistance = 6f;
-        this.harvestLevel = 1;
         this.lightEmissive = 0;
         this.speedFactor = 1f;
         this.jumpFactor = 1f;
@@ -49,12 +47,11 @@ public class CustomProperties {
         }
         properties.strength(destroyTime, explosionResistance)
                 .sound(SoundType.STONE)
-//                .harvestLevel(harvestLevel)
+                .explosionResistance(6.0f)
                 .speedFactor(speedFactor)
                 .jumpFactor(jumpFactor)
                 .friction(friction)
                 .lightLevel(s->lightEmissive);
-//                .harvestTool(ToolType.PICKAXE);
         return properties;
     }
 

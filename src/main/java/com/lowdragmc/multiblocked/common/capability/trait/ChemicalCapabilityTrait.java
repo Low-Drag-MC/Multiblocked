@@ -62,12 +62,10 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
         int size = jsonArray.size();
         tankCapability = new long[size];
         handlers = new ArrayList<>(size);
-        int i = 0;
         for (JsonElement element : jsonArray) {
             JsonObject jsonObject = element.getAsJsonObject();
-            tankCapability[i] = GsonHelper.getAsLong(jsonObject, "tankCapability", 1000L);
-            handlers.set(i, tankBuilder.createAllValid(tankCapability[i], this::markAsDirty));
-            i++;
+            tankCapability[handlers.size()] = GsonHelper.getAsLong(jsonObject, "tankCapability", 1000L);
+            handlers.add(tankBuilder.createAllValid(tankCapability[handlers.size()], this::markAsDirty));
         }
     }
 
@@ -76,7 +74,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
         JsonArray jsonArray = super.deserialize().getAsJsonArray();
         for (int i = 0; i < capabilityIO.length; i++) {
             JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
-            jsonObject.addProperty("tC", tankCapability[i]);
+            jsonObject.addProperty("tankCapability", tankCapability[i]);
         }
         return jsonArray;
     }

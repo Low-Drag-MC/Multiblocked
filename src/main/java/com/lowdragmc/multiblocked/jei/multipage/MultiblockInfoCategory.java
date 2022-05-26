@@ -14,6 +14,7 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.network.chat.Component;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockInfoWrapper> {
     private final static ResourceLocation UID = new ResourceLocation(Multiblocked.MODID + ":multiblock_info");
+    private final static RecipeType<MultiblockInfoWrapper> RECIPE_TYPE = new RecipeType<>(UID, MultiblockInfoWrapper.class);
     private final IDrawable background;
     private final IDrawable icon;
 
@@ -44,7 +46,7 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     }
 
     public static void registerRecipes(IRecipeRegistration registry) {
-        registry.addRecipes(REGISTER.stream().map(MultiblockInfoWrapper::new).collect(Collectors.toList()), UID);
+        registry.addRecipes(RECIPE_TYPE, REGISTER.stream().map(MultiblockInfoWrapper::new).collect(Collectors.toList()));
         for (ControllerDefinition definition : REGISTER) {
             if (definition.recipeMap != null) {
                 if (definition.recipeMap.categoryTexture == null) {
@@ -63,12 +65,6 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     }
 
     @Override
-    @ParametersAreNonnullByDefault
-    public void setRecipe(IRecipeLayoutBuilder builder, MultiblockInfoWrapper recipe, IFocusGroup focuses) {
-        super.setRecipe(builder, recipe, focuses);
-    }
-
-    @Override
     public void setIngredients(@Nonnull MultiblockInfoWrapper recipe, IIngredients ingredients) {
         ingredients.setInputs(VanillaTypes.ITEM, recipe.getWidget().allItemStackInputs);
         ingredients.setOutput(VanillaTypes.ITEM, recipe.definition.getStackForm());
@@ -84,6 +80,12 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     @Override
     public Class<? extends MultiblockInfoWrapper> getRecipeClass() {
         return MultiblockInfoWrapper.class;
+    }
+
+    @Override
+    @Nonnull
+    public RecipeType<MultiblockInfoWrapper> getRecipeType() {
+        return RECIPE_TYPE;
     }
 
     @Nonnull

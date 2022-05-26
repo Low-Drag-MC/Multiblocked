@@ -28,7 +28,7 @@ public class CustomProperties {
 
     public CustomProperties() {
         this.isOpaque = true;
-        this.destroyTime = 5f;
+        this.destroyTime = 1.5f;
         this.explosionResistance = 6f;
         this.harvestLevel = 1;
         this.lightEmissive = 0;

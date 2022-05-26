@@ -47,7 +47,7 @@ public class MbdComponents {
         if (DEFINITION_REGISTRY.containsKey(definition.location)) return;
         DEFINITION_REGISTRY.put(definition.location, definition);
         COMPONENT_ITEMS_REGISTRY.computeIfAbsent(definition.location, x -> new ItemComponent(COMPONENT_BLOCKS_REGISTRY.computeIfAbsent(definition.location, X -> new BlockComponent(definition))));
-        if (definition instanceof ControllerDefinition && Multiblocked.isJeiLoaded()) {
+        if (Multiblocked.isClient() && definition instanceof ControllerDefinition && Multiblocked.isJeiLoaded()) {
             MultiblockInfoCategory.registerMultiblock((ControllerDefinition) definition);
         }
     }

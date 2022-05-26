@@ -9,6 +9,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,7 +62,10 @@ public abstract class WorldMixin implements LevelAccessor {
     @Inject(method = "getBlockEntity", at = @At(value = "HEAD"), cancellable = true)
     private void getTileEntity(BlockPos pos, CallbackInfoReturnable<BlockEntity> cir) {
         if (!this.isClientSide && Thread.currentThread() != this.thread && MultiblockWorldSavedData.isThreadService() && isLoaded(pos)) {
-            cir.setReturnValue(getExistingBlockEntity(pos));
+            ChunkAccess chunk = this.getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk instanceof LevelChunk levelChunk) {
+                cir.setReturnValue(levelChunk.getBlockEntity(pos, LevelChunk.EntityCreationType.IMMEDIATE));
+            }
         }
     }
 

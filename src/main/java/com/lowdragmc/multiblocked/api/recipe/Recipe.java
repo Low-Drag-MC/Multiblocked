@@ -9,7 +9,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Tuple;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class Recipe {
     public final ImmutableMap<MultiblockCapability<?>, ImmutableList<Tuple<Object, Float>>> tickOutputs;
     public final ImmutableMap<String, Object> data;
     public final int duration;
-    public final TextComponent text;
+    public final Component text;
 
     public Recipe(String uid,
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Tuple<Object, Float>>> inputs,
@@ -46,7 +46,7 @@ public class Recipe {
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Tuple<Object, Float>>> tickInputs,
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Tuple<Object, Float>>> tickOutputs,
                   ImmutableMap<String, Object> data,
-                  TextComponent text,
+                  Component text,
                   int duration) {
         this.uid = uid;
         this.inputs = inputs;

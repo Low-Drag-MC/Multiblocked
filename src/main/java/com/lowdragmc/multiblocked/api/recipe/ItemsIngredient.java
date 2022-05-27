@@ -54,7 +54,11 @@ public class ItemsIngredient {
 
     public ItemStack getOutputStack() {
         ItemStack[] stacks = ingredient.getItems();
-        return stacks.length > 0 ? stacks[0] : ItemStack.EMPTY;
+        ItemStack output = stacks.length > 0 ? stacks[0] : ItemStack.EMPTY;
+        if (!output.isEmpty()) {
+            output.setCount(amount);
+        }
+        return output;
     }
 
     public boolean isTag() {

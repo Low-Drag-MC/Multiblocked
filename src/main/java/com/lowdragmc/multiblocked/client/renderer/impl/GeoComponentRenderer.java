@@ -250,10 +250,10 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
 
     @OnlyIn(Dist.CLIENT)
     public VertexConsumer renderRecursively(GeoBone bone, PoseStack stack, MultiBufferSource buffers, VertexConsumer currentBuffer, int packedLightIn) {
-        if (bone.name.equals("emissive")) {
+        if (bone.name.startsWith("emissive")) {
             packedLightIn = 0xf000f0;
         }
-        boolean isTranslucent = bone.name.equals("translucent");
+        boolean isTranslucent = bone.name.startsWith("translucent");
         if (isTranslucent) {
             currentBuffer = buffers.getBuffer(RenderType.entityTranslucentCull(getTextureLocation(null)));
         }

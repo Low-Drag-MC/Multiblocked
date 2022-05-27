@@ -180,13 +180,13 @@ dependencies {
     compileOnly fg.deobf("curse.maven:kubejs-238086:${kubejs_file}")
 
     //botania
-    compileOnly fg.deobf("curse.maven:rhino-225643:${botania_file}")
+    compileOnly fg.deobf("curse.maven:botania-225643:${botania_file}")
     //mekanism
-    compileOnly fg.deobf("curse.maven:rhino-268560:${mekanism_file}")
+    compileOnly fg.deobf("curse.maven:mekanism-268560:${mekanism_file}")
     // patchouli
-    compileOnly fg.deobf("curse.maven:rhino-306770:${patchouli_file}")
+    compileOnly fg.deobf("curse.maven:patchouli-306770:${patchouli_file}")
     // curios
-    compileOnly fg.deobf("curse.maven:rhino-309927:${curios_file}")
+    compileOnly fg.deobf("curse.maven:curios-309927:${curios_file}")
 
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.18')

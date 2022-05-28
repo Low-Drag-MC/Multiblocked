@@ -17,9 +17,7 @@ import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.UnbakedModel;
@@ -30,7 +28,6 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -39,7 +36,9 @@ import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -110,15 +109,9 @@ public class GTRenderer extends MBDIModelRenderer {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean renderModel(BlockState state, BlockPos pos,
-                               BlockAndTintGetter blockReader,
-                               PoseStack poseStack,
-                               VertexConsumer vertexBuilder, boolean checkSides,
-                               Random rand, IModelData modelData) {
-        BlockEntity te = blockReader.getBlockEntity(pos);
-        if (formedAsController && te instanceof PartTileEntity) {
-            PartTileEntity<?> part = (PartTileEntity<?>) te;
+    public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
+        BlockEntity te = level.getBlockEntity(pos);
+        if (formedAsController && te instanceof PartTileEntity<?> part) {
             for (ControllerTileEntity controller : part.getControllers()) {
                 if (controller.isFormed() && controller.getRenderer() instanceof GTRenderer) {
                     BakedModel model = getModel(((GTRenderer) controller.getRenderer()).baseTexture).bake(
@@ -126,17 +119,15 @@ public class GTRenderer extends MBDIModelRenderer {
                             ForgeModelBakery.defaultTextureGetter(),
                             ModelFactory.getRotation(part.getFrontFacing()),
                             modelLocation);
-                    if (model == null) return false;
+                    if (model == null) return Collections.emptyList();
                     model = new CustomBakedModel(model);
-                    if (!((CustomBakedModel)model).shouldRenderInLayer(state, rand)) return false;
-                    BlockRenderDispatcher brd = Minecraft.getInstance().getBlockRenderer();
-                    return brd.getModelRenderer().tesselateBlock(blockReader, model, state, pos, poseStack, vertexBuilder, checkSides, rand, state.getSeed(pos), OverlayTexture.NO_OVERLAY, modelData);
+                    if (!((CustomBakedModel)model).shouldRenderInLayer(state, rand)) return Collections.emptyList();
+                    return model.getQuads(state, side, rand, modelData);
                 }
             }
         }
-        return super.renderModel(state, pos, blockReader, poseStack, vertexBuilder, checkSides, rand, modelData);
+        return super.renderModel(level, pos, state, side, rand, modelData);
     }
-
 
 
     @OnlyIn(Dist.CLIENT)

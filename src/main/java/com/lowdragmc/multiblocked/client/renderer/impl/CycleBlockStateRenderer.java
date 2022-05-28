@@ -3,27 +3,26 @@ package com.lowdragmc.multiblocked.client.renderer.impl;
 import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FacadeBlockWorld;
-import com.lowdragmc.multiblocked.api.block.BlockComponent;
-import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
-import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.core.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -31,6 +30,8 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -82,9 +83,8 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean renderModel(BlockState state, BlockPos pos, BlockAndTintGetter blockReader, PoseStack matrixStack, VertexConsumer vertexBuilder, boolean checkSides, Random rand, IModelData modelData) {
-        return false;
+    public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
+        return Collections.emptyList();
     }
 
     @Override
@@ -114,14 +114,16 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
                 BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
                 bufferBuilder.begin(layer.mode(), layer.format());
                 IModelData modelData = tileEntity == null ? EmptyModelData.INSTANCE : tileEntity.getModelData();
-                if (state.getBlock() instanceof BlockComponent) {
-                    IMultiblockedRenderer renderer = ((BlockComponent) state.getBlock()).definition.baseRenderer;
-                    if (renderer != null) {
-                        renderer.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-                    }
-                } else {
-                    brd.renderBatched(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-                }
+//                if (state.getBlock() instanceof BlockComponent) {
+//                    IMultiblockedRenderer renderer = ((BlockComponent) state.getBlock()).definition.baseRenderer;
+//                    if (renderer != null) {
+//                        renderer.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
+//                    }
+//                } else {
+//                    brd.renderBatched(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
+//                }
+                brd.renderBatched(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
+
                 layer.end(bufferBuilder, 0, 0, 0);
             }
         }

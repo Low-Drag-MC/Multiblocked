@@ -15,10 +15,12 @@ import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -55,7 +57,9 @@ import software.bernie.geckolib3.util.RenderUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -110,12 +114,10 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
 
 
     @Override
-    public boolean renderModel(BlockState state, BlockPos pos,
-                               BlockAndTintGetter blockReader,
-                               PoseStack poseStack,
-                               VertexConsumer vertexBuilder, boolean checkSides,
-                               Random rand, IModelData modelData) {
-        return false;
+    public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos,
+                                       BlockState state, Direction side,
+                                       Random rand, IModelData modelData) {
+        return Collections.emptyList();
     }
 
     @Override

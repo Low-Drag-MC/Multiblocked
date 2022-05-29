@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.AtlasTexture;
@@ -26,6 +27,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -56,7 +58,9 @@ import software.bernie.geckolib3.util.RenderUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -109,10 +113,9 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
         matrixStack.popPose();
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
-    public boolean renderModel(BlockState state, BlockPos pos, IBlockDisplayReader blockReader, MatrixStack matrixStack, IVertexBuilder vertexBuilder, boolean checkSides, Random rand, IModelData modelData) {
-        return false;
+    public List<BakedQuad> renderModel(IBlockDisplayReader level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
+        return Collections.emptyList();
     }
 
     @Override

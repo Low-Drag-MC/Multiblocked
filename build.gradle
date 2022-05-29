@@ -16,6 +16,15 @@ repositories {
     flatDir {
         dir 'libs'
     }
+    //    maven {
+//        url 'https://cfa2.cursemaven.com'
+//    }
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     maven { url 'https://dvs1.progwml6.com/files/maven' }
     maven {
@@ -177,6 +186,9 @@ dependencies {
         runtimeOnly fg.deobf("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
         compileOnly ("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
     }
+
+    // Rubidium
+    compileOnly fg.deobf("curse.maven:rubidium-574856:3769736")
 
     // KubeJS
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")

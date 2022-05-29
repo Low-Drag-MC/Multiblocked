@@ -22,6 +22,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.BlockModel;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IUnbakedModel;
@@ -39,7 +40,9 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -109,14 +112,9 @@ public class GTRenderer extends MBDIModelRenderer {
         return false;
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
-    public boolean renderModel(BlockState state, BlockPos pos,
-                               IBlockDisplayReader blockReader,
-                               MatrixStack matrixStack,
-                               IVertexBuilder vertexBuilder, boolean checkSides,
-                               Random rand, IModelData modelData) {
-        TileEntity te = blockReader.getBlockEntity(pos);
+    public List<BakedQuad> renderModel(IBlockDisplayReader level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
+        TileEntity te = level.getBlockEntity(pos);
         if (formedAsController && te instanceof PartTileEntity) {
             PartTileEntity<?> part = (PartTileEntity<?>) te;
             for (ControllerTileEntity controller : part.getControllers()) {
@@ -126,17 +124,16 @@ public class GTRenderer extends MBDIModelRenderer {
                             ModelLoader.defaultTextureGetter(),
                             ModelFactory.getRotation(part.getFrontFacing()),
                             modelLocation);
-                    if (model == null) return false;
+                    if (model == null) return Collections.emptyList();
                     model = new CustomBakedModel(model);
-                    if (!((CustomBakedModel)model).shouldRenderInLayer(state, rand)) return false;
-                    BlockRendererDispatcher brd = Minecraft.getInstance().getBlockRenderer();
-                    return brd.getModelRenderer().renderModel(blockReader, model, state, pos, matrixStack, vertexBuilder, checkSides, rand, state.getSeed(pos), OverlayTexture.NO_OVERLAY, modelData);
+                    if (!((CustomBakedModel)model).shouldRenderInLayer(state, rand)) return Collections.emptyList();
+                    return model.getQuads(state, side, rand, modelData);
                 }
             }
         }
-        return super.renderModel(state, pos, blockReader, matrixStack, vertexBuilder, checkSides, rand, modelData);
-    }
+        return super.renderModel(level, pos, state, side, rand, modelData);
 
+    }
 
 
     @OnlyIn(Dist.CLIENT)

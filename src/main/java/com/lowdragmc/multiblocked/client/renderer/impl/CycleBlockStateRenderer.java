@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
@@ -25,6 +26,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.api.distmarker.Dist;
@@ -34,6 +36,8 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -84,9 +88,8 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean renderModel(BlockState state, BlockPos pos, IBlockDisplayReader blockReader, MatrixStack matrixStack, IVertexBuilder vertexBuilder, boolean checkSides, Random rand, IModelData modelData) {
-        return false;
+    public List<BakedQuad> renderModel(IBlockDisplayReader level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
+        return Collections.emptyList();
     }
 
     @Override
@@ -123,14 +126,14 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
                 BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
                 bufferBuilder.begin(layer.mode(), layer.format());
                 IModelData modelData = tileEntity == null ? EmptyModelData.INSTANCE : tileEntity.getModelData();
-                if (state.getBlock() instanceof BlockComponent) {
-                    IMultiblockedRenderer renderer = ((BlockComponent) state.getBlock()).definition.baseRenderer;
-                    if (renderer != null) {
-                        renderer.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-                    }
-                } else {
-                    brd.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-                }
+//                if (state.getBlock() instanceof BlockComponent) {
+//                    IMultiblockedRenderer renderer = ((BlockComponent) state.getBlock()).definition.baseRenderer;
+//                    if (renderer != null) {
+//                        renderer.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
+//                    }
+//                } else {
+//                }
+                brd.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
                 layer.end(bufferBuilder, 0, 0, 0);
             }
         }

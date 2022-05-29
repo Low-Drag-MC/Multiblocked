@@ -31,14 +31,12 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.IBlockRenderProperties;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Author: KilaBash
@@ -170,8 +168,4 @@ public class BlockComponent extends Block implements IBlockRendererProvider, Ent
         return definition.createNewTileEntity(pPos, pState);
     }
 
-    @Override
-    public void initializeClient(Consumer<IBlockRenderProperties> consumer) {
-        consumer.accept(IRENDERER_PARTICLE_PROPERTIES);
-    }
 }

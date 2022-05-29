@@ -83,6 +83,7 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
         return Collections.emptyList();
     }

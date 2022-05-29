@@ -114,6 +114,7 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public List<BakedQuad> renderModel(IBlockDisplayReader level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
         return Collections.emptyList();
     }

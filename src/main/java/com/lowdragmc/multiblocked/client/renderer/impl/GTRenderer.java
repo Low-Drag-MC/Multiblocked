@@ -113,6 +113,7 @@ public class GTRenderer extends MBDIModelRenderer {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public List<BakedQuad> renderModel(IBlockDisplayReader level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
         TileEntity te = level.getBlockEntity(pos);
         if (formedAsController && te instanceof PartTileEntity) {

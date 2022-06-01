@@ -10,6 +10,7 @@ import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IComponent;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,11 +24,11 @@ public interface IMultiblockedRenderer extends IRenderer {
      */
     String getType();
 
-    default void onPostAccess(ComponentTileEntity<?> tileEntity) {
+    default void onPostAccess(IComponent tileEntity) {
 
     }
 
-    default void onPreAccess(ComponentTileEntity<?> tileEntity) {
+    default void onPreAccess(IComponent tileEntity) {
 
     }
 

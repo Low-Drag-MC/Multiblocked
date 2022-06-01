@@ -68,7 +68,7 @@ public class PartScriptWidget extends PageWidget {
                 try {
                     PartDefinition definition = Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class);
                     part.setDefinition(definition);
-                    MbdComponents.DEFINITION_REGISTRY.put(definition.location, definition);
+                    MbdComponents.TEST_DEFINITION_REGISTRY.put(definition.location, definition);
                     writeClientAction(-1, buffer -> buffer.writeUtf(definition.location.toString()));
                 } catch (Exception e) {
                     Multiblocked.LOGGER.error("tester: error while loading the part json {}", selected.getName(), e);
@@ -104,7 +104,7 @@ public class PartScriptWidget extends PageWidget {
     @Override
     public void handleClientAction(int id, PacketBuffer buffer) {
         if (id == -1) {
-            part.setDefinition((PartDefinition) MbdComponents.DEFINITION_REGISTRY.get(new ResourceLocation(buffer.readUtf(Short.MAX_VALUE))));
+            part.setDefinition((PartDefinition) MbdComponents.TEST_DEFINITION_REGISTRY.get(new ResourceLocation(buffer.readUtf(Short.MAX_VALUE))));
         } else {
             super.handleClientAction(id, buffer);
         }

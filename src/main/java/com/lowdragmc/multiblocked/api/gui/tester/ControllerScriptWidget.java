@@ -84,7 +84,7 @@ public class ControllerScriptWidget extends PageWidget {
                         }
                     }
                     controller.setDefinition(definition);
-                    MbdComponents.DEFINITION_REGISTRY.put(definition.location, definition);
+                    MbdComponents.TEST_DEFINITION_REGISTRY.put(definition.location, definition);
                     writeClientAction(-1, buffer -> buffer.writeUtf(definition.location.toString()));
                 } catch (Exception e) {
                     Multiblocked.LOGGER.error("tester: error while loading the controller json {}", selected.getName(), e);
@@ -120,7 +120,7 @@ public class ControllerScriptWidget extends PageWidget {
     @Override
     public void handleClientAction(int id, PacketBuffer buffer) {
         if (id == -1) {
-            controller.setDefinition((ControllerDefinition)MbdComponents.DEFINITION_REGISTRY.get(new ResourceLocation(buffer.readUtf(Short.MAX_VALUE))));
+            controller.setDefinition((ControllerDefinition)MbdComponents.TEST_DEFINITION_REGISTRY.get(new ResourceLocation(buffer.readUtf(Short.MAX_VALUE))));
         } else {
             super.handleClientAction(id, buffer);
         }

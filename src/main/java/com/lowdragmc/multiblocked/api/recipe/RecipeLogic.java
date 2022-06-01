@@ -54,6 +54,7 @@ public class RecipeLogic {
     public void handleRecipeWorking() {
         progress++;
         handleTickRecipe(lastRecipe);
+        markDirty();
     }
 
     private void checkAsyncRecipeSearching(Runnable changed) {
@@ -185,6 +186,7 @@ public class RecipeLogic {
         if (lastRecipe != null) {
             status = compound.contains("status") ? Status.values()[compound.getInt("status")] : Status.WORKING;
             duration = lastRecipe.duration;
+            progress = compound.contains("progress") ? compound.getInt("progress") : 0;
         }
     }
 
@@ -192,6 +194,7 @@ public class RecipeLogic {
         if (lastRecipe != null && status != Status.IDLE) {
             compound.putString("recipe", lastRecipe.uid);
             compound.putInt("status", status.ordinal());
+            compound.putInt("progress", progress);
         }
         return compound;
     }

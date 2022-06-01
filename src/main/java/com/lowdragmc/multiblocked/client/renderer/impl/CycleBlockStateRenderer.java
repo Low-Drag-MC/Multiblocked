@@ -123,18 +123,9 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
             ForgeHooksClient.setRenderLayer(layer);
             if (RenderTypeLookup.canRenderInLayer(state, layer)) {
                 ForgeHooksClient.setRenderLayer(layer);
-                BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
-                bufferBuilder.begin(layer.mode(), layer.format());
+                IVertexBuilder bufferBuilder = buffer.getBuffer(layer);
                 IModelData modelData = tileEntity == null ? EmptyModelData.INSTANCE : tileEntity.getModelData();
-//                if (state.getBlock() instanceof BlockComponent) {
-//                    IMultiblockedRenderer renderer = ((BlockComponent) state.getBlock()).definition.baseRenderer;
-//                    if (renderer != null) {
-//                        renderer.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-//                    }
-//                } else {
-//                }
                 brd.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-                layer.end(bufferBuilder, 0, 0, 0);
             }
         }
 

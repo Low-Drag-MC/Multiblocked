@@ -4,9 +4,9 @@ package com.lowdragmc.multiblocked.api.definition;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class ControllerDefinition extends ComponentDefinition {
         this(location, ControllerTileEntity::new);
     }
 
-    public ControllerDefinition(ResourceLocation location, Function<ControllerDefinition, ? extends ComponentTileEntity<?>> teSupplier) {
+    public ControllerDefinition(ResourceLocation location, Function<ControllerDefinition, TileEntity> teSupplier) {
         super(location, d -> teSupplier.apply((ControllerDefinition) d));
         this.recipeMap = RecipeMap.EMPTY;
     }

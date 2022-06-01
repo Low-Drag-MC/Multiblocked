@@ -3,7 +3,7 @@ package com.lowdragmc.multiblocked.api.block;
 import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -58,15 +58,15 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
         pBuilder.add(BlockStateProperties.FACING);
     }
 
-    public ComponentTileEntity<?> getComponent(IBlockReader world, BlockPos pos) {
+    public IComponent getComponent(IBlockReader world, BlockPos pos) {
         TileEntity instance = world.getBlockEntity(pos);
-        return instance instanceof ComponentTileEntity<?> ? ((ComponentTileEntity<?>) instance) : null;
+        return instance instanceof IComponent ? ((IComponent) instance) : null;
     }
 
     @Nonnull
     @Override
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-        ComponentTileEntity<?> instance = getComponent(world, pos);
+        IComponent instance = getComponent(world, pos);
         if (instance != null) {
             return instance.use(player, hand, hit);
         }
@@ -75,7 +75,7 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
 
     @Override
     public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
-        ComponentTileEntity<?> instance = getComponent(world, pos);
+        IComponent instance = getComponent(world, pos);
         if (instance != null) {
             instance.onNeighborChange();
         }
@@ -83,32 +83,32 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
 
     @Override
     public void setPlacedBy(@Nonnull World level, @Nonnull BlockPos pPos, @Nonnull BlockState pState, @Nullable LivingEntity placer, @Nonnull ItemStack pStack) {
-        ComponentTileEntity<?> componentTileEntity = getComponent(level, pPos);
-        if (componentTileEntity != null && placer != null) {
+        IComponent component = getComponent(level, pPos);
+        if (component != null && placer != null) {
             Vector3d pos = placer.position();
             if (placer instanceof PlayerEntity) {
-                componentTileEntity.setOwner(placer.getUUID());
+                component.setOwner(placer.getUUID());
             }
             if (Math.abs(pos.x - (double)((float)pPos.getX() + 0.5F)) < 2.0D && Math.abs(pos.z - (double)((float)pPos.getZ() + 0.5F)) < 2.0D) {
                 double d0 = pos.y + (double)placer.getEyeHeight();
-                if (d0 - (double)pPos.getY() > 2.0D && componentTileEntity.isValidFrontFacing(Direction.UP)) {
-                    componentTileEntity.setFrontFacing(Direction.UP);
+                if (d0 - (double)pPos.getY() > 2.0D && component.isValidFrontFacing(Direction.UP)) {
+                    component.setFrontFacing(Direction.UP);
                     return;
                 }
-                if ((double)pPos.getY() - d0 > 0.0D && componentTileEntity.isValidFrontFacing(Direction.DOWN)) {
-                    componentTileEntity.setFrontFacing(Direction.DOWN);
+                if ((double)pPos.getY() - d0 > 0.0D && component.isValidFrontFacing(Direction.DOWN)) {
+                    component.setFrontFacing(Direction.DOWN);
                     return;
                 }
             }
-            componentTileEntity.setFrontFacing(placer.getDirection().getOpposite());
+            component.setFrontFacing(placer.getDirection().getOpposite());
         }
     }
 
     @Override
     public BlockState rotate(BlockState state, IWorld world, BlockPos pos, Rotation direction) {
-        ComponentTileEntity<?> instance = getComponent(world, pos);
+        IComponent instance = getComponent(world, pos);
         if (instance != null) {
-            instance.rotate(direction);
+            instance.rotateTo(direction);
         }
         return state;
     }
@@ -123,9 +123,9 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
         LootContext context = pBuilder.withParameter(LootParameters.BLOCK_STATE, pState).create(LootParameterSets.BLOCK);
         Entity entity = context.getParamOrNull(LootParameters.THIS_ENTITY);
         TileEntity tileEntity = context.getParamOrNull(LootParameters.BLOCK_ENTITY);
-        if (tileEntity instanceof ComponentTileEntity<?> && entity instanceof PlayerEntity) {
+        if (tileEntity instanceof IComponent && entity instanceof PlayerEntity) {
             NonNullList<ItemStack> drops = NonNullList.create();
-            ((ComponentTileEntity<?>) tileEntity).onDrops(drops, (PlayerEntity) entity);
+            ((IComponent) tileEntity).onDrops(drops, (PlayerEntity) entity);
             return drops;
         }
         return Collections.emptyList();
@@ -133,7 +133,7 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
 
     @Override
     public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
-        ComponentTileEntity<?> instance = getComponent(world, pos);
+        IComponent instance = getComponent(world, pos);
         return instance != null && instance.canConnectRedstone(side == null ? null : side.getOpposite());
     }
 
@@ -156,8 +156,8 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
     @Override
     public IRenderer getRenderer(BlockState state, BlockPos pos, IBlockDisplayReader blockReader) {
         TileEntity tileEntity = blockReader.getBlockEntity(pos);
-        if (tileEntity instanceof ComponentTileEntity) {
-            return ((ComponentTileEntity<?>) tileEntity).getRenderer();
+        if (tileEntity instanceof IComponent) {
+            return ((IComponent) tileEntity).getRenderer();
         }
         return null;
     }

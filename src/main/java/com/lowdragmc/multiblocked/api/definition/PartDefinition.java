@@ -1,7 +1,7 @@
 package com.lowdragmc.multiblocked.api.definition;
 
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Function;
@@ -16,7 +16,7 @@ public class PartDefinition extends ComponentDefinition {
         this(null);
     }
 
-    public PartDefinition(ResourceLocation location, Function<PartDefinition, ? extends ComponentTileEntity<?>> teSupplier) {
+    public PartDefinition(ResourceLocation location, Function<PartDefinition, TileEntity> teSupplier) {
         super(location, d -> teSupplier.apply((PartDefinition) d));
     }
 

@@ -10,13 +10,12 @@ import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -194,21 +193,21 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     }
 
     @Override
-    public void onPostAccess(ComponentTileEntity<?> component) {
-        component.rendererObject = null;
+    public void onPostAccess(IComponent component) {
+        component.setRendererObject(null);
 
     }
 
     @Override
-    public void onPreAccess(ComponentTileEntity<?> component) {
-        component.rendererObject = new ComponentFactory(component, this);
+    public void onPreAccess(IComponent component) {
+        component.setRendererObject(new ComponentFactory(component, this));
     }
 
     @Override
     public void render(TileEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-        if (te instanceof ComponentTileEntity<?> && ((ComponentTileEntity<?>) te).rendererObject instanceof  ComponentFactory) {
-            ComponentTileEntity<?> controller = (ComponentTileEntity<?>) te;
-            ComponentFactory factory = (ComponentFactory) controller.rendererObject;
+        if (te instanceof IComponent && ((IComponent) te).getRendererObject() instanceof  ComponentFactory) {
+            IComponent controller = (IComponent) te;
+            ComponentFactory factory = (ComponentFactory) controller.getRendererObject();
             GeoModel model = this.getModel(this.getModelLocation(factory));
             this.setLivingAnimations(factory, this.getUniqueID(factory));
 
@@ -307,12 +306,12 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     }
 
     public static class ComponentFactory implements IAnimatable {
-        public final ComponentTileEntity<?> component;
+        public final IComponent component;
         public final GeoComponentRenderer renderer;
         public final AnimationFile animationFile;
         public String currentStatus;
 
-        public ComponentFactory(ComponentTileEntity<?> component, GeoComponentRenderer renderer) {
+        public ComponentFactory(IComponent component, GeoComponentRenderer renderer) {
             this.component = component;
             this.renderer = renderer;
             animationFile = GeckoLibCache.getInstance().getAnimations().get(renderer.getAnimationFileLocation(this));

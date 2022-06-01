@@ -34,7 +34,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -67,7 +66,7 @@ import java.util.function.Consumer;
  *
  * This isn't going to be in-world.
  */
-public abstract class ComponentTileEntity<T extends ComponentDefinition> extends TileEntity implements IInnerCapabilityProvider, IUIHolder {
+public abstract class ComponentTileEntity<T extends ComponentDefinition> extends TileEntity implements IInnerCapabilityProvider, IUIHolder, IComponent {
     // is good to write down all CT code here? or move them to @ZenExpansion.
     protected T definition;
 
@@ -200,26 +199,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 //        return definition.getAABB(isFormed(), frontFacing);
 //    }
 
-    public Direction getFrontFacing() {
-        return getBlockState().getValue(BlockStateProperties.FACING);
-    }
-
-    public void setFrontFacing(Direction facing) {
-        if (level != null && !level.isClientSide) {
-            if (!isValidFrontFacing(facing)) return;
-            if (getBlockState().getValue(BlockStateProperties.FACING) == facing) return;
-            level.setBlock(getBlockPos(), getBlockState().setValue(BlockStateProperties.FACING, facing), 3);
-        }
-    }
-
-    @Override
-    public void rotate(@Nonnull Rotation rotationIn) {
-        setFrontFacing(rotationIn.rotate(getFrontFacing()));
-    }
-
     @Override
     public void mirror(@Nonnull Mirror mirrorIn) {
-        rotate(mirrorIn.getRotation(getFrontFacing()));
+        rotateTo(mirrorIn.getRotation(getFrontFacing()));
     }
 
     public IMultiblockedRenderer updateCurrentRenderer() {
@@ -249,10 +231,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
             }
         }
         return currentRenderer;
-    }
-
-    public boolean isValidFrontFacing(Direction facing) {
-        return definition.allowRotate;
     }
 
 //    public boolean canConnectRedstone(Direction facing) {
@@ -352,10 +330,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public final boolean isRemote() {
         return level == null ? LDLMod.isRemote() : level.isClientSide;
-    }
-
-    public boolean canConnectRedstone(Direction direction) {
-        return false;
     }
 
     @Override
@@ -563,5 +537,15 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     @Nonnull
     public AxisAlignedBB getRenderBoundingBox() {
         return getRenderer().isGlobalRenderer(this) ? INFINITE_EXTENT_AABB : super.getRenderBoundingBox();
+    }
+
+    @Override
+    public void setRendererObject(Object o) {
+        rendererObject = o;
+    }
+
+    @Override
+    public Object getRendererObject() {
+        return rendererObject;
     }
 }

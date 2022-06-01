@@ -199,13 +199,17 @@ dependencies {
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.71')
 
     //botania
-    implementation fg.deobf("blank:botania-1.16.5:420.2")
+    implementation fg.deobf("curse.maven:botania-225643:3608755")
     //mekanism
-    implementation fg.deobf("blank:mekanism-1.16.5:10.1.2.457")
+    implementation fg.deobf("curse.maven:mekanism-268560:3659389")
     // patchouli
-    implementation fg.deobf("blank:patchouli-1.16.4:53.2")
+    implementation fg.deobf("curse.maven:patchouli-306770:3459118")
     // curios
-    implementation fg.deobf("blank:curios-forge-1.16.5:4.0.5.3")
+    implementation fg.deobf("curse.maven:curios-309927:3456953")
+    // create
+    implementation fg.deobf("curse.maven:create-328085:3499718")
+    // flywheel
+    implementation fg.deobf("curse.maven:flywheel-486392:3459739")
 
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")

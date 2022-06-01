@@ -22,6 +22,7 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import com.lowdragmc.multiblocked.client.renderer.MultiblockPreviewRenderer;
 import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import dev.latvian.mods.kubejs.script.ScriptType;
@@ -364,6 +365,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                 return InteractionResult.SUCCESS;
             }
         }
+
+        if (isRemote() && !this.isFormed() && player.isCrouching() && player.getItemInHand(hand).isEmpty()) {
+            MultiblockPreviewRenderer.renderMultiBlockPreview(this, 60000);
+            return ActionResultType.SUCCESS;
+        }
+
         if (!isRemote()) {
             if (!isFormed() && definition.catalyst != null) {
                 if (state == null) state = new MultiblockState(level, getBlockPos());

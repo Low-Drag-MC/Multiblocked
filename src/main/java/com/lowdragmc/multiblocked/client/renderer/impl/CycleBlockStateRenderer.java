@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -112,20 +113,9 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
         for (RenderType layer : RenderType.chunkBufferLayers()) {
             if (ItemBlockRenderTypes.canRenderInLayer(state, layer)) {
                 ForgeHooksClient.setRenderType(layer);
-                BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-                bufferBuilder.begin(layer.mode(), layer.format());
+                VertexConsumer bufferBuilder = buffer.getBuffer(layer);
                 IModelData modelData = tileEntity == null ? EmptyModelData.INSTANCE : tileEntity.getModelData();
-//                if (state.getBlock() instanceof BlockComponent) {
-//                    IMultiblockedRenderer renderer = ((BlockComponent) state.getBlock()).definition.baseRenderer;
-//                    if (renderer != null) {
-//                        renderer.renderModel(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-//                    }
-//                } else {
-//                    brd.renderBatched(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-//                }
                 brd.renderBatched(state, te.getBlockPos(), dummyWorld, stack, bufferBuilder, true, LDLMod.random, modelData);
-
-                layer.end(bufferBuilder, 0, 0, 0);
             }
         }
 

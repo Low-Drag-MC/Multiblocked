@@ -28,6 +28,7 @@ import java.util.function.BiConsumer;
 
 public class MbdComponents {
     public static final Map<ResourceLocation, ComponentDefinition> DEFINITION_REGISTRY = new HashMap<>();
+    public static final Map<ResourceLocation, ComponentDefinition> TEST_DEFINITION_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, BlockComponent> COMPONENT_BLOCKS_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, ItemComponent> COMPONENT_ITEMS_REGISTRY = new HashMap<>();
     public static final BlockComponent DummyComponentBlock;

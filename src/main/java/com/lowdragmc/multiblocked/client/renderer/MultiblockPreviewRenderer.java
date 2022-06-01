@@ -5,31 +5,29 @@ import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.block.BlockState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -54,7 +52,7 @@ public class MultiblockPreviewRenderer {
     private static Map<BlockPos, BlockInfo> blockMap;
 
     @SubscribeEvent
-    public static void renderWorldLastEvent(RenderWorldLastEvent event) {
+    public static void renderWorldLastEvent(RenderLevelLastEvent event) {
         if (mbpPos != null) {
             Minecraft mc = Minecraft.getInstance();
             long time = System.currentTimeMillis();
@@ -63,9 +61,9 @@ public class MultiblockPreviewRenderer {
                 layer = 0;
                 return;
             }
-            MatrixStack stack = event.getMatrixStack();
+            PoseStack stack = event.getPoseStack();
 
-            Vector3d pos = mc.gameRenderer.getMainCamera().getPosition();
+            Vec3 pos = mc.gameRenderer.getMainCamera().getPosition();
 
             stack.pushPose();
             stack.translate(-pos.x, -pos.y, -pos.z);
@@ -74,10 +72,9 @@ public class MultiblockPreviewRenderer {
             RenderSystem.enableBlend();
             RenderSystem.enableCull();
             RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            Minecraft.getInstance().getTextureManager().bind(AtlasTexture.LOCATION_BLOCKS);
-            RenderSystem.color4f(1F, 1F, 1F, 1F);
+            RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
-            IRenderTypeBuffer.Impl buffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+            MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             render(stack, buffer);
             buffer.endBatch();
 
@@ -120,7 +117,8 @@ public class MultiblockPreviewRenderer {
                 BlockInfo[] column = aisle[y];
                 for (int z = 0; z < column.length; z++) {
                     blockMap.put(new BlockPos(x, y, z), column[z]);
-                    ControllerTileEntity metaTE = column[z].getTileEntity() instanceof ControllerTileEntity ? (ControllerTileEntity) column[z].getTileEntity() : null;
+                    BlockEntity te = column[z].getBlockEntity(new BlockPos(x, y, z));
+                    ControllerTileEntity metaTE = te instanceof ControllerTileEntity ? (ControllerTileEntity) te : null;
                     if (metaTE != null) {
                         if (metaTE.getDefinition().location.equals(controllerBase.getDefinition().location)) {
                             controllerPos = new BlockPos(x, y, z);
@@ -141,12 +139,13 @@ public class MultiblockPreviewRenderer {
         rotatePreviewBy = Rotation.values()[(4 + frontFacing.get2DDataValue() - previewFacing.get2DDataValue()) % 4];
         if (mte != null) {
             mbpPos = controllerBase.getBlockPos();
+            world.setBlockEntity(mte);
         }
     }
 
-    public static void render(MatrixStack stack, IRenderTypeBuffer buffer) {
+    public static void render(PoseStack stack, MultiBufferSource buffer) {
         Minecraft mc = Minecraft.getInstance();
-        BlockRendererDispatcher brd = mc.getBlockRenderer();
+        BlockRenderDispatcher brd = mc.getBlockRenderer();
         stack.pushPose();
         stack.translate(mbpPos.getX(), mbpPos.getY(), mbpPos.getZ());
 
@@ -173,11 +172,11 @@ public class MultiblockPreviewRenderer {
             mte.checkPattern();
         }
 
-        RenderType lastType = MinecraftForgeClient.getRenderLayer();
+        RenderType lastType = MinecraftForgeClient.getRenderType();
         for (BlockPos pos : blockMap.keySet()) {
             if (controllerPos.equals(pos)) continue;
             stack.pushPose();
-            BlockPos.Mutable tPos = pos.subtract(controllerPos).mutable();
+            BlockPos.MutableBlockPos tPos = pos.subtract(controllerPos).mutable();
             stack.translate(tPos.getX(), tPos.getY(), tPos.getZ());
             stack.translate(0.125, 0.125, 0.125);
             stack.scale(0.75f, 0.75f, 0.75f);
@@ -185,14 +184,14 @@ public class MultiblockPreviewRenderer {
             BlockState state = world.getBlockState(pos);
 
             for (RenderType renderType : RenderType.chunkBufferLayers()) {
-                ForgeHooksClient.setRenderLayer(renderType);
-                brd.renderModel(state, pos, world, stack, buffer.getBuffer(RenderTypeLookup.getRenderType(state, false)), false, Multiblocked.RNG, EmptyModelData.INSTANCE);
+                ForgeHooksClient.setRenderType(renderType);
+                brd.renderBatched(state, pos, world, stack, buffer.getBuffer(ItemBlockRenderTypes.getRenderType(state, false)), false, Multiblocked.RNG, EmptyModelData.INSTANCE);
             }
 
-            TileEntity tileEntity = world.getBlockEntity(pos);
+            BlockEntity tileEntity = world.getBlockEntity(pos);
 
             if (tileEntity != null) {
-                TileEntityRenderer<TileEntity> tesr = TileEntityRendererDispatcher.instance.getRenderer(tileEntity);
+                BlockEntityRenderer<BlockEntity> tesr = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(tileEntity);
                 if (tesr != null) {
                     try {
                         tesr.render(tileEntity, Minecraft.getInstance().getFrameTime(), stack, buffer, 0xf000f0, OverlayTexture.NO_OVERLAY);
@@ -200,8 +199,6 @@ public class MultiblockPreviewRenderer {
                         RenderSystem.enableBlend();
                         RenderSystem.enableCull();
                         RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-                        Minecraft.getInstance().getTextureManager().bind(AtlasTexture.LOCATION_BLOCKS);
-                        RenderSystem.color4f(1F, 1F, 1F, 1F);
                     } catch (Exception ignored) {
 
                     }
@@ -210,7 +207,7 @@ public class MultiblockPreviewRenderer {
 
             stack.popPose();
         }
-        ForgeHooksClient.setRenderLayer(lastType);
+        ForgeHooksClient.setRenderType(lastType);
 
         stack.popPose();
     }

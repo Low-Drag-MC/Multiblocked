@@ -368,7 +368,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
         if (isRemote() && !this.isFormed() && player.isCrouching() && player.getItemInHand(hand).isEmpty()) {
             MultiblockPreviewRenderer.renderMultiBlockPreview(this, 60000);
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         if (!isRemote()) {

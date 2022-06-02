@@ -13,12 +13,11 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class PredicateComponent extends SimplePredicate {
     @Override
     public SimplePredicate buildPredicate() {
         predicate = state -> {
-            TileEntity tileEntity = state.getTileEntity();
+            BlockEntity tileEntity = state.getTileEntity();
             if (tileEntity instanceof IComponent) {
                 return ((IComponent) tileEntity).getDefinition().location.equals(location);
             }
@@ -59,18 +58,14 @@ public class PredicateComponent extends SimplePredicate {
         };
         candidates = () -> {
             if (MbdComponents.COMPONENT_BLOCKS_REGISTRY.containsKey(location)) {
-                return new BlockInfo[]{new BlockInfo(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(location).defaultBlockState(), MbdComponents.DEFINITION_REGISTRY.get(location).createNewTileEntity())};
+                return new BlockInfo[]{new BlockInfo(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(location).defaultBlockState(), true)};
             } else {
                 if (definition == null) return new BlockInfo[0];
-                if (definition instanceof ControllerDefinition){
-                    ControllerTileTesterEntity te = new ControllerTileTesterEntity(ControllerTileTesterEntity.DEFAULT_DEFINITION);
-                    te.setDefinition((ControllerDefinition) definition);
-                    return new BlockInfo[]{new BlockInfo(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(ControllerTileTesterEntity.DEFAULT_DEFINITION.location).defaultBlockState(), te)};
-                } else {
-                    DummyComponentTileEntity te = new DummyComponentTileEntity(MbdComponents.DummyComponentBlock.definition);
-                    te.setDefinition(definition);
-                    return new BlockInfo[]{new BlockInfo(MbdComponents.DummyComponentBlock.defaultBlockState(), te)};
-                }
+                return new BlockInfo[]{new BlockInfo(MbdComponents.DummyComponentBlock.defaultBlockState(), be -> {
+                    if (be instanceof DummyComponentTileEntity dummy) {
+                        dummy.setDefinition(definition);
+                    }
+                })};
             }
         };
         return this;

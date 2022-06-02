@@ -21,10 +21,10 @@ import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.simibubi.create.foundation.block.BlockStressDefaults;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -80,8 +80,8 @@ public class CommonProxy {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
-        IForgeRegistry<TileEntityType<?>> registry = event.getRegistry();
+    public void registerTileEntities(RegistryEvent.Register<BlockEntityType<?>> event) {
+        IForgeRegistry<BlockEntityType<?>> registry = event.getRegistry();
         MbdComponents.registerTileEntity(registry);
     }
 

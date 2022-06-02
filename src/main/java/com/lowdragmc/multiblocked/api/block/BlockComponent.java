@@ -4,32 +4,33 @@ import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,7 +44,7 @@ import java.util.List;
  * Description:
  */
 @ParametersAreNonnullByDefault
-public class BlockComponent extends Block implements IBlockRendererProvider {
+public class BlockComponent extends Block implements IBlockRendererProvider, EntityBlock {
     public ComponentDefinition definition;
 
     public BlockComponent(ComponentDefinition definition) {
@@ -54,59 +55,59 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> pBuilder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(BlockStateProperties.FACING);
     }
 
-    public IComponent getComponent(IBlockReader world, BlockPos pos) {
-        TileEntity instance = world.getBlockEntity(pos);
+    public IComponent getComponent(BlockGetter world, BlockPos pos) {
+        BlockEntity instance = world.getBlockEntity(pos);
         return instance instanceof IComponent ? ((IComponent) instance) : null;
     }
 
     @Nonnull
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         IComponent instance = getComponent(world, pos);
         if (instance != null) {
             return instance.use(player, hand, hit);
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
-        IComponent instance = getComponent(world, pos);
+    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
+        IComponent instance = getComponent(level, pos);
         if (instance != null) {
             instance.onNeighborChange();
         }
     }
 
     @Override
-    public void setPlacedBy(@Nonnull World level, @Nonnull BlockPos pPos, @Nonnull BlockState pState, @Nullable LivingEntity placer, @Nonnull ItemStack pStack) {
-        IComponent component = getComponent(level, pPos);
-        if (component != null && placer != null) {
-            Vector3d pos = placer.position();
-            if (placer instanceof PlayerEntity) {
-                component.setOwner(placer.getUUID());
+    public void setPlacedBy(@Nonnull Level level, @Nonnull BlockPos pPos, @Nonnull BlockState pState, @Nullable LivingEntity placer, @Nonnull ItemStack pStack) {
+        IComponent componentTileEntity = getComponent(level, pPos);
+        if (componentTileEntity != null && placer != null) {
+            Vec3 pos = placer.position();
+            if (placer instanceof Player) {
+                componentTileEntity.setOwner(placer.getUUID());
             }
             if (Math.abs(pos.x - (double)((float)pPos.getX() + 0.5F)) < 2.0D && Math.abs(pos.z - (double)((float)pPos.getZ() + 0.5F)) < 2.0D) {
                 double d0 = pos.y + (double)placer.getEyeHeight();
-                if (d0 - (double)pPos.getY() > 2.0D && component.isValidFrontFacing(Direction.UP)) {
-                    component.setFrontFacing(Direction.UP);
+                if (d0 - (double)pPos.getY() > 2.0D && componentTileEntity.isValidFrontFacing(Direction.UP)) {
+                    componentTileEntity.setFrontFacing(Direction.UP);
                     return;
                 }
-                if ((double)pPos.getY() - d0 > 0.0D && component.isValidFrontFacing(Direction.DOWN)) {
-                    component.setFrontFacing(Direction.DOWN);
+                if ((double)pPos.getY() - d0 > 0.0D && componentTileEntity.isValidFrontFacing(Direction.DOWN)) {
+                    componentTileEntity.setFrontFacing(Direction.DOWN);
                     return;
                 }
             }
-            component.setFrontFacing(placer.getDirection().getOpposite());
+            componentTileEntity.setFrontFacing(placer.getDirection().getOpposite());
         }
     }
 
     @Override
-    public BlockState rotate(BlockState state, IWorld world, BlockPos pos, Rotation direction) {
-        IComponent instance = getComponent(world, pos);
+    public BlockState rotate(BlockState state, LevelAccessor level, BlockPos pos, Rotation direction) {
+        IComponent instance = getComponent(level, pos);
         if (instance != null) {
             instance.rotateTo(direction);
         }
@@ -114,48 +115,33 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
     }
 
     @Override
-    public void destroy(IWorld level, BlockPos pPos, BlockState pState) {
-        super.destroy(level, pPos, pState);
-    }
-
-    @Override
     public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
-        LootContext context = pBuilder.withParameter(LootParameters.BLOCK_STATE, pState).create(LootParameterSets.BLOCK);
-        Entity entity = context.getParamOrNull(LootParameters.THIS_ENTITY);
-        TileEntity tileEntity = context.getParamOrNull(LootParameters.BLOCK_ENTITY);
-        if (tileEntity instanceof IComponent && entity instanceof PlayerEntity) {
+        LootContext context = pBuilder.withParameter(LootContextParams.BLOCK_STATE, pState).create(LootContextParamSets.BLOCK);
+        Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+        BlockEntity tileEntity = context.getParamOrNull(LootContextParams.BLOCK_ENTITY);
+        if (tileEntity instanceof IComponent && entity instanceof Player) {
             NonNullList<ItemStack> drops = NonNullList.create();
-            ((IComponent) tileEntity).onDrops(drops, (PlayerEntity) entity);
+            ((IComponent) tileEntity).onDrops(drops, (Player) entity);
             return drops;
         }
         return Collections.emptyList();
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
+    public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side) {
         IComponent instance = getComponent(world, pos);
         return instance != null && instance.canConnectRedstone(side == null ? null : side.getOpposite());
     }
 
     @Override
     @ParametersAreNonnullByDefault
-    public boolean propagatesSkylightDown(BlockState state, IBlockReader pReader, BlockPos pPos) {
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter pReader, BlockPos pPos) {
         return !state.canOcclude();
     }
 
     @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return definition.createNewTileEntity();
-    }
-
-    @Override
-    public IRenderer getRenderer(BlockState state, BlockPos pos, IBlockDisplayReader blockReader) {
-        TileEntity tileEntity = blockReader.getBlockEntity(pos);
+    public IRenderer getRenderer(BlockState state, BlockPos pos, BlockAndTintGetter blockReader) {
+        BlockEntity tileEntity = blockReader.getBlockEntity(pos);
         if (tileEntity instanceof IComponent) {
             return ((IComponent) tileEntity).getRenderer();
         }
@@ -163,16 +149,23 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
     }
 
     @Override
-    public int getLightingMap(IBlockDisplayReader world, BlockState state, BlockPos pos) {
+    public int getLightingMap(BlockAndTintGetter world, BlockState state, BlockPos pos) {
         if (state.emissiveRendering(world, pos)) {
             return 15728880; // 15 << 20 | 15 << 4
         } else {
-            int j = world.getBrightness(LightType.BLOCK, pos);
-            int k = state.getLightValue(world, pos);
+            int j = world.getBrightness(LightLayer.BLOCK, pos);
+            int k = state.getLightEmission(world, pos);
             if (j < k) {
                 j = k;
             }
             return 15 << 20 | j << 4; // 15 << 20
         }
     }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+        return definition.createNewTileEntity(pPos, pState);
+    }
+
 }

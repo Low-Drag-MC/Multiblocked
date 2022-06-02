@@ -11,20 +11,20 @@ import com.simibubi.create.content.contraptions.base.IRotate;
 import com.simibubi.create.content.contraptions.base.KineticTileEntity;
 import com.simibubi.create.content.contraptions.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.utility.Lang;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.ChatFormatting;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -47,9 +47,8 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     public Set<BlockPos> controllerPos = new HashSet<>();
     public float workingSpeed;
 
-    public CreateKineticSourceTileEntity(
-            CreatePartDefinition CreateStressDefinition) {
-        super(CreateStressDefinition.getTileType());
+    public CreateKineticSourceTileEntity(CreatePartDefinition CreateStressDefinition, BlockPos pos, BlockState state) {
+        super(CreateStressDefinition.getTileType(), pos, state);
         definition = CreateStressDefinition;
     }
 
@@ -80,7 +79,7 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     public List<ControllerTileEntity> getControllers() {
         List<ControllerTileEntity> result = new ArrayList<>();
         for (BlockPos blockPos : controllerPos) {
-            TileEntity controller = level.getBlockEntity(blockPos);
+            BlockEntity controller = level.getBlockEntity(blockPos);
             if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
                 result.add((ControllerTileEntity) controller);
             }
@@ -133,7 +132,7 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     }
 
     @Override
-    public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult use(Player player, InteractionHand hand, BlockHitResult hit) {
         return IPartComponent.super.use(player, hand, hit);
     }
 
@@ -185,9 +184,8 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     public void setSource(BlockPos source) {
         super.setSource(source);
         if (!definition.isOutput) return;
-        TileEntity tileEntity = this.level.getBlockEntity(source);
-        if (tileEntity instanceof KineticTileEntity) {
-            KineticTileEntity sourceTe = (KineticTileEntity)tileEntity;
+        BlockEntity tileEntity = this.level.getBlockEntity(source);
+        if (tileEntity instanceof KineticTileEntity sourceTe) {
             if (this.reActivateSource && Math.abs(sourceTe.getSpeed()) >= Math.abs(this.getGeneratedSpeed())) {
                 this.reActivateSource = false;
             }
@@ -204,12 +202,12 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
 
     }
 
-    public boolean addToGoggleTooltip(List<ITextComponent> tooltip, boolean isPlayerSneaking) {
+    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         boolean added = super.addToGoggleTooltip(tooltip, isPlayerSneaking);
         float stressBase = this.calculateAddedStressCapacity();
         if (stressBase != 0.0F && IRotate.StressImpact.isEnabled()) {
             tooltip.add(componentSpacing.plainCopy().append(Lang.translate("gui.goggles.generator_stats")));
-            tooltip.add(componentSpacing.plainCopy().append(Lang.translate("tooltip.capacityProvided").withStyle(TextFormatting.GRAY)));
+            tooltip.add(componentSpacing.plainCopy().append(Lang.translate("tooltip.capacityProvided").withStyle(ChatFormatting.GRAY)));
             float speed = this.getTheoreticalSpeed();
             if (speed != this.getGeneratedSpeed() && speed != 0.0F) {
                 stressBase *= this.getGeneratedSpeed() / speed;
@@ -217,7 +215,7 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
 
             speed = Math.abs(speed);
             float stressTotal = stressBase * speed;
-            tooltip.add(componentSpacing.plainCopy().append((new StringTextComponent(" " + IHaveGoggleInformation.format((double)stressTotal))).append(Lang.translate("generic.unit.stress", new Object[0])).withStyle(TextFormatting.AQUA)).append(" ").append(Lang.translate("gui.goggles.at_current_speed", new Object[0]).withStyle(TextFormatting.DARK_GRAY)));
+            tooltip.add(componentSpacing.plainCopy().append((new TextComponent(" " + IHaveGoggleInformation.format(stressTotal))).append(Lang.translate("generic.unit.stress", new Object[0])).withStyle(ChatFormatting.AQUA)).append(" ").append(Lang.translate("gui.goggles.at_current_speed", new Object[0]).withStyle(ChatFormatting.DARK_GRAY)));
             added = true;
         }
 
@@ -291,13 +289,13 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     }
 
     @Override
-    protected void write(CompoundNBT compound, boolean clientPacket) {
+    protected void write(CompoundTag compound, boolean clientPacket) {
         super.write(compound, clientPacket);
         if (clientPacket) {
             compound.putString("status", status);
-            ListNBT list = new ListNBT();
+            ListTag list = new ListTag();
             for (BlockPos pos : controllerPos) {
-                list.add(NBTUtil.writeBlockPos(pos));
+                list.add(NbtUtils.writeBlockPos(pos));
             }
             compound.put("controller", list);
         }
@@ -305,14 +303,14 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     }
 
     @Override
-    protected void fromTag(BlockState state, CompoundNBT compound, boolean clientPacket) {
-        super.fromTag(state, compound, clientPacket);
+    protected void read(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
         if (clientPacket) {
             status = compound.contains("status") ? compound.getString("status") : "unformed";
             if (compound.contains("controller")) {
                 controllerPos.clear();
-                for (INBT controller : compound.getList("controller", 10)) {
-                    controllerPos.add(NBTUtil.readBlockPos((CompoundNBT) controller));
+                for (Tag controller : compound.getList("controller", 10)) {
+                    controllerPos.add(NbtUtils.readBlockPos((CompoundTag) controller));
                 }
             }
         }

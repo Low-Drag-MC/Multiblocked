@@ -2,8 +2,8 @@ package com.lowdragmc.multiblocked.client.renderer;
 
 import com.lowdragmc.lowdraglib.client.renderer.ATESRRendererProvider;
 
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -13,10 +13,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * Description:
  */
 @OnlyIn(Dist.CLIENT)
-public class ComponentTESR extends ATESRRendererProvider<TileEntity> {
+public class ComponentTESR extends ATESRRendererProvider<BlockEntity> {
 
-    public ComponentTESR(TileEntityRendererDispatcher dispatcher) {
-        super(dispatcher);
+    public ComponentTESR(BlockEntityRendererProvider.Context context) {
+
     }
 
 }

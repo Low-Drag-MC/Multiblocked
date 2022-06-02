@@ -17,9 +17,9 @@ import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
@@ -45,7 +45,8 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         if (tileEntity instanceof CreateKineticSourceTileEntity) {
             if (io == IO.IN && ((CreateKineticSourceTileEntity) tileEntity).isGenerator()) {
                 return false;
@@ -64,13 +65,14 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
     }
 
     @Override
-    public CreateStressCapacityCapability.ManaBotainaCapabilityProxy createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public CreateStressCapacityCapability.ManaBotainaCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
+    BlockEntity tileEntity) {
         return new CreateStressCapacityCapability.ManaBotainaCapabilityProxy(tileEntity);
     }
 
     @Override
     public ContentWidget<? super Float> createContentWidget() {
-        return new NumberContentWidget().setContentTexture(new TextTexture("MN", color)).setUnit("Mana");
+        return new NumberContentWidget().setContentTexture(new TextTexture("SC", color)).setUnit("Stress");
     }
 
     @Override
@@ -105,7 +107,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
 
     public static class ManaBotainaCapabilityProxy extends CapabilityProxy<Float> {
 
-        public ManaBotainaCapabilityProxy(TileEntity tileEntity) {
+        public ManaBotainaCapabilityProxy(BlockEntity tileEntity) {
             super(CreateStressCapacityCapability.CAP, tileEntity);
         }
 
@@ -119,7 +121,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
             if (capability == null) return left;
             float sum = left.stream().reduce(0f, Float::sum);
             if (io == IO.IN && !capability.isGenerator()) {
-                float capacity = MathHelper.abs(capability.getSpeed()) * capability.definition.stress;
+                float capacity = Mth.abs(capability.getSpeed()) * capability.definition.stress;
                 if (capacity > 0) {
                     sum = sum - capacity;
                 }

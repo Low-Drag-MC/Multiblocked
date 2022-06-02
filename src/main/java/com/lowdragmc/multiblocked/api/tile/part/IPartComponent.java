@@ -1,12 +1,8 @@
 package com.lowdragmc.multiblocked.api.tile.part;
 
-import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.kubejs.events.PartAddedEvent;
-import com.lowdragmc.multiblocked.api.kubejs.events.PartRemovedEvent;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
-import dev.latvian.kubejs.script.ScriptType;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nonnull;
 import java.util.List;

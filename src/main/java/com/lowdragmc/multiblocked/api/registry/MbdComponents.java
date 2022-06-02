@@ -12,12 +12,13 @@ import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.ComponentTESR;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.item.BlockItem;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import javax.annotation.Nullable;
@@ -69,7 +70,7 @@ public class MbdComponents {
         COMPONENT_BLOCKS_REGISTRY.values().forEach(registry::register);
     }
     
-    public static void registerTileEntity(IForgeRegistry<TileEntityType<?>> registry) {
+    public static void registerTileEntity(IForgeRegistry<BlockEntityType<?>> registry) {
         COMPONENT_BLOCKS_REGISTRY.forEach((k, v) -> Optional.ofNullable(DEFINITION_REGISTRY.get(k)).ifPresent(d -> d.registerTileEntity(v, registry)));
     }
 
@@ -132,13 +133,14 @@ public class MbdComponents {
     public static void clientLastWork() {
         // set block render layer
         for (Block block : MbdComponents.COMPONENT_BLOCKS_REGISTRY.values()) {
-            if (block instanceof IBlockRendererProvider) {
-                RenderTypeLookup.setRenderLayer(block, renderType -> true);
-            }
+            ItemBlockRenderTypes.setRenderLayer(block, renderType -> true);
         }
+    }
+
+    public static void registerBlockEntityRenderer(EntityRenderersEvent.RegisterRenderers event) {
         // register tesr
         for (ComponentDefinition definition : DEFINITION_REGISTRY.values()) {
-            ClientRegistry.bindTileEntityRenderer(definition.getTileType(), ComponentTESR::new);
+            event.registerBlockEntityRenderer(definition.getTileType(), ComponentTESR::new);
         }
     }
 }

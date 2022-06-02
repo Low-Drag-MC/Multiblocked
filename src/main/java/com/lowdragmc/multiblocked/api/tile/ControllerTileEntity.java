@@ -3,7 +3,7 @@ package com.lowdragmc.multiblocked.api.tile;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
-import com.lowdragmc.lowdraglib.gui.factory.TileEntityUIFactory;
+import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.multiblocked.Multiblocked;
@@ -25,32 +25,31 @@ import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.MultiblockPreviewRenderer;
 import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import dev.latvian.kubejs.script.ScriptType;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,7 +58,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static net.minecraft.util.Util.NIL_UUID;
+import static net.minecraft.Util.NIL_UUID;
 
 /**
  * A TileEntity that defies all controller machines.
@@ -74,8 +73,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     protected LongOpenHashSet parts;
     protected RecipeLogic recipeLogic;
 
-    public ControllerTileEntity(ControllerDefinition definition) {
-        super(definition);
+    public ControllerTileEntity(ControllerDefinition definition, BlockPos pos, BlockState state) {
+        super(definition, pos, state);
     }
 
     @Nullable
@@ -160,7 +159,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (capabilityMap != null) {
             capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
             for (Map.Entry<Long, EnumMap<IO, Set<MultiblockCapability<?>>>> entry : capabilityMap.entrySet()) {
-                TileEntity tileEntity = level.getBlockEntity(BlockPos.of(entry.getKey()));
+                BlockEntity tileEntity = level.getBlockEntity(BlockPos.of(entry.getKey()));
                 if (tileEntity != null) {
                     if (settings != null) {
                         Map<MultiblockCapability<?>, Tuple<IO, Direction>> caps = settings.get(entry.getKey());
@@ -204,7 +203,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         parts = state.getMatchContext().get("parts");
         if (parts != null) {
             for (Long pos : parts) {
-                TileEntity tileEntity = level.getBlockEntity(BlockPos.of(pos));
+                BlockEntity tileEntity = level.getBlockEntity(BlockPos.of(pos));
                 if (tileEntity instanceof IPartComponent) {
                     ((IPartComponent) tileEntity).addedToController(this);
                 }
@@ -216,14 +215,14 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             new StructureFormedEvent(this).post(ScriptType.SERVER, StructureFormedEvent.ID, getSubID());
         }
     }
-    
+
     public void onStructureInvalid() {
         recipeLogic = null;
         setStatus("unformed");
         // invalid parts
         if (parts != null) {
             for (Long pos : parts) {
-                TileEntity tileEntity = level.getBlockEntity(BlockPos.of(pos));
+                BlockEntity tileEntity = level.getBlockEntity(BlockPos.of(pos));
                 if (tileEntity instanceof IPartComponent) {
                     ((IPartComponent) tileEntity).removedFromController(this);
                 }
@@ -239,7 +238,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     }
 
     @Override
-    public void receiveCustomData(int dataId, PacketBuffer buf) {
+    public void receiveCustomData(int dataId, FriendlyByteBuf buf) {
         if (dataId == -1) {
             readState(buf);
             scheduleChunkForRenderUpdate();
@@ -249,19 +248,19 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     }
 
     @Override
-    public void writeInitialSyncData(PacketBuffer buf) {
+    public void writeInitialSyncData(FriendlyByteBuf buf) {
         super.writeInitialSyncData(buf);
         writeState(buf);
     }
 
     @Override
-    public void receiveInitialSyncData(PacketBuffer buf) {
+    public void receiveInitialSyncData(FriendlyByteBuf buf) {
         super.receiveInitialSyncData(buf);
         readState(buf);
         scheduleChunkForRenderUpdate();
     }
 
-    protected void writeState(PacketBuffer buffer) {
+    protected void writeState(FriendlyByteBuf buffer) {
         buffer.writeBoolean(isFormed());
         if (isFormed()) {
             LongSet disabled = state.getMatchContext().getOrDefault("renderMask", LongSets.EMPTY_SET);
@@ -272,7 +271,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
     }
 
-    protected void readState(PacketBuffer buffer) {
+    protected void readState(FriendlyByteBuf buffer) {
         if (buffer.readBoolean()) {
             state = new MultiblockState(level, worldPosition);
             state.setError(null);
@@ -293,15 +292,15 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     }
 
     @Override
-    public void setLevelAndPosition(@Nonnull World world, @Nonnull BlockPos pos) {
-        super.setLevelAndPosition(world, pos);
+    public void setLevel(@Nonnull Level world) {
+        super.setLevel(world);
         state = MultiblockWorldSavedData.getOrCreate(level).mapping.get(worldPosition);
     }
 
     @Override
-    public void load(@Nonnull BlockState blockState, @Nonnull CompoundNBT compound) {
+    public void load(@Nonnull CompoundTag compound) {
         try {
-            super.load(blockState, compound);
+            super.load(compound);
         } catch (Exception e) {
             if (definition == null) {
                 MultiblockWorldSavedData mwsd = MultiblockWorldSavedData.getOrCreate(level);
@@ -320,33 +319,32 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             status = recipeLogic.getStatus().name;
         }
         if (compound.contains("capabilities")) {
-            ListNBT tagList = compound.getList("capabilities", Constants.NBT.TAG_COMPOUND);
+            ListTag tagList = compound.getList("capabilities", Tag.TAG_COMPOUND);
             settings = new HashMap<>();
-            for (INBT base : tagList) {
-                CompoundNBT tag = (CompoundNBT) base;
+            for (Tag base : tagList) {
+                CompoundTag tag = (CompoundTag) base;
                 settings.computeIfAbsent(tag.getLong("pos"), l->new HashMap<>())
                         .put(MbdCapabilities.get(tag.getString("cap")), new Tuple<>(IO.VALUES[tag.getInt("io")], Direction.values()[tag.getInt("facing")]));
             }
         }
     }
 
-    @Nonnull
     @Override
-    public CompoundNBT save(@Nonnull CompoundNBT compound) {
-        super.save(compound);
+    public void saveAdditional(@Nonnull CompoundTag compound) {
+        super.saveAdditional(compound);
         if (!asyncRecipeSearching) {
             compound.putBoolean("ars", false);
         }
-        if (recipeLogic != null) compound.put("recipeLogic", recipeLogic.writeToNBT(new CompoundNBT()));
+        if (recipeLogic != null) compound.put("recipeLogic", recipeLogic.writeToNBT(new CompoundTag()));
         if (capabilities != null) {
-            ListNBT tagList = new ListNBT();
+            ListTag tagList = new ListTag();
             for (Table.Cell<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> cell : capabilities.cellSet()) {
                 IO io = cell.getRowKey();
                 MultiblockCapability<?> cap = cell.getColumnKey();
                 Long2ObjectOpenHashMap<CapabilityProxy<?>> value = cell.getValue();
                 if (io != null && cap != null && value != null) {
                     for (Map.Entry<Long, CapabilityProxy<?>> entry : value.entrySet()) {
-                        CompoundNBT tag = new CompoundNBT();
+                        CompoundTag tag = new CompoundTag();
                         tag.putInt("io", io.ordinal());
                         tag.putInt("facing", entry.getValue().facing.ordinal());
                         tag.putString("cap", cap.name);
@@ -357,21 +355,20 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
             compound.put("capabilities", tagList);
         }
-        return compound;
     }
 
     @Override
-    public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult use(Player player, InteractionHand hand, BlockHitResult hit) {
         if (Multiblocked.isKubeJSLoaded()) {
             RightClickEvent event = new RightClickEvent(this, player, hand, hit);
             if (event.post(ScriptType.SERVER, RightClickEvent.ID, getSubID())) {
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
 
         if (isRemote() && !this.isFormed() && player.isCrouching() && player.getItemInHand(hand).isEmpty()) {
             MultiblockPreviewRenderer.renderMultiBlockPreview(this, 60000);
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         if (!isRemote()) {
@@ -381,7 +378,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                 if (definition.catalyst.isEmpty() || held.equals(definition.catalyst, false)) {
                     if (checkPattern()) { // formed
                         player.swing(hand);
-                        ITextComponent formedMsg = new TranslationTextComponent(getUnlocalizedName()).append(new TranslationTextComponent("multiblocked.multiblock.formed"));
+                        Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));
                         player.sendMessage(formedMsg, NIL_UUID);
                         if (!player.isCreative() && !definition.catalyst.isEmpty()) {
                             held.shrink(1);
@@ -391,21 +388,21 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                             MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
                         }
                         onStructureFormed();
-                        return ActionResultType.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     }
                 }
             }
             if (!player.isCrouching()) {
-                if (!isRemote() && player instanceof ServerPlayerEntity) {
-                    TileEntityUIFactory.INSTANCE.openUI(this, (ServerPlayerEntity) player);
+                if (!isRemote() && player instanceof ServerPlayer) {
+                    BlockEntityUIFactory.INSTANCE.openUI(this, (ServerPlayer) player);
                 }
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity entityPlayer) {
+    public ModularUI createUI(Player entityPlayer) {
         TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
         if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
         if (isFormed()) {

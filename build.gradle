@@ -190,13 +190,17 @@ dependencies {
     compileOnly fg.deobf("curse.maven:patchouli-306770:${patchouli_file}")
     // curios
     compileOnly fg.deobf("curse.maven:curios-309927:${curios_file}")
+    // create
+    compileOnly fg.deobf("curse.maven:create-328085:3737418")
+    // flywheel
+    compileOnly fg.deobf("curse.maven:flywheel-486392:3737402")
 
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.18')
 
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
-    compileOnly fg.deobf("mezz.jei:jei-${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${jei_version}")
 
     if (System.getProperty('idea.sync.active') != 'true') {
         annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'

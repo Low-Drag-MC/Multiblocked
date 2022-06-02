@@ -2,17 +2,17 @@ package com.lowdragmc.multiblocked.api.tile;
 
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
@@ -22,14 +22,14 @@ import java.util.UUID;
  * @implNote IComponent
  */
 public interface IComponent {
-    default TileEntity self() {
-        return (TileEntity) this;
+    default BlockEntity self() {
+        return (BlockEntity) this;
     }
 
     ComponentDefinition getDefinition();
 
-    default ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-        return ActionResultType.PASS;
+    default InteractionResult use(Player player, InteractionHand hand, BlockHitResult hit) {
+        return InteractionResult.PASS;
     }
 
     default void onNeighborChange() {}
@@ -41,7 +41,7 @@ public interface IComponent {
     }
 
     default void setFrontFacing(Direction facing) {
-        World level = self().getLevel();
+        Level level = self().getLevel();
         if (level != null && !level.isClientSide) {
             if (!isValidFrontFacing(facing)) return;
             if (self().getBlockState().getValue(BlockStateProperties.FACING) == facing) return;
@@ -57,7 +57,7 @@ public interface IComponent {
         setFrontFacing(direction.rotate(getFrontFacing()));
     }
 
-    default void onDrops(NonNullList<ItemStack> drops, PlayerEntity entity) {
+    default void onDrops(NonNullList<ItemStack> drops, Player entity) {
         drops.add(getDefinition().getStackForm());
     }
 

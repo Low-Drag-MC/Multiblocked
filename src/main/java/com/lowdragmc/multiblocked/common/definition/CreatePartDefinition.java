@@ -2,7 +2,7 @@ package com.lowdragmc.multiblocked.common.definition;
 
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * @author KilaBash
@@ -20,7 +20,7 @@ public class CreatePartDefinition extends PartDefinition {
     }
 
     public CreatePartDefinition(ResourceLocation location) {
-        super(location, partDefinition -> new CreateKineticSourceTileEntity((CreatePartDefinition) partDefinition));
+        super(location, (partDefinition, pos, state) -> new CreateKineticSourceTileEntity((CreatePartDefinition) partDefinition, pos, state));
         canShared = false;
         stress = 4;
         isOutput = false;

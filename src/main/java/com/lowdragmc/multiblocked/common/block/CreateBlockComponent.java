@@ -3,11 +3,11 @@ package com.lowdragmc.multiblocked.common.block;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.simibubi.create.content.contraptions.base.IRotate;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
 
 /**
  * @author KilaBash
@@ -21,8 +21,8 @@ public class CreateBlockComponent extends BlockComponent implements IRotate {
     }
 
     @Override
-    public boolean hasShaftTowards(IWorldReader world, BlockPos pos, BlockState state, Direction face) {
-        return state.getValue(BlockStateProperties.FACING) == face;
+    public boolean hasShaftTowards(LevelReader levelReader, BlockPos blockPos, BlockState blockState, Direction direction) {
+        return blockState.getValue(BlockStateProperties.FACING) == direction;
     }
 
     @Override

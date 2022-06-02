@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
+import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
@@ -21,11 +22,14 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.blueprint_table.components.PartWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
+import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
+import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
+import com.lowdragmc.multiblocked.common.gui.component.CreatePartWidget;
+import com.simibubi.create.AllBlocks;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -35,9 +39,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public class PartBuilderWidget extends WidgetGroup {
     DraggableScrollableWidgetGroup containers;
+    TextTexture textTexture;
     DummyComponentTileEntity tileEntity;
     List<SelectableWidgetGroup> files = new ArrayList<>();
 
@@ -58,15 +64,24 @@ public class PartBuilderWidget extends WidgetGroup {
                 }
             }
         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.open_folder"));
-        this.addWidget(new ButtonWidget(200 - 4 - 20, 51, 20, 20, new ResourceTexture("multiblocked:textures/gui/add.png"), cd -> {
+        this.addWidget(new ButtonWidget(200 - 4 - 20, 51, 20, 20, null, cd -> {
             new PartWidget(this, new PartDefinition(new ResourceLocation("mod_id:component_id")), jsonObject -> {
-
                 if (jsonObject != null) {
                     FileUtility.saveJson(new File(Multiblocked.location, "definition/part/" + jsonObject.get("location").getAsString().replace(":", "_") + ".json"), jsonObject);
                 }
                 updateList();
             });
-        }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.builder.part.create"));
+        }).setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new ItemStackTexture(BlueprintTableTileEntity.partDefinition.getStackForm())).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.builder.part.create"));
+        if (Multiblocked.isCreateLoaded()) {
+            this.addWidget(new ButtonWidget(200 - 4 - 20, 71, 20, 20, null, cd -> {
+                new CreatePartWidget(this, new CreatePartDefinition(new ResourceLocation("mod_id:component_id")), jsonObject -> {
+                    if (jsonObject != null) {
+                        FileUtility.saveJson(new File(Multiblocked.location, "definition/part/create/" + jsonObject.get("location").getAsString().replace(":", "_") + ".json"), jsonObject);
+                    }
+                    updateList();
+                });
+            }).setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new ItemStackTexture(AllBlocks.FLYWHEEL.asStack())).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.builder.create_part.create"));
+        }
         initScene();
         updateList();
     }
@@ -81,32 +96,55 @@ public class PartBuilderWidget extends WidgetGroup {
                 .setRenderedCore(Collections.singleton(BlockPos.ZERO), null)
                 .setRenderSelect(false)
                 .setRenderFacing(false));
+        this.addWidget(new ImageWidget(30, 65,  138, 15, textTexture = new TextTexture("", 0xff00ff00).setDropShadow(true).setWidth(138).setType(TextTexture.TextType.ROLL)));
     }
 
-    private void setNewRenderer(IMultiblockedRenderer newRenderer) {
+    private void setNewRenderer(IMultiblockedRenderer newRenderer, String type) {
         PartDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "i_renderer"));
         definition.baseRenderer = newRenderer;
         tileEntity.setDefinition(definition);
+        textTexture.updateText(type);
     }
 
     protected void updateList() {
-        setNewRenderer(null);
-        int size = files.size();
+        setNewRenderer(null, "");
         files.forEach(containers::waitToRemoved);
         files.clear();
         File path = new File(Multiblocked.location, "definition/part");
+        walkFile("Common", new ItemStackTexture(BlueprintTableTileEntity.partDefinition.getStackForm()), path, (jsonElement, file)->{
+            PartDefinition definition = Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class);
+            new PartWidget(this, definition, jsonObject -> {
+                if (jsonObject != null) {
+                    FileUtility.saveJson(file, jsonObject);
+                }
+            });
+        });
+        if (Multiblocked.isCreateLoaded()) {
+            path = new File(path, "create");
+            walkFile("Create", new ItemStackTexture(AllBlocks.FLYWHEEL.asStack()), path, ((jsonElement, file) -> {
+                CreatePartDefinition definition = Multiblocked.GSON.fromJson(jsonElement, CreatePartDefinition.class);
+                new CreatePartWidget(this, definition, jsonObject -> {
+                    if (jsonObject != null) {
+                        FileUtility.saveJson(file, jsonObject);
+                    }
+                });
+            }));
+        }
+    }
+
+    private void walkFile(String type, IGuiTexture icon, File path, BiConsumer<JsonElement, File> consumer) {
         if (!path.isDirectory()) {
             if (!path.mkdirs()) {
                 return;
             }
         }
         for (File file : Optional.ofNullable(path.listFiles((s, name) -> name.endsWith(".json"))).orElse(new File[0])) {
-            SelectableWidgetGroup widgetGroup = (SelectableWidgetGroup) new SelectableWidgetGroup(0, (containers.widgets.size() - size) * 22, containers.getSize().width, 20)
+            SelectableWidgetGroup widgetGroup = (SelectableWidgetGroup) new SelectableWidgetGroup(0, files.size() * 22, containers.getSize().width, 20)
                     .setOnSelected(group -> {
                         JsonElement jsonElement = FileUtility.loadJson(file);
-                        if (jsonElement != null) {
+                        if (jsonElement != null && jsonElement.isJsonObject()) {
                             try {
-                                setNewRenderer(Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class).baseRenderer);
+                                setNewRenderer(Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class).baseRenderer, type);
                             } catch (Exception ignored) {}
                         }
                     })
@@ -114,20 +152,14 @@ public class PartBuilderWidget extends WidgetGroup {
                     .addWidget(new ImageWidget(0, 0, 150, 20, new ColorRectTexture(0x4faaaaaa)))
                     .addWidget(new ButtonWidget(134, 4, 12, 12, new ResourceTexture("multiblocked:textures/gui/option.png"), cd -> {
                         JsonElement jsonElement = FileUtility.loadJson(file);
-                        if (jsonElement != null) {
+                        if (jsonElement != null && jsonElement.isJsonObject()) {
                             try {
-                                PartDefinition definition = Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class);
-                                new PartWidget(this, definition, jsonObject -> {
-                                    if (jsonObject != null) {
-                                        FileUtility.saveJson(file, jsonObject);
-                                    }
-                                });
+                                consumer.accept(jsonElement, file);
                             } catch (Exception ignored) {}
                         }
                     }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.settings"))
                     .addWidget(new ImageWidget(32, 0, 100, 20, new TextTexture(file.getName().replace(".json", "")).setWidth(100).setType(TextTexture.TextType.ROLL)))
-                    .addWidget(new ImageWidget(4, 2, 18, 18, new ItemStackTexture(
-                            Items.PAPER)));
+                    .addWidget(new ImageWidget(4, 2, 18, 18, icon));
             files.add(widgetGroup);
             containers.addWidget(widgetGroup);
         }

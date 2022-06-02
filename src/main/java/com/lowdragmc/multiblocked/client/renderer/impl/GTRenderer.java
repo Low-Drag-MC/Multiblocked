@@ -14,8 +14,8 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
+import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -112,9 +112,9 @@ public class GTRenderer extends MBDIModelRenderer {
     @OnlyIn(Dist.CLIENT)
     public List<BakedQuad> renderModel(IBlockDisplayReader level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
         TileEntity te = level.getBlockEntity(pos);
-        if (formedAsController && te instanceof PartTileEntity) {
-            PartTileEntity<?> part = (PartTileEntity<?>) te;
-            for (ControllerTileEntity controller : part.getControllers()) {
+        if (formedAsController && te instanceof IPartComponent) {
+            IPartComponent part = (IPartComponent) te;
+            for (IControllerComponent controller : part.getControllers()) {
                 if (controller.isFormed() && controller.getRenderer() instanceof GTRenderer) {
                     IBakedModel model = getModel(((GTRenderer) controller.getRenderer()).baseTexture).bake(
                             ModelLoader.instance(),

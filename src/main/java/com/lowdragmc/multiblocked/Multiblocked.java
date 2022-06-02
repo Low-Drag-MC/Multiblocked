@@ -44,6 +44,7 @@ public class Multiblocked {
     public static final String MODID_GEO = "geckolib3";
     public static final String MODID_GTCE = "gregtech";
     public static final String MODID_KUBEJS = "kubejs";
+    private static final String MODID_CREATE = "create";
     public static final String MODNAME = "Multiblocked";
     public static final Logger LOGGER = LogManager.getLogger(MODNAME);
     public static final CreativeModeTab
@@ -101,5 +102,9 @@ public class Multiblocked {
     }
     public static boolean isJeiLoaded() {
         return isModLoaded(MODID_JEI);
+    }
+
+    public static boolean isCreateLoaded() {
+        return isModLoaded(MODID_CREATE);
     }
 }

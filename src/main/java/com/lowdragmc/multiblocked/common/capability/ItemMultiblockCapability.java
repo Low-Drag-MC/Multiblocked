@@ -15,13 +15,15 @@ import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.ItemCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.ItemsContentWidget;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.block.Blocks;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -43,8 +45,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
         return !getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, tileEntity).isEmpty();
     }
 
@@ -54,8 +55,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     }
 
     @Override
-    public ItemCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+    public ItemCapabilityProxy createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
         return new ItemCapabilityProxy(tileEntity);
     }
 
@@ -78,7 +78,9 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
         return new BlockInfo[] {
                 BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState()),
                 BlockInfo.fromBlockState(Blocks.WHITE_SHULKER_BOX.defaultBlockState()),
-                BlockInfo.fromBlockState(Blocks.TRAPPED_CHEST.defaultBlockState())
+                BlockInfo.fromBlockState(Blocks.TRAPPED_CHEST.defaultBlockState()),
+                BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "item_input"))),
+                BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "item_output")))
         };
     }
 
@@ -116,7 +118,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
 
     public static class ItemCapabilityProxy extends CapCapabilityProxy<IItemHandler, ItemsIngredient> {
 
-        public ItemCapabilityProxy(BlockEntity tileEntity) {
+        public ItemCapabilityProxy(TileEntity tileEntity) {
             super(ItemMultiblockCapability.CAP, tileEntity, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
         }
 

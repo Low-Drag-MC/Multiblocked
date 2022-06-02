@@ -7,6 +7,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -15,13 +16,13 @@ import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.FluidCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.FluidContentWidget;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.block.Block;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -42,12 +43,11 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
 
     @Override
     public FluidStack defaultContent() {
-        return new FluidStack(Fluids.LAVA.getSource(), 1000);
+        return new FluidStack(Fluids.LAVA.getFluid(), 1000);
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
         return !getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, tileEntity).isEmpty();
     }
 
@@ -58,8 +58,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
 
 
     @Override
-    public FluidCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+    public FluidCapabilityProxy createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
         return new FluidCapabilityProxy(tileEntity);
     }
 
@@ -81,21 +80,24 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
     @Override
     public BlockInfo[] getCandidates() {
         List<BlockInfo> list = new ArrayList<>();
+        TrackedDummyWorld dummyWorld = new TrackedDummyWorld();
         for (Block block : ForgeRegistries.BLOCKS.getValues()) {
             if (block.getRegistryName() != null) {
                 String path = block.getRegistryName().getPath();
                 if (path.contains("tank") || path.contains("fluid") || path.contains("liquid")) {
                     try {
-                        if (block instanceof EntityBlock entityBlock) {
-                            BlockEntity tileEntity = entityBlock.newBlockEntity(BlockPos.ZERO, block.defaultBlockState());
-                            if (tileEntity != null && isBlockHasCapability(IO.BOTH, tileEntity)) {
-                                list.add(new BlockInfo(block.defaultBlockState(), true));
+                        if (block.hasTileEntity(block.defaultBlockState())) {
+                            TileEntity tileEntity = block.createTileEntity(block.defaultBlockState(), dummyWorld);
+                            if (tileEntity != null  && isBlockHasCapability(IO.BOTH, tileEntity)) {
+                                list.add(new BlockInfo(block.defaultBlockState(), tileEntity));
                             }
                         }
                     } catch (Throwable ignored) { }
                 }
             }
         }
+        list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "fluid_input"))));
+        list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "fluid_output"))));
         return list.toArray(new BlockInfo[0]);
     }
 
@@ -121,7 +123,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
 
     public static class FluidCapabilityProxy extends CapCapabilityProxy<IFluidHandler, FluidStack> {
 
-        public FluidCapabilityProxy(BlockEntity tileEntity) {
+        public FluidCapabilityProxy(TileEntity tileEntity) {
             super(FluidMultiblockCapability.CAP, tileEntity, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
         }
 

@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.capability.proxy;
 
 
+import com.lowdragmc.multiblocked.api.capability.ICapabilityProxyHolder;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -91,5 +92,11 @@ public abstract class CapabilityProxy<K> {
         if (hasInnerChanged() || periodID < latestPeriodID) {
             latestPeriodID = periodID;
         }
+    }
+
+    public void preWorking(ICapabilityProxyHolder holder, IO io, Recipe recipe) {
+    }
+
+    public void postWorking(ICapabilityProxyHolder holder, IO io, Recipe recipe) {
     }
 }

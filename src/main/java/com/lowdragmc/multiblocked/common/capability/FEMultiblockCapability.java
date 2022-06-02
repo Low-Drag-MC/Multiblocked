@@ -7,18 +7,20 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.FECapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.block.Block;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -43,8 +45,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     }
 
     @Override
-    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+    public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
         return !getCapability(CapabilityEnergy.ENERGY, tileEntity).isEmpty();
     }
 
@@ -54,8 +55,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     }
 
     @Override
-    public FECapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+    public FECapabilityProxy createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
         return new FECapabilityProxy(tileEntity);
     }
 
@@ -77,21 +77,24 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     @Override
     public BlockInfo[] getCandidates() {
         List<BlockInfo> list = new ArrayList<>();
+        TrackedDummyWorld dummyWorld = new TrackedDummyWorld();
         for (Block block : ForgeRegistries.BLOCKS.getValues()) {
             if (block.getRegistryName() != null) {
                 String path = block.getRegistryName().getPath();
                 if (path.contains("energy") || path.contains("rf")) {
                     try {
-                        if (block instanceof EntityBlock entityBlock) {
-                            BlockEntity tileEntity = entityBlock.newBlockEntity(BlockPos.ZERO, block.defaultBlockState());
+                        if (block.hasTileEntity(block.defaultBlockState())) {
+                            TileEntity tileEntity = block.createTileEntity(block.defaultBlockState(), dummyWorld);
                             if (tileEntity != null && isBlockHasCapability(IO.BOTH, tileEntity)) {
-                                list.add(new BlockInfo(block.defaultBlockState(), true));
+                                list.add(new BlockInfo(block.defaultBlockState(), tileEntity));
                             }
                         }
                     } catch (Throwable ignored) { }
                 }
             }
         }
+        list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "energy_input"))));
+        list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "energy_output"))));
         return list.toArray(new BlockInfo[0]);
     }
 
@@ -119,7 +122,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
 
     public static class FECapabilityProxy extends CapCapabilityProxy<IEnergyStorage, Integer> {
 
-        public FECapabilityProxy(BlockEntity tileEntity) {
+        public FECapabilityProxy(TileEntity tileEntity) {
             super(FEMultiblockCapability.CAP, tileEntity, CapabilityEnergy.ENERGY);
         }
 

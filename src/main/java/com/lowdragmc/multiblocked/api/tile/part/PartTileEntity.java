@@ -8,15 +8,16 @@ import com.lowdragmc.multiblocked.api.kubejs.events.UpdateRendererEvent;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
-import dev.latvian.mods.kubejs.script.ScriptType;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.ChunkPos;
+import dev.latvian.kubejs.script.ScriptType;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -29,19 +30,19 @@ import java.util.Set;
  *
  * part of the multiblock.
  */
-public abstract class PartTileEntity<T extends PartDefinition> extends ComponentTileEntity<T> {
+public abstract class PartTileEntity<T extends PartDefinition> extends ComponentTileEntity<T> implements IPartComponent {
 
     public Set<BlockPos> controllerPos = new HashSet<>();
 
-    public PartTileEntity(T definition, BlockPos pos, BlockState state) {
-        super(definition, pos, state);
+    public PartTileEntity(T definition) {
+        super(definition);
     }
 
     @Override
     public boolean isFormed() {
         for (BlockPos blockPos : controllerPos) {
-            BlockEntity controller = level.getBlockEntity(blockPos);
-            if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
+            TileEntity controller = level.getBlockEntity(blockPos);
+            if (controller instanceof IControllerComponent && ((IControllerComponent) controller).isFormed()) {
                 return true;
             }
         }
@@ -51,7 +52,7 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     @Override
     public IMultiblockedRenderer updateCurrentRenderer() {
         if (definition.workingRenderer != null) {
-            for (ControllerTileEntity controller : getControllers()) {
+            for (IControllerComponent controller : getControllers()) {
                 if (controller.isFormed() && controller.getStatus().equals("working")) {
                     IMultiblockedRenderer renderer = definition.workingRenderer;
                     if (Multiblocked.isKubeJSLoaded()) {
@@ -69,33 +70,38 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public boolean canShared() {
         return definition.canShared;
     }
-    
-    public List<ControllerTileEntity> getControllers() {
-        List<ControllerTileEntity> result = new ArrayList<>();
+
+    @Override
+    public boolean hasController(BlockPos controllerPos) {
+        return this.controllerPos.contains(controllerPos);
+    }
+
+    public List<IControllerComponent> getControllers() {
+        List<IControllerComponent> result = new ArrayList<>();
         for (BlockPos blockPos : controllerPos) {
-            BlockEntity controller = level.getBlockEntity(blockPos);
-            if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
-                result.add((ControllerTileEntity) controller);
+            TileEntity controller = level.getBlockEntity(blockPos);
+            if (controller instanceof IControllerComponent && ((IControllerComponent) controller).isFormed()) {
+                result.add((IControllerComponent) controller);
             }
         }
         return result;
     }
 
-    public void addedToController(@Nonnull ControllerTileEntity controller){
-        if (controllerPos.add(controller.getBlockPos())) {
+    public void addedToController(@Nonnull IControllerComponent controller){
+        if (controllerPos.add(controller.self().getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-            if (Multiblocked.isKubeJSLoaded()) {
-                new PartAddedEvent(controller).post(ScriptType.SERVER, PartAddedEvent.ID, getSubID());
+            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity) {
+                new PartAddedEvent((ControllerTileEntity) controller).post(ScriptType.SERVER, PartAddedEvent.ID, getSubID());
             }
             setStatus("idle");
         }
     }
 
-    public void removedFromController(@Nonnull ControllerTileEntity controller){
-        if (controllerPos.remove(controller.getBlockPos())) {
+    public void removedFromController(@Nonnull IControllerComponent controller){
+        if (controllerPos.remove(controller.self().getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-            if (Multiblocked.isKubeJSLoaded()) {
-                new PartRemovedEvent(controller).post(ScriptType.SERVER, PartRemovedEvent.ID, getSubID());
+            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity) {
+                new PartRemovedEvent((ControllerTileEntity) controller).post(ScriptType.SERVER, PartRemovedEvent.ID, getSubID());
             }
             if (getControllers().isEmpty()) {
                 setStatus("unformed");
@@ -104,19 +110,19 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     }
 
     @Override
-    public void writeInitialSyncData(FriendlyByteBuf buf) {
+    public void writeInitialSyncData(PacketBuffer buf) {
         super.writeInitialSyncData(buf);
         writeControllersToBuffer(buf);
     }
 
     @Override
-    public void receiveInitialSyncData(FriendlyByteBuf buf) {
+    public void receiveInitialSyncData(PacketBuffer buf) {
         super.receiveInitialSyncData(buf);
         readControllersFromBuffer(buf);
     }
 
     @Override
-    public void receiveCustomData(int dataId, FriendlyByteBuf buf) {
+    public void receiveCustomData(int dataId, PacketBuffer buf) {
         if (dataId == -1) {
             readControllersFromBuffer(buf);
         } else {
@@ -125,8 +131,8 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     }
 
     @Override
-    public void load(@Nonnull CompoundTag compound) {
-        super.load(compound);
+    public void load(@Nonnull BlockState state, @Nonnull CompoundNBT compound) {
+        super.load(state, compound);
         for (MultiblockState multiblockState : MultiblockWorldSavedData.getOrCreate(level).getControllerInChunk(new ChunkPos(getBlockPos()))) {
             if(multiblockState.isPosInCache(getBlockPos())) {
                 controllerPos.add(multiblockState.controllerPos);
@@ -134,14 +140,14 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
         }
     }
 
-    private void writeControllersToBuffer(FriendlyByteBuf buffer) {
+    private void writeControllersToBuffer(PacketBuffer buffer) {
         buffer.writeVarInt(controllerPos.size());
         for (BlockPos pos : controllerPos) {
             buffer.writeBlockPos(pos);
         }
     }
 
-    private void readControllersFromBuffer(FriendlyByteBuf buffer) {
+    private void readControllersFromBuffer(PacketBuffer buffer) {
         int size = buffer.readVarInt();
         controllerPos.clear();
         for (int i = size; i > 0; i--) {
@@ -151,8 +157,8 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
 
     public static class PartSimpleTileEntity extends PartTileEntity<PartDefinition> {
 
-        public PartSimpleTileEntity(PartDefinition definition, BlockPos pos, BlockState state) {
-            super(definition, pos, state);
+        public PartSimpleTileEntity(PartDefinition definition) {
+            super(definition);
         }
     }
 

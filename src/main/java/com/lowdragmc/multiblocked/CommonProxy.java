@@ -1,5 +1,7 @@
 package com.lowdragmc.multiblocked;
 
+import com.google.gson.JsonObject;
+import com.lowdragmc.multiblocked.api.block.ItemComponent;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
@@ -15,11 +17,14 @@ import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileTesterEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
-import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
+import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
+import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import com.simibubi.create.foundation.block.BlockStressDefaults;
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -52,6 +57,18 @@ public class CommonProxy {
             }
             RecipeMap.registerRecipeFromFile(Multiblocked.GSON, new File(Multiblocked.location, "recipe_map"));
             MbdComponents.commonLastWork();
+            if (Multiblocked.isCreateLoaded()) {
+                MbdComponents.DEFINITION_REGISTRY.forEach((r, d) -> {
+                    if (d instanceof CreatePartDefinition) {
+                        CreatePartDefinition definition = (CreatePartDefinition) d;
+                        if (definition.isOutput) {
+                            BlockStressDefaults.setDefaultCapacity(d.location, definition.stress);
+                        } else {
+                            BlockStressDefaults.setDefaultImpact(d.location, definition.stress);
+                        }
+                    }
+                });
+            }
         });
     }
 
@@ -63,8 +80,8 @@ public class CommonProxy {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void registerTileEntities(RegistryEvent.Register<BlockEntityType<?>> event) {
-        IForgeRegistry<BlockEntityType<?>> registry = event.getRegistry();
+    public void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
+        IForgeRegistry<TileEntityType<?>> registry = event.getRegistry();
         MbdComponents.registerTileEntity(registry);
     }
 
@@ -82,23 +99,45 @@ public class CommonProxy {
         BlueprintTableTileEntity.registerBlueprintTable();
         // register controller tester
         ControllerTileTesterEntity.registerTestController();
-        CreateKineticSourceTileEntity.registerTest();
         // register part tester
         PartTileTesterEntity.registerTestPart();
         // register JsonBlockPatternBlock
         JsonBlockPatternWidget.registerBlock();
+        // register builtin components
+        MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_energy_input"), PartDefinition.class, null);
+        MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_energy_output"), PartDefinition.class, null);
+        MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_item_input"), PartDefinition.class, null);
+        MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_item_output"), PartDefinition.class, null);
+        MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_fluid_input"), PartDefinition.class, null);
+        MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_fluid_output"), PartDefinition.class, null);
         // register JsonFiles
         MbdComponents.registerComponentFromFile(
                 Multiblocked.GSON,
                 new File(Multiblocked.location, "definition/controller"),
                 ControllerDefinition.class,
-                (definition, config) -> {
-                    definition.basePattern = Multiblocked.GSON.fromJson(config.get("basePattern"), JsonBlockPattern.class).build();
-                    definition.recipeMap = RecipeMap.RECIPE_MAP_REGISTRY.getOrDefault(config.get("recipeMap").getAsString(), RecipeMap.EMPTY);
-                });
+                CommonProxy::controllerPost);
         MbdComponents.registerComponentFromFile(
                 Multiblocked.GSON,
                 new File(Multiblocked.location, "definition/part"),
                 PartDefinition.class, null);
+
+        if (Multiblocked.isCreateLoaded()) {
+
+            MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/create/mbd_create_input"), CreatePartDefinition.class, CreateBlockComponent::new, ItemComponent::new, null);
+            MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/create/mbd_create_output"), CreatePartDefinition.class, CreateBlockComponent::new, ItemComponent::new, null);
+
+            MbdComponents.registerComponentFromFile(
+                    Multiblocked.GSON,
+                    new File(Multiblocked.location, "definition/part/create"),
+                    CreatePartDefinition.class,
+                    CreateBlockComponent::new,
+                    ItemComponent::new,
+                    null);
+        }
+    }
+
+    public static void controllerPost(ControllerDefinition definition, JsonObject config) {
+        definition.basePattern = Multiblocked.GSON.fromJson(config.get("basePattern"), JsonBlockPattern.class).build();
+        definition.recipeMap = RecipeMap.RECIPE_MAP_REGISTRY.getOrDefault(config.get("recipeMap").getAsString(), RecipeMap.EMPTY);
     }
 }

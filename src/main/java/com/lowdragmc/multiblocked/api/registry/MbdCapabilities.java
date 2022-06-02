@@ -6,6 +6,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
+import com.lowdragmc.multiblocked.common.capability.CreateStressCapacityCapability;
 import com.lowdragmc.multiblocked.common.capability.FEMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.HeatMekanismCapability;
@@ -36,6 +37,9 @@ public class MbdCapabilities {
         }
         if (Multiblocked.isBotLoaded()) {
             registerCapability(ManaBotaniaCapability.CAP);
+        }
+        if (Multiblocked.isCreateLoaded()) {
+            registerCapability(CreateStressCapacityCapability.CAP);
         }
     }
 

@@ -4,7 +4,6 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
-import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.pattern.error.PatternError;
 import com.lowdragmc.multiblocked.api.pattern.error.PatternStringError;
 import com.lowdragmc.multiblocked.api.pattern.error.SinglePredicateError;
@@ -13,24 +12,24 @@ import com.lowdragmc.multiblocked.api.pattern.util.PatternMatchContext;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
+import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.level.Level;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Array;
@@ -125,11 +124,11 @@ public class BlockPattern {
                             }
                         }
                         boolean canPartShared = true;
-                        BlockEntity tileEntity = worldState.getTileEntity();
-                        if (tileEntity instanceof PartTileEntity) { // add detected parts
+                        TileEntity tileEntity = worldState.getTileEntity();
+                        if (tileEntity instanceof IPartComponent) { // add detected parts
                             if (!predicate.isAny()) {
-                                PartTileEntity<?> partTileEntity = (PartTileEntity<?>) tileEntity;
-                                if (partTileEntity.isFormed() && !partTileEntity.canShared() && !partTileEntity.controllerPos.contains(worldState.controllerPos)) { // check part can be shared
+                                IPartComponent part = (IPartComponent) tileEntity;
+                                if (part.isFormed() && !part.canShared() && !part.hasController(worldState.controllerPos)) { // check part can be shared
                                     canPartShared = false;
                                     worldState.setError(new PatternStringError("multiblocked.pattern.error.share"));
                                 } else {
@@ -206,8 +205,8 @@ public class BlockPattern {
         return true;
     }
 
-    public void autoBuild(Player player, MultiblockState worldState) {
-        Level world = player.level;
+    public void autoBuild(PlayerEntity player, MultiblockState worldState) {
+        World world = player.level;
         int minZ = -centerOffset[4];
         worldState.clean();
         ControllerTileEntity controller = worldState.getController();
@@ -287,7 +286,7 @@ public class BlockPattern {
                             // check inventory
                             ItemStack found = null;
                             if (!player.isCreative()) {
-                                for (ItemStack itemStack : player.getInventory().items) {
+                                for (ItemStack itemStack : player.inventory.items) {
                                     if (candidates.stream().anyMatch(candidate -> candidate.equals(itemStack, false)) && !itemStack.isEmpty() && itemStack.getItem() instanceof BlockItem) {
                                         found = itemStack.copy();
                                         itemStack.setCount(itemStack.getCount() - 1);
@@ -305,9 +304,9 @@ public class BlockPattern {
                             }
                             if (found == null) continue;
                             BlockItem itemBlock = (BlockItem) found.getItem();
-                            BlockPlaceContext context = new BlockPlaceContext(world, player, InteractionHand.MAIN_HAND, found, BlockHitResult.miss(player.getEyePosition(0), Direction.UP, pos));
+                            BlockItemUseContext context = new BlockItemUseContext(world, player, Hand.MAIN_HAND, found, BlockRayTraceResult.miss(player.getEyePosition(0), Direction.UP, pos));
                             itemBlock.place(context);
-                            BlockEntity tileEntity = world.getBlockEntity(pos);
+                            TileEntity tileEntity = world.getBlockEntity(pos);
                             if (tileEntity instanceof ComponentTileEntity) {
                                 blocks.put(pos, tileEntity);
                             } else {
@@ -448,16 +447,12 @@ public class BlockPattern {
         int finalMinY = minY;
         int finalMinZ = minZ;
         blocks.forEach((pos, info) -> {
+            TileEntity te = blocks.get(pos).getTileEntity();
             resetFacing(pos, info.getBlockState(), null, (p, f) -> {
                 BlockInfo blockInfo = blocks.get(p.relative(f));
                 if (blockInfo == null || blockInfo.getBlockState().getBlock() == Blocks.AIR) {
-                    if (blocks.get(pos).getBlockState().getBlock() instanceof BlockComponent component) {
-                        if (component.definition instanceof ControllerDefinition) {
-                            BlockEntity te = component.newBlockEntity(BlockPos.ZERO, component.defaultBlockState());
-                            if (te instanceof ComponentTileEntity) {
-                                return ((ComponentTileEntity<?>) te).isValidFrontFacing(f);
-                            }
-                        }
+                    if (te instanceof ComponentTileEntity) {
+                        return ((ComponentTileEntity<?>) te).isValidFrontFacing(f);
                     }
                     return true;
                 }
@@ -476,7 +471,7 @@ public class BlockPattern {
         }
     }
 
-    private void tryFacings(BlockState blockState, BlockPos pos, BiFunction<BlockPos, Direction, Boolean> checker, Consumer<BlockState> consumer, Property<Direction> property, Direction[] facings) {
+    private void tryFacings(BlockState blockState, BlockPos pos, BiFunction<BlockPos, Direction, Boolean> checker, Consumer<BlockState> consumer, DirectionProperty property, Direction[] facings) {
         Direction found = null;
         for (Direction facing : facings) {
             if (checker.apply(pos, facing)) {
@@ -494,12 +489,24 @@ public class BlockPattern {
         int[] c0 = new int[]{x, y, z}, c1 = new int[3];
         for (int i = 0; i < 3; i++) {
             switch (structureDir[i].getActualFacing(facing)) {
-                case UP -> c1[1] = c0[i];
-                case DOWN -> c1[1] = -c0[i];
-                case WEST -> c1[0] = -c0[i];
-                case EAST -> c1[0] = c0[i];
-                case NORTH -> c1[2] = -c0[i];
-                case SOUTH -> c1[2] = c0[i];
+                case UP:
+                    c1[1] = c0[i];
+                    break;
+                case DOWN:
+                    c1[1] = -c0[i];
+                    break;
+                case WEST:
+                    c1[0] = -c0[i];
+                    break;
+                case EAST:
+                    c1[0] = c0[i];
+                    break;
+                case NORTH:
+                    c1[2] = -c0[i];
+                    break;
+                case SOUTH:
+                    c1[2] = c0[i];
+                    break;
             }
         }
         return new BlockPos(c1[0], c1[1], c1[2]);

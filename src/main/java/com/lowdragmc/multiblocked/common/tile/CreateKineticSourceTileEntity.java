@@ -291,27 +291,23 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     @Override
     protected void write(CompoundTag compound, boolean clientPacket) {
         super.write(compound, clientPacket);
-        if (clientPacket) {
-            compound.putString("status", status);
-            ListTag list = new ListTag();
-            for (BlockPos pos : controllerPos) {
-                list.add(NbtUtils.writeBlockPos(pos));
-            }
-            compound.put("controller", list);
+        compound.putString("status", status);
+        ListTag list = new ListTag();
+        for (BlockPos pos : controllerPos) {
+            list.add(NbtUtils.writeBlockPos(pos));
         }
+        compound.put("controller", list);
         compound.putFloat("workingSpeed", workingSpeed);
     }
 
     @Override
     protected void read(CompoundTag compound, boolean clientPacket) {
         super.read(compound, clientPacket);
-        if (clientPacket) {
-            status = compound.contains("status") ? compound.getString("status") : "unformed";
-            if (compound.contains("controller")) {
-                controllerPos.clear();
-                for (Tag controller : compound.getList("controller", 10)) {
-                    controllerPos.add(NbtUtils.readBlockPos((CompoundTag) controller));
-                }
+        status = compound.contains("status") ? compound.getString("status") : "unformed";
+        if (compound.contains("controller")) {
+            controllerPos.clear();
+            for (Tag controller : compound.getList("controller", 10)) {
+                controllerPos.add(NbtUtils.readBlockPos((CompoundTag) controller));
             }
         }
         workingSpeed = compound.contains("workingSpeed") ? compound.getFloat("workingSpeed") : 0;

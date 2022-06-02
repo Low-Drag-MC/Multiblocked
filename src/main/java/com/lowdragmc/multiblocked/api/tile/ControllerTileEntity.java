@@ -217,6 +217,9 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     }
 
     public void onStructureInvalid() {
+        if (recipeLogic != null) {
+            recipeLogic.inValid();
+        }
         recipeLogic = null;
         setStatus("unformed");
         // invalid parts

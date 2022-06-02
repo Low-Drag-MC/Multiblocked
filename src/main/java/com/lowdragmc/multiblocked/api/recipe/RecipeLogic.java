@@ -199,6 +199,12 @@ public class RecipeLogic {
         return compound;
     }
 
+    public void inValid() {
+        if (lastRecipe != null && isWorking()) {
+            lastRecipe.postWorking(controller);
+        }
+    }
+
     public enum Status {
         IDLE("idle"),
         WORKING("working"),

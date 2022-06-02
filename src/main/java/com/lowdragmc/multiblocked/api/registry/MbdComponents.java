@@ -101,13 +101,13 @@ public class MbdComponents {
         }
     }
 
-    public static <T extends ComponentDefinition> void registerComponentFromResource(Gson gson, ResourceLocation location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
-        registerComponentFromResource(gson, location, clazz, null, null, postHandler);
+    public static <T extends ComponentDefinition> void registerComponentFromResource(Class<?> source, Gson gson, ResourceLocation location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
+        registerComponentFromResource(source, gson, location, clazz, null, null, postHandler);
     }
 
-    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromResource(Gson gson, ResourceLocation location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
+    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromResource(Class<?> source, Gson gson, ResourceLocation location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
         try {
-            InputStream inputstream = ResourceLocation.class.getResourceAsStream(String.format("/assets/%s/definition/%s.json", location.getNamespace(), location.getPath()));
+            InputStream inputstream = source.getResourceAsStream(String.format("/assets/%s/definition/%s.json", location.getNamespace(), location.getPath()));
             JsonObject config = FileUtility.jsonParser.parse(new InputStreamReader(inputstream)).getAsJsonObject();
             T definition = gson.fromJson(config, clazz);
             if (definition != null) {

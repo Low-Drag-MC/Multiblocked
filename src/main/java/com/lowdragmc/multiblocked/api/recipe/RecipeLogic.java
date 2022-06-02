@@ -130,6 +130,7 @@ public class RecipeLogic {
             }
             recipe = event.getRecipe();
         }
+        recipe.preWorking(this.controller);
         if (recipe.handleRecipeIO(IO.IN, this.controller)) {
             lastRecipe = recipe;
             setStatus(Status.WORKING);
@@ -166,6 +167,7 @@ public class RecipeLogic {
         if (Multiblocked.isKubeJSLoaded()) {
             new RecipeFinishEvent(this).post(ScriptType.SERVER, RecipeFinishEvent.ID, controller.getSubID());
         }
+        lastRecipe.postWorking(this.controller);
         lastRecipe.handleRecipeIO(IO.OUT, this.controller);
         if (lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller)) {
             setupRecipe(lastRecipe);

@@ -1,0 +1,29 @@
+{
+  "isOutput": true,
+  "stress": 4.0,
+  "canShared": false,
+  "location": "multiblocked:create_output",
+  "traits": {},
+  "allowRotate": true,
+  "showInJei": true,
+  "baseRenderer": {
+    "baseTexture": "multiblocked:blocks/casing/create",
+    "frontTexture": "multiblocked:blocks/overlay/overlay_energy_out",
+    "formedAsController": true,
+    "type": "gregtech"
+  },
+  "properties": {
+    "isOpaque": true,
+    "destroyTime": 1.5,
+    "explosionResistance": 6.0,
+    "harvestLevel": 1,
+    "lightEmissive": 0,
+    "speedFactor": 1.0,
+    "jumpFactor": 1.0,
+    "friction": 0.6,
+    "hasCollision": true,
+    "tabGroup": "multiblocked.all",
+    "stackSize": 64
+  },
+  "type": "create_part"
+}

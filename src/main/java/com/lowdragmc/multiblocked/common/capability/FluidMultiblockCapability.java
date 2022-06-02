@@ -16,11 +16,13 @@ import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.FluidCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.FluidContentWidget;
 import net.minecraft.block.Block;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -94,6 +96,8 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
                 }
             }
         }
+        list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "fluid_input"))));
+        list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "fluid_output"))));
         return list.toArray(new BlockInfo[0]);
     }
 

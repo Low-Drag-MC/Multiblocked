@@ -4,11 +4,11 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.kubejs.events.PartAddedEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.PartRemovedEvent;
-import com.lowdragmc.multiblocked.api.kubejs.events.StatusChangedEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.UpdateRendererEvent;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import dev.latvian.kubejs.script.ScriptType;
@@ -30,7 +30,7 @@ import java.util.Set;
  *
  * part of the multiblock.
  */
-public abstract class PartTileEntity<T extends PartDefinition> extends ComponentTileEntity<T> {
+public abstract class PartTileEntity<T extends PartDefinition> extends ComponentTileEntity<T> implements IPartComponent {
 
     public Set<BlockPos> controllerPos = new HashSet<>();
 
@@ -42,7 +42,7 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public boolean isFormed() {
         for (BlockPos blockPos : controllerPos) {
             TileEntity controller = level.getBlockEntity(blockPos);
-            if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
+            if (controller instanceof IControllerComponent && ((IControllerComponent) controller).isFormed()) {
                 return true;
             }
         }
@@ -52,7 +52,7 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     @Override
     public IMultiblockedRenderer updateCurrentRenderer() {
         if (definition.workingRenderer != null) {
-            for (ControllerTileEntity controller : getControllers()) {
+            for (IControllerComponent controller : getControllers()) {
                 if (controller.isFormed() && controller.getStatus().equals("working")) {
                     IMultiblockedRenderer renderer = definition.workingRenderer;
                     if (Multiblocked.isKubeJSLoaded()) {
@@ -70,33 +70,38 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public boolean canShared() {
         return definition.canShared;
     }
-    
-    public List<ControllerTileEntity> getControllers() {
-        List<ControllerTileEntity> result = new ArrayList<>();
+
+    @Override
+    public boolean hasController(BlockPos controllerPos) {
+        return this.controllerPos.contains(controllerPos);
+    }
+
+    public List<IControllerComponent> getControllers() {
+        List<IControllerComponent> result = new ArrayList<>();
         for (BlockPos blockPos : controllerPos) {
             TileEntity controller = level.getBlockEntity(blockPos);
-            if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
-                result.add((ControllerTileEntity) controller);
+            if (controller instanceof IControllerComponent && ((IControllerComponent) controller).isFormed()) {
+                result.add((IControllerComponent) controller);
             }
         }
         return result;
     }
 
-    public void addedToController(@Nonnull ControllerTileEntity controller){
-        if (controllerPos.add(controller.getBlockPos())) {
+    public void addedToController(@Nonnull IControllerComponent controller){
+        if (controllerPos.add(controller.self().getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-            if (Multiblocked.isKubeJSLoaded()) {
-                new PartAddedEvent(controller).post(ScriptType.SERVER, PartAddedEvent.ID, getSubID());
+            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity) {
+                new PartAddedEvent((ControllerTileEntity) controller).post(ScriptType.SERVER, PartAddedEvent.ID, getSubID());
             }
             setStatus("idle");
         }
     }
 
-    public void removedFromController(@Nonnull ControllerTileEntity controller){
-        if (controllerPos.remove(controller.getBlockPos())) {
+    public void removedFromController(@Nonnull IControllerComponent controller){
+        if (controllerPos.remove(controller.self().getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-            if (Multiblocked.isKubeJSLoaded()) {
-                new PartRemovedEvent(controller).post(ScriptType.SERVER, PartRemovedEvent.ID, getSubID());
+            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity) {
+                new PartRemovedEvent((ControllerTileEntity) controller).post(ScriptType.SERVER, PartRemovedEvent.ID, getSubID());
             }
             if (getControllers().isEmpty()) {
                 setStatus("unformed");

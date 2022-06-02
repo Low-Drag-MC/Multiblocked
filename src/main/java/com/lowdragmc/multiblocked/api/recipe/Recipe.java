@@ -179,4 +179,42 @@ public class Recipe {
     public boolean hasTick() {
         return !tickInputs.isEmpty() || !tickOutputs.isEmpty();
     }
+
+    public void preWorking(ICapabilityProxyHolder holder) {
+        handlePre(inputs, holder, IO.IN);
+        handlePre(outputs, holder, IO.OUT);
+    }
+
+    public void postWorking(ICapabilityProxyHolder holder) {
+        handlePost(inputs, holder, IO.IN);
+        handlePost(outputs, holder, IO.OUT);
+    }
+
+    private void handlePre(ImmutableMap<MultiblockCapability<?>, ImmutableList<Tuple<Object, Float>>> contents, ICapabilityProxyHolder holder, IO io) {
+        contents.forEach(((capability, tuples) -> {
+            if (holder.getCapabilitiesProxy().contains(io, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability).values()) {
+                    capabilityProxy.preWorking(holder, io, this);
+                }
+            } else if (holder.getCapabilitiesProxy().contains(IO.BOTH, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(IO.BOTH, capability).values()) {
+                    capabilityProxy.preWorking(holder, io, this);
+                }
+            }
+        }));
+    }
+
+    private void handlePost(ImmutableMap<MultiblockCapability<?>, ImmutableList<Tuple<Object, Float>>> contents, ICapabilityProxyHolder holder, IO io) {
+        contents.forEach(((capability, tuples) -> {
+            if (holder.getCapabilitiesProxy().contains(io, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability).values()) {
+                    capabilityProxy.postWorking(holder, io, this);
+                }
+            } else if (holder.getCapabilitiesProxy().contains(IO.BOTH, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(IO.BOTH, capability).values()) {
+                    capabilityProxy.postWorking(holder, io, this);
+                }
+            }
+        }));
+    }
 }

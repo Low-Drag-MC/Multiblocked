@@ -381,7 +381,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
         definition.properties.tabGroup = null;
         definition.showInJei = false;
         MbdComponents.registerComponent(definition);
-        symbolBlock = MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(definition.location);
+        symbolBlock = (BlockComponent) MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(definition.location);
     }
 
     public class BlockPatternSceneWidget extends SceneWidget {

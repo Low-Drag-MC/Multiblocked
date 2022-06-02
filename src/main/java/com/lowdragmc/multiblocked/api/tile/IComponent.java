@@ -75,4 +75,6 @@ public interface IComponent {
 
     String getStatus();
 
+    void setStatus(String status);
+
 }

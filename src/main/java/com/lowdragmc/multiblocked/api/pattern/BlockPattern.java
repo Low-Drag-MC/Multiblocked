@@ -12,7 +12,7 @@ import com.lowdragmc.multiblocked.api.pattern.util.PatternMatchContext;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
+import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -125,10 +125,10 @@ public class BlockPattern {
                         }
                         boolean canPartShared = true;
                         TileEntity tileEntity = worldState.getTileEntity();
-                        if (tileEntity instanceof PartTileEntity) { // add detected parts
+                        if (tileEntity instanceof IPartComponent) { // add detected parts
                             if (!predicate.isAny()) {
-                                PartTileEntity<?> partTileEntity = (PartTileEntity<?>) tileEntity;
-                                if (partTileEntity.isFormed() && !partTileEntity.canShared() && !partTileEntity.controllerPos.contains(worldState.controllerPos)) { // check part can be shared
+                                IPartComponent part = (IPartComponent) tileEntity;
+                                if (part.isFormed() && !part.canShared() && !part.hasController(worldState.controllerPos)) { // check part can be shared
                                     canPartShared = false;
                                     worldState.setError(new PatternStringError("multiblocked.pattern.error.share"));
                                 } else {

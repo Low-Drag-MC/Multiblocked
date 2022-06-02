@@ -6,27 +6,27 @@ import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IComponent;
+import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 public class PredicateComponent extends SimplePredicate {
     public ResourceLocation location = new ResourceLocation("mod_id", "component_id");
@@ -50,7 +50,13 @@ public class PredicateComponent extends SimplePredicate {
 
     @Override
     public SimplePredicate buildPredicate() {
-        predicate = state -> state.getTileEntity() instanceof ComponentTileEntity<?> && ((ComponentTileEntity<?>) state.getTileEntity()).getDefinition().location.equals(location);
+        predicate = state -> {
+            TileEntity tileEntity = state.getTileEntity();
+            if (tileEntity instanceof IComponent) {
+                return ((IComponent) tileEntity).getDefinition().location.equals(location);
+            }
+            return false;
+        };
         candidates = () -> {
             if (MbdComponents.COMPONENT_BLOCKS_REGISTRY.containsKey(location)) {
                 return new BlockInfo[]{new BlockInfo(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(location).defaultBlockState(), MbdComponents.DEFINITION_REGISTRY.get(location).createNewTileEntity())};
@@ -91,22 +97,26 @@ public class PredicateComponent extends SimplePredicate {
     }
 
     private List<String> getAvailableComponents() {
+        Set<String> components = new HashSet<>();
+        for (ComponentDefinition value : MbdComponents.DEFINITION_REGISTRY.values()) {
+            if (value.baseRenderer instanceof CycleBlockStateRenderer) continue;
+            if (value instanceof ControllerDefinition) continue;
+            components.add(value.location.toString());
+        }
         File dir = new File(Multiblocked.location, "definition/part");
         if (dir.isDirectory()) {
             File[] files = dir.listFiles();
             if (files != null) {
-                return Arrays.stream(files).map(file -> {
+                Arrays.stream(files).map(file -> {
                     try {
                         return FileUtility.loadJson(file).getAsJsonObject().get("location").getAsString();
                     } catch (Exception e) {
                         return null;
                     }
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-            } else {
-                return Collections.emptyList();
+                }).filter(Objects::nonNull).forEach(components::add);
             }
         }
-        return Collections.emptyList();
+        return new ArrayList<>(components);
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
-import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
+import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.MultiblockPreviewRenderer;
 import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
@@ -66,7 +66,7 @@ import static net.minecraft.util.Util.NIL_UUID;
  *
  * Head of the multiblock.
  */
-public class ControllerTileEntity extends ComponentTileEntity<ControllerDefinition> implements ICapabilityProxyHolder, IAsyncThreadUpdate {
+public class ControllerTileEntity extends ComponentTileEntity<ControllerDefinition> implements ICapabilityProxyHolder, IAsyncThreadUpdate, IControllerComponent {
     public MultiblockState state;
     public boolean asyncRecipeSearching = true;
     protected Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities;
@@ -205,8 +205,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (parts != null) {
             for (Long pos : parts) {
                 TileEntity tileEntity = level.getBlockEntity(BlockPos.of(pos));
-                if (tileEntity instanceof PartTileEntity) {
-                    ((PartTileEntity<?>) tileEntity).addedToController(this);
+                if (tileEntity instanceof IPartComponent) {
+                    ((IPartComponent) tileEntity).addedToController(this);
                 }
             }
         }
@@ -224,8 +224,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (parts != null) {
             for (Long pos : parts) {
                 TileEntity tileEntity = level.getBlockEntity(BlockPos.of(pos));
-                if (tileEntity instanceof PartTileEntity) {
-                    ((PartTileEntity<?>) tileEntity).removedFromController(this);
+                if (tileEntity instanceof IPartComponent) {
+                    ((IPartComponent) tileEntity).removedFromController(this);
                 }
             }
             parts = null;

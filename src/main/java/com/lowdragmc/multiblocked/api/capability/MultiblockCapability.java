@@ -108,7 +108,7 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
     }
 
     public final BlockComponent getAnyBlock() {
-        return MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, name + ".any"));
+        return (BlockComponent) MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, name + ".any"));
     }
 
     public final JsonElement serialize(Object obj) {

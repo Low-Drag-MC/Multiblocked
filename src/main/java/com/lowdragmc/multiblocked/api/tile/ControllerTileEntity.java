@@ -216,8 +216,11 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             new StructureFormedEvent(this).post(ScriptType.SERVER, StructureFormedEvent.ID, getSubID());
         }
     }
-    
+
     public void onStructureInvalid() {
+        if (recipeLogic != null) {
+            recipeLogic.inValid();
+        }
         recipeLogic = null;
         setStatus("unformed");
         // invalid parts

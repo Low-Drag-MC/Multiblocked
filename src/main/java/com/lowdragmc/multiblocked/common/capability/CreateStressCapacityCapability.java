@@ -70,7 +70,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
 
     @Override
     public ContentWidget<? super Float> createContentWidget() {
-        return new NumberContentWidget().setContentTexture(new TextTexture("MN", color)).setUnit("Mana");
+        return new NumberContentWidget().setContentTexture(new TextTexture("SC", color)).setUnit("Stress");
     }
 
     @Override

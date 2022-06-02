@@ -196,24 +196,24 @@ dependencies {
     implementation fg.deobf("me.shedaniel:architectury-forge:${architectury_version}")
 
     //geckolib
-    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.71')
+    compileOnly fg.deobf('software.bernie.geckolib:geckolib-forge-1.16.5:3.0.71')
 
     //botania
-    implementation fg.deobf("curse.maven:botania-225643:3608755")
+    compileOnly fg.deobf("curse.maven:botania-225643:3608755")
     //mekanism
-    implementation fg.deobf("curse.maven:mekanism-268560:3659389")
+    compileOnly fg.deobf("curse.maven:mekanism-268560:3659389")
     // patchouli
-    implementation fg.deobf("curse.maven:patchouli-306770:3459118")
+    compileOnly fg.deobf("curse.maven:patchouli-306770:3459118")
     // curios
-    implementation fg.deobf("curse.maven:curios-309927:3456953")
+    compileOnly fg.deobf("curse.maven:curios-309927:3456953")
     // create
-    implementation fg.deobf("curse.maven:create-328085:3499718")
+    compileOnly fg.deobf("curse.maven:create-328085:3499718")
     // flywheel
-    implementation fg.deobf("curse.maven:flywheel-486392:3459739")
+    compileOnly fg.deobf("curse.maven:flywheel-486392:3459739")
 
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
-    compileOnly fg.deobf("mezz.jei:jei-${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${jei_version}")
 
     if (System.getProperty('idea.sync.active') != 'true') {
         annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'

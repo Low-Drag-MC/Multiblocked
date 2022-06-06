@@ -23,7 +23,7 @@
 
   "block.multiblocked.energy_output": "Energy Output Hatch",
   "block.multiblocked.energy_input": "Energy Input Hatch",
-  "block.multiblocked.fluid_input": "Fluid Output Hatch",
+  "block.multiblocked.fluid_input": "Fluid Input Hatch",
   "block.multiblocked.fluid_output": "Fluid Output Hatch",
   "block.multiblocked.item_input": "Item Input Bus",
   "block.multiblocked.item_output": "Item Output Bus",

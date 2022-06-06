@@ -378,7 +378,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             if (!isFormed() && definition.catalyst != null) {
                 if (state == null) state = new MultiblockState(level, getBlockPos());
                 ItemStack held = player.getItemInHand(hand);
-                if (definition.catalyst.isEmpty() || held.equals(definition.catalyst, false)) {
+                if (definition.catalyst.isEmpty() || ItemStack.isSame(held, definition.catalyst)) {
                     if (checkPattern()) { // formed
                         player.swing(hand);
                         Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));

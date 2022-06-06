@@ -18,7 +18,7 @@
   "showInJei": true,
   "baseRenderer": {
     "baseTexture": "multiblocked:blocks/casing/base",
-    "frontTexture": "multiblocked:blocks/overlay/overlay_fluid_out",
+    "frontTexture": "multiblocked:blocks/overlay/overlay_fluid_in",
     "formedAsController": true,
     "type": "gregtech"
   },

@@ -3,8 +3,13 @@ package com.lowdragmc.multiblocked.api.gui.recipe;
 import com.google.common.collect.Lists;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
+import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
+import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
+import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
@@ -16,6 +21,7 @@ import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -34,6 +40,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
     protected T content;
     protected float chance;
     protected IO io;
+    protected String slotName;
     protected boolean perTick;
     protected IGuiTexture background;
     protected Consumer<ContentWidget<T>> onPhantomUpdate;
@@ -50,11 +57,24 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     public final ContentWidget<T> setContent(@Nonnull IO io, @Nonnull Object content, float chance, boolean perTick) {
         this.io = io;
         this.content = (T) content;
         this.chance = chance;
         this.perTick = perTick;
+        this.slotName = null;
+        onContentUpdate();
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public final ContentWidget<T> setContent(@Nonnull IO io, Content content, boolean perTick) {
+        this.io = io;
+        this.content = (T) content.content;
+        this.chance = content.chance;
+        this.perTick = perTick;
+        this.slotName = content.slotName;
         onContentUpdate();
         return this;
     }
@@ -131,6 +151,10 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
         return chance;
     }
 
+    public String getSlotName() {
+        return slotName;
+    }
+
     public boolean getPerTick() {
         return perTick;
     }
@@ -163,12 +187,22 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
     public void openConfigurator(WidgetGroup dialog){
         dialog.addWidget(new LabelWidget(5, 8, "multiblocked.gui.label.chance"));
         dialog.addWidget(new TextFieldWidget(125 - 60, 5, 30, 15, null, number -> setContent(io, content, Float.parseFloat(number), perTick)).setNumbersOnly(0f, 1f).setCurrentString(chance + ""));
-        dialog.addWidget(new SwitchWidget(125 - 25 , 5, 15, 15, (cd, r) -> setContent(io, content, chance, r))
-                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
-                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
-                .setHoverBorderTexture(1, -1)
-                .setPressed(perTick)
-                .setHoverTooltips("multiblocked.gui.content.per_tick"));
+        dialog.addWidget(new ButtonWidget(125 - 25 , 5, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"), cd -> {
+            DialogWidget dialogWidget = new DialogWidget(dialog, true);
+            dialogWidget
+                    .addWidget(new ImageWidget(0, 0, dialog.getSize().width, dialog.getSize().height, ResourceBorderTexture.BORDERED_BACKGROUND))
+                    .addWidget(new LabelWidget(25, 8, "perTick"))
+                    .addWidget(new SwitchWidget(5, 5, 15, 15, (x, r) -> setContent(io, content, chance, r))
+                            .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
+                            .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
+                            .setHoverBorderTexture(1, -1)
+                            .setPressed(perTick)
+                            .setHoverTooltips("multiblocked.gui.content.per_tick"))
+                    .addWidget(new TextFieldWidget(5, 25, dialog.getSize().width - 10, 15, null, s -> setContent(io, new Content(content, chance, s != null && !s.isEmpty() ? s : null), perTick))
+                            .setCurrentString(slotName == null ? "" : slotName)
+                            .setHoverTooltips("multiblocked.gui.content.slot_name"))
+                    .addWidget(new ButtonWidget(5, dialog.getSize().height - 20, dialog.getSize().width - 10, 15, null, c -> dialogWidget.close()).setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("multiblocked.gui.content.back")));
+        }).setHoverTooltips("multiblocked.gui.content.more_option"));
     }
 
     public ContentWidget<T> setBackground(IGuiTexture background) {

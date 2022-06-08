@@ -12,6 +12,7 @@ import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.registry.MbdItems;
 import com.lowdragmc.multiblocked.api.registry.MbdPredicates;
+import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
 import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
@@ -47,6 +48,7 @@ public class CommonProxy {
         MbdCapabilities.registerCapabilities();
         MbdRenderers.registerRenderers();
         MbdPredicates.registerPredicates();
+        MbdRecipeConditions.registerConditions();
     }
 
     @SubscribeEvent

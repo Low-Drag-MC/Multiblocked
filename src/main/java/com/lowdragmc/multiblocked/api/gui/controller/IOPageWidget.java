@@ -337,6 +337,7 @@ public class IOPageWidget extends PageWidget {
         if (id == -1) {
             MultiblockCapability<?> capability = MbdCapabilities.get(buffer.readUtf());
             Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities = controller.getCapabilitiesProxy();
+            Map<Long, Set<String>> slotsMap = controller.state != null && controller.state.getMatchContext() != null ? controller.state.getMatchContext().get("slots") : null;
             if (buffer.readBoolean()) {
                 IO io = buffer.readEnum(IO.class);
                 capabilities.get(io, capability).remove(pos.asLong());
@@ -353,6 +354,7 @@ public class IOPageWidget extends PageWidget {
                     }
                     CapabilityProxy<?> proxy = capability.createProxy(io, entity);
                     proxy.facing = buffer.readEnum(Direction.class);
+                    proxy.slots = slotsMap == null ? null : slotsMap.get(entity.getBlockPos().asLong());
                     capabilities.get(io, capability).put(pos.asLong(), proxy);
                 }
             }
@@ -360,6 +362,7 @@ public class IOPageWidget extends PageWidget {
         } else if (id == -2) {
             MultiblockCapability<?> capability = MbdCapabilities.get(buffer.readUtf());
             Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities = controller.getCapabilitiesProxy();
+            Map<Long, Set<String>> slotsMap = controller.state != null && controller.state.getMatchContext() != null ? controller.state.getMatchContext().get("slots") : null;
             IO io = buffer.readEnum(IO.class);
             BlockEntity entity = controller.getLevel().getBlockEntity(pos);
             if (entity != null && capability.isBlockHasCapability(io, entity)) {
@@ -368,6 +371,7 @@ public class IOPageWidget extends PageWidget {
                 }
                 CapabilityProxy<?> proxy = capability.createProxy(io, entity);
                 proxy.facing = buffer.readEnum(Direction.class);
+                proxy.slots = slotsMap == null ? null : slotsMap.get(entity.getBlockPos().asLong());
                 capabilities.get(io, capability).put(pos.asLong(), proxy);
             }
             controller.markAsDirty();

@@ -12,6 +12,7 @@ import net.minecraftforge.common.capabilities.Capability;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public abstract class CapabilityProxy<K> {
     public final MultiblockCapability<? super K> capability;
     public Direction facing;
+    public Set<String> slots;
     private long latestPeriodID;
 
     private BlockEntity tileEntity;

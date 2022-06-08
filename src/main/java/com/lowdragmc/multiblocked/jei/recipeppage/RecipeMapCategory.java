@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.jei.IGui2IDrawable;
 import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
+import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
@@ -76,14 +77,14 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
         Recipe recipe = wrapper.recipe;
         if (recipe.inputs.containsKey(ItemMultiblockCapability.CAP)) {
             ingredients.setInputs(VanillaTypes.ITEM, recipe.inputs.get(ItemMultiblockCapability.CAP).stream()
-                    .map(Tuple::getA)
+                    .map(Content::getContent)
                     .map(ItemsIngredient.class::cast)
                     .flatMap(r-> Arrays.stream(r.ingredient.getItems()))
                     .collect(Collectors.toList()));
         }
         if (recipe.outputs.containsKey(ItemMultiblockCapability.CAP)) {
             ingredients.setOutputs(VanillaTypes.ITEM, recipe.outputs.get(ItemMultiblockCapability.CAP).stream()
-                    .map(Tuple::getA)
+                    .map(Content::getContent)
                     .map(ItemsIngredient.class::cast)
                     .flatMap(r -> Arrays.stream(r.ingredient.getItems()))
                     .collect(Collectors.toList()));
@@ -103,13 +104,13 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
     private <T> void checkCommonIngredients(Recipe recipe, MultiblockCapability<T> CAP, IIngredients ingredients, IIngredientType<T> type, Class<T> clazz) {
         if (recipe.inputs.containsKey(CAP)) {
             ingredients.setInputs(type, recipe.inputs.get(CAP).stream()
-                    .map(Tuple::getA)
+                    .map(Content::getContent)
                     .map(clazz::cast)
                     .collect(Collectors.toList()));
         }
         if (recipe.outputs.containsKey(CAP)) {
             ingredients.setOutputs(type, recipe.outputs.get(CAP).stream()
-                    .map(Tuple::getA)
+                    .map(Content::getContent)
                     .map(clazz::cast)
                     .collect(Collectors.toList()));
         }

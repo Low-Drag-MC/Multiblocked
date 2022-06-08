@@ -1,14 +1,18 @@
 package com.lowdragmc.multiblocked.api.recipe;
 
-import net.minecraft.util.Tuple;
-
 public class Content {
-    public final Object content;
-    public final float chance;
-    
-    public Content(Tuple<Object, Float> tuple) {
-        content = tuple.getA();
-        chance = tuple.getB();
+    public transient Object content;
+    public float chance;
+    public String slotName;
+
+    public Content(Object content, float chance, String slotName) {
+        this.content = content;
+        this.chance = chance;
+        this.slotName = slotName;
     }
-    
+
+    public Object getContent() {
+        return content;
+    }
+
 }

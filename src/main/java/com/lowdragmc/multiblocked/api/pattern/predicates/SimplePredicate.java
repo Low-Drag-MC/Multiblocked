@@ -21,6 +21,7 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
 import com.lowdragmc.multiblocked.api.pattern.error.PatternStringError;
 import com.lowdragmc.multiblocked.api.pattern.error.SinglePredicateError;
+import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.resources.I18n;
@@ -34,7 +35,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -54,6 +59,7 @@ public class SimplePredicate {
     public int previewCount = -1;
     public boolean disableRenderFormed = false;
     public IO io = IO.BOTH;
+    public String slotName;
     public String customTips;
     public String nbtParser;
 
@@ -150,6 +156,11 @@ public class SimplePredicate {
             blockWorldState.setError(new PatternStringError("The NBT fails to match"));
             return false;
         }
+        if (slotName != null) {
+            Map<Long, Set<String>> slots = blockWorldState.getMatchContext().getOrCreate("slots", Long2ObjectArrayMap::new);
+            slots.computeIfAbsent(blockWorldState.pos.asLong(), s->new HashSet<>()).add(slotName);
+            return true;
+        }
         return true;
     }
 
@@ -173,7 +184,7 @@ public class SimplePredicate {
         groups.add(group);
         group.setClientSideWidget();
         group.addWidget(new LabelWidget(0, 0, () -> LocalizationUtils.format("multiblocked.gui.label.type") + " " + type).setTextColor(-1).setDrop(true));
-        TextFieldWidget min, max, preview, nbt, tooltips;
+        TextFieldWidget min, max, preview, nbt, tooltips, slot;
 
         group.addWidget(min = new TextFieldWidget(55, 15, 30, 15, () -> minCount + "", s -> {
             minCount = Integer.parseInt(s);
@@ -240,6 +251,16 @@ public class SimplePredicate {
                 .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("tips (Y)", -1).setDropShadow(true))
                 .setHoverTooltips("multiblocked.gui.predicate.add_tips"));
 
+        group.addWidget(slot = new TextFieldWidget(155, 52, 100, 15, null, s -> slotName = s));
+        slot.setCurrentString(slotName == null ? "" : slotName).setHoverTooltips("slot name").setVisible(slotName != null);
+        group.addWidget(new SwitchWidget(100, 52, 50, 15, (cd, r)->{
+            slot.setVisible(r);
+            slotName = r ? "" : null;
+        }).setPressed(slotName != null).setHoverBorderTexture(1, -1)
+                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("slot (N)", -1).setDropShadow(true))
+                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/button_common.png"), new TextTexture("slot (Y)", -1).setDropShadow(true))
+                .setHoverTooltips("multiblocked.gui.predicate.slot"));
+
         group.addWidget(new SelectorWidget(130, 70, 40, 15, Arrays.asList("IN", "OUT", "BOTH", "NULL"), -1)
                 .setValue(io == null ? "NULL" : io.name())
                 .setIsUp(true)
@@ -277,6 +298,9 @@ public class SimplePredicate {
         if (customTips != null) {
             jsonObject.addProperty("customTips", customTips);
         }
+        if (slotName != null) {
+            jsonObject.addProperty("slotName", slotName);
+        }
         return jsonObject;
     }
 
@@ -288,6 +312,7 @@ public class SimplePredicate {
         io = JSONUtils.getAsString(jsonObject, "io", "").equals("null") ? null : IO.valueOf(JSONUtils.getAsString(jsonObject, "io", IO.BOTH.name()));
         nbtParser = JSONUtils.getAsString(jsonObject, "nbtParser", nbtParser);
         customTips = JSONUtils.getAsString(jsonObject, "customTips", customTips);
+        slotName = JSONUtils.getAsString(jsonObject, "slotName", slotName);
     }
     
 }

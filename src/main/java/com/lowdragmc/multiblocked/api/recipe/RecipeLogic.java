@@ -4,21 +4,22 @@ package com.lowdragmc.multiblocked.api.recipe;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
-import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeFinishEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.SetupRecipeEvent;
-import com.lowdragmc.multiblocked.api.kubejs.events.UpdateTickEvent;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import dev.latvian.kubejs.script.ScriptType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.CompoundNBT;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeLogic {
     public final ControllerTileEntity controller;
     public Recipe lastRecipe;
+    public List<Recipe> lastFaildMattches;
+
     public int progress;
     public int duration;
     public int timer;
@@ -48,12 +49,28 @@ public class RecipeLogic {
             findAndHandleRecipe();
         } else if (timer % 5 == 0) {
             checkAsyncRecipeSearching(this::findAndHandleRecipe);
+            if (lastFaildMattches != null) {
+                for (Recipe recipe : lastFaildMattches) {
+                    if (recipe.checkConditions(this)) {
+                        setupRecipe(recipe);
+                    }
+                    if (lastRecipe != null && getStatus() == Status.WORKING) {
+                        lastFaildMattches = null;
+                        return;
+                    }
+                }
+            }
         }
     }
 
     public void handleRecipeWorking() {
-        progress++;
-        handleTickRecipe(lastRecipe);
+        if (lastRecipe.checkConditions(this)) {
+            setStatus(Status.WORKING);
+            progress++;
+            handleTickRecipe(lastRecipe);
+        } else {
+            setStatus(Status.SUSPEND);
+        }
         markDirty();
     }
 
@@ -93,7 +110,8 @@ public class RecipeLogic {
 
     public void findAndHandleRecipe() {
         Recipe recipe;
-        if (lastRecipe != null && lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller)) {
+        lastFaildMattches = null;
+        if (lastRecipe != null && lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller) && lastRecipe.checkConditions(this)) {
             recipe = lastRecipe;
             lastRecipe = null;
             setupRecipe(recipe);
@@ -101,10 +119,17 @@ public class RecipeLogic {
             List<Recipe> matches = controller.getDefinition().recipeMap.searchRecipe(this.controller);
             lastRecipe = null;
             for (Recipe match : matches) {
-                setupRecipe(match);
+                if (match.checkConditions(this)) {
+                    setupRecipe(match);
+                }
                 if (lastRecipe != null && getStatus() == Status.WORKING) {
+                    lastFaildMattches = null;
                     break;
                 }
+                if (lastFaildMattches == null) {
+                    lastFaildMattches = new ArrayList<>();
+                }
+                lastFaildMattches.add(match);
             }
         }
     }
@@ -169,7 +194,7 @@ public class RecipeLogic {
         }
         lastRecipe.postWorking(this.controller);
         lastRecipe.handleRecipeIO(IO.OUT, this.controller);
-        if (lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller)) {
+        if (lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller) && lastRecipe.checkConditions(this)) {
             setupRecipe(lastRecipe);
         } else {
             setStatus(Status.IDLE);

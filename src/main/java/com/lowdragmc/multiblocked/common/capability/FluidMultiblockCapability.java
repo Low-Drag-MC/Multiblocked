@@ -107,8 +107,6 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
     public FluidStack of(Object o) {
         if (o instanceof FluidStack) {
             return ((FluidStack) o).copy();
-        } else if (Multiblocked.isKubeJSLoaded()) {
-            return MultiblockedJSPlugin.FluidStackWrapper(o);
         }
         return FluidStack.EMPTY;
     }

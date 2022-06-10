@@ -90,8 +90,6 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     public ItemsIngredient of(Object o) {
         if (o instanceof ItemsIngredient) {
             return ((ItemsIngredient) o).copy();
-        } else if (Multiblocked.isKubeJSLoaded()) {
-            return MultiblockedJSPlugin.ItemsIngredientWrapper(o);
         }
         return new ItemsIngredient(ItemStack.EMPTY);
     }

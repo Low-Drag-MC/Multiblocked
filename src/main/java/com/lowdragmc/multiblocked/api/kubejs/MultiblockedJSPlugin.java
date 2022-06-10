@@ -1,5 +1,7 @@
 package com.lowdragmc.multiblocked.api.kubejs;
 
+import com.lowdragmc.multiblocked.api.kubejs.events.RecipeEvent;
+import com.lowdragmc.multiblocked.api.kubejs.recipes.RecipeMapJS;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
@@ -11,34 +13,44 @@ import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.Mod;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author KilaBash
  * @date 2022/5/23
  * @implNote MultiblockedJSPlugin
  */
+@Mod.EventBusSubscriber
 public class MultiblockedJSPlugin extends KubeJSPlugin {
+    public static final Set<String> ADDED_RECIPES = new HashSet<>();
+
     @Override
     public void addBindings(BindingsEvent event) {
-        event.add("MbdRecipeMap", RecipeMap.class);
-        event.add("MbdRegistry", RegistryWrapper.class);
         event.add("MbdFactoryBlockPattern", FactoryBlockPattern.class);
         event.add("MbdRelativeDirection", RelativeDirection.class);
     }
 
-    @Override
-    public void addTypeWrappers(ScriptType type, TypeWrappers typeWrappers) {
-        typeWrappers.register(ItemsIngredient.class, MultiblockedJSPlugin::ItemsIngredientWrapper);
-        typeWrappers.register(FluidStack.class, MultiblockedJSPlugin::FluidStackWrapper);
+    //Fire MBD's own event when things are good
+    @SubscribeEvent
+    public static void onServerLoad(ServerStartedEvent event) {
+        ADDED_RECIPES.clear();
+        var recipeEvent = new RecipeEvent();
+        recipeEvent.post(ScriptType.SERVER, RecipeEvent.ID);
+        recipeEvent.recipeMaps.forEach(RecipeMapJS::build);
     }
 
-    public static FluidStack FluidStackWrapper(Object o) {
-        return FluidStackHooksForge.toForge(FluidStackJS.of(o).getFluidStack());
-    }
-
-    public static ItemsIngredient ItemsIngredientWrapper(Object o) {
-        IngredientJS ingredient = IngredientJS.of(o);
-        return new ItemsIngredient(ingredient.createVanillaIngredient());
+    //Remove added recipes when server stopped so we won't get dupes
+    @SubscribeEvent
+    public static void onServerUnload(ServerStoppedEvent event) {
+        RecipeMap.RECIPE_MAP_REGISTRY.values().forEach(map -> {
+            ADDED_RECIPES.forEach(uid -> map.recipes.remove(uid));
+        });
     }
 }

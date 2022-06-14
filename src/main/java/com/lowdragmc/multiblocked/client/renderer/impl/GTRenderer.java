@@ -46,15 +46,15 @@ import java.util.function.Supplier;
 
 public class GTRenderer extends MBDIModelRenderer {
     public final static GTRenderer INSTANCE = new GTRenderer();
+    private static final ResourceLocation VOID = new ResourceLocation("multiblocked:void");
 
     public ResourceLocation baseTexture = new ResourceLocation("multiblocked:blocks/gregtech_base");
     public ResourceLocation frontOverlay = new ResourceLocation("multiblocked:blocks/gregtech_front");
-
-    public ResourceLocation backOverlay;
-    public ResourceLocation leftOverlay;
-    public ResourceLocation rightOverlay;
-    public ResourceLocation upOverlay;
-    public ResourceLocation downOverlay;
+    public ResourceLocation backOverlay = VOID;
+    public ResourceLocation leftOverlay = VOID;
+    public ResourceLocation rightOverlay = VOID;
+    public ResourceLocation upOverlay = VOID;
+    public ResourceLocation downOverlay = VOID;
 
     public boolean formedAsController;
 
@@ -142,21 +142,11 @@ public class GTRenderer extends MBDIModelRenderer {
             ((BlockModel) model).textureMap.put("bot_west", ModelFactory.parseBlockTextureLocationOrReference(baseTexture.toString()));
             ((BlockModel) model).textureMap.put("bot_east", ModelFactory.parseBlockTextureLocationOrReference(baseTexture.toString()));
             ((BlockModel) model).textureMap.put("top_north", ModelFactory.parseBlockTextureLocationOrReference(frontOverlay.toString()));
-            if (backOverlay != null) {
-                ((BlockModel) model).textureMap.put("top_south", ModelFactory.parseBlockTextureLocationOrReference(backOverlay.toString()));
-            }
-            if (leftOverlay != null) {
-                ((BlockModel) model).textureMap.put("top_west", ModelFactory.parseBlockTextureLocationOrReference(leftOverlay.toString()));
-            }
-            if (rightOverlay != null) {
-                ((BlockModel) model).textureMap.put("top_east", ModelFactory.parseBlockTextureLocationOrReference(rightOverlay.toString()));
-            }
-            if (upOverlay != null) {
-                ((BlockModel) model).textureMap.put("top_up", ModelFactory.parseBlockTextureLocationOrReference(upOverlay.toString()));
-            }
-            if (downOverlay != null) {
-                ((BlockModel) model).textureMap.put("top_down", ModelFactory.parseBlockTextureLocationOrReference(downOverlay.toString()));
-            }
+            ((BlockModel) model).textureMap.put("top_south", ModelFactory.parseBlockTextureLocationOrReference(backOverlay.toString()));
+            ((BlockModel) model).textureMap.put("top_west", ModelFactory.parseBlockTextureLocationOrReference(leftOverlay.toString()));
+            ((BlockModel) model).textureMap.put("top_east", ModelFactory.parseBlockTextureLocationOrReference(rightOverlay.toString()));
+            ((BlockModel) model).textureMap.put("top_up", ModelFactory.parseBlockTextureLocationOrReference(upOverlay.toString()));
+            ((BlockModel) model).textureMap.put("top_down", ModelFactory.parseBlockTextureLocationOrReference(downOverlay.toString()));
         }
         return model;
     }
@@ -171,19 +161,19 @@ public class GTRenderer extends MBDIModelRenderer {
     public JsonObject toJson(Gson gson, JsonObject jsonObject) {
         jsonObject.add("baseTexture", gson.toJsonTree(baseTexture, ResourceLocation.class));
         jsonObject.add("frontTexture", gson.toJsonTree(frontOverlay, ResourceLocation.class));
-        if (backOverlay != null) {
+        if (!backOverlay.equals(VOID)) {
             jsonObject.add("backTexture", gson.toJsonTree(backOverlay, ResourceLocation.class) );
         }
-        if (leftOverlay != null) {
+        if (!leftOverlay.equals(VOID)) {
             jsonObject.add("leftTexture", gson.toJsonTree(leftOverlay, ResourceLocation.class) );
         }
-        if (rightOverlay != null) {
+        if (!rightOverlay.equals(VOID)) {
             jsonObject.add("rightTexture", gson.toJsonTree(rightOverlay, ResourceLocation.class) );
         }
-        if (upOverlay != null) {
+        if (!upOverlay.equals(VOID)) {
             jsonObject.add("upTexture", gson.toJsonTree(upOverlay, ResourceLocation.class) );
         }
-        if (downOverlay != null) {
+        if (!downOverlay.equals(VOID)) {
             jsonObject.add("downTexture", gson.toJsonTree(downOverlay, ResourceLocation.class) );
         }
         if (formedAsController) {

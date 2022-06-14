@@ -2,11 +2,7 @@ package com.lowdragmc.multiblocked.api.registry;
 
 import com.google.common.collect.Maps;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.BiomeCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.DimensionCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.PositionYCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.RainingCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.ThunderCondition;
+import com.lowdragmc.multiblocked.common.recipe.conditions.*;
 
 import java.util.Map;
 
@@ -32,5 +28,6 @@ public class MbdRecipeConditions {
         registerCondition(RainingCondition.INSTANCE);
         registerCondition(PositionYCondition.INSTANCE);
         registerCondition(BiomeCondition.INSTANCE);
+        registerCondition(BlockCondition.INSTANCE);
     }
 }

@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends MultiblockCapability<STACK> {
     public static final ChemicalMekanismCapability<Gas, GasStack> CAP_GAS =
             new ChemicalMekanismCapability<>("mek_gas", 0xff85909E,
-                    Capabilities.GAS_HANDLER_CAPABILITY,
+                    () -> Capabilities.GAS_HANDLER_CAPABILITY,
                     MekanismAPI.EMPTY_GAS, MekanismAPI::gasRegistry,
                     GasStack::new,
                     ChemicalTankBuilder.GAS,
@@ -58,7 +58,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     public static final ChemicalMekanismCapability<InfuseType, InfusionStack> CAP_INFUSE =
             new ChemicalMekanismCapability<>("mek_infuse", 0xff5c9e90,
-                    Capabilities.INFUSION_HANDLER_CAPABILITY,
+                    () -> Capabilities.INFUSION_HANDLER_CAPABILITY,
                     MekanismAPI.EMPTY_INFUSE_TYPE, MekanismAPI::infuseTypeRegistry,
                     InfusionStack::new,
                     ChemicalTankBuilder.INFUSION,
@@ -73,7 +73,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     public static final ChemicalMekanismCapability<Pigment, PigmentStack> CAP_PIGMENT =
             new ChemicalMekanismCapability<>("mek_pigment", 0xff9e2768,
-                    Capabilities.PIGMENT_HANDLER_CAPABILITY,
+                    () -> Capabilities.PIGMENT_HANDLER_CAPABILITY,
                     MekanismAPI.EMPTY_PIGMENT, MekanismAPI::pigmentRegistry,
                     PigmentStack::new,
                     ChemicalTankBuilder.PIGMENT,
@@ -88,7 +88,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     public static final ChemicalMekanismCapability<Slurry, SlurryStack> CAP_SLURRY =
             new ChemicalMekanismCapability<>("mek_slurry", 0xff9e5a11,
-                    Capabilities.SLURRY_HANDLER_CAPABILITY,
+                    () -> Capabilities.SLURRY_HANDLER_CAPABILITY,
                     MekanismAPI.EMPTY_SLURRY, MekanismAPI::slurryRegistry,
                     SlurryStack::new,
                     ChemicalTankBuilder.SLURRY,
@@ -102,7 +102,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                     });
 
 
-    public final Capability<IChemicalHandler<CHEMICAL, STACK>> capability;
+    public final Supplier<Capability<IChemicalHandler<CHEMICAL, STACK>>> capability;
     public final CHEMICAL empty;
     public final Supplier<IForgeRegistry<CHEMICAL>> registry;
     public final BiFunction<CHEMICAL, Long, STACK> createStack;
@@ -111,7 +111,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     public final Function<PacketBuffer, STACK> readFromBuffer;
 
     private ChemicalMekanismCapability(String key, int color,
-                                       Capability<? extends IChemicalHandler<CHEMICAL, STACK>> capability,
+                                       Supplier<Capability<? extends IChemicalHandler<CHEMICAL, STACK>>> capability,
                                        CHEMICAL empty,
                                        Supplier<IForgeRegistry<CHEMICAL>> registry,
                                        BiFunction<CHEMICAL, Long, STACK> createStack,
@@ -119,7 +119,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                                        Function<PacketBuffer, STACK> readFromBuffer,
                                        Supplier<BlockInfo[]> candidates) {
         super(key, color);
-        this.capability = (Capability<IChemicalHandler<CHEMICAL, STACK>>) capability;
+        this.capability = (Supplier<Capability<IChemicalHandler<CHEMICAL, STACK>>>)(Object)capability;
         this.empty = empty;
         this.registry = registry;
         this.createStack = createStack;
@@ -202,7 +202,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     public static class ChemicalMekanismCapabilityProxy<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends CapCapabilityProxy<IChemicalHandler<CHEMICAL, STACK>, STACK> {
 
         public ChemicalMekanismCapabilityProxy(ChemicalMekanismCapability<CHEMICAL, STACK> cap, TileEntity tileEntity) {
-            super(cap, tileEntity, cap.capability);
+            super(cap, tileEntity, cap.capability.get());
         }
 
         @Override
@@ -230,8 +230,8 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                         iterator.remove();
                         continue;
                     }
-                    STACK inserted = capability.insertChemical((STACK) chemicalStack.copy(), simulate ? Action.SIMULATE : Action.EXECUTE);
-                    chemicalStack.setAmount(chemicalStack.getAmount() - inserted.getAmount());
+                    STACK leftStack = capability.insertChemical((STACK) chemicalStack.copy(), simulate ? Action.SIMULATE : Action.EXECUTE);
+                    chemicalStack.setAmount(leftStack.getAmount());
                     if (chemicalStack.isEmpty()) {
                         iterator.remove();
                     }
@@ -278,7 +278,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
             lastCapability = new long[capability.getTanks()];
             for (int i = 0; i < capability.getTanks(); i++) {
                 STACK gas = capability.getChemicalInTank(i);
-                lastStacks.set(i, (STACK) gas.copy());
+                lastStacks.add((STACK) gas.copy());
                 lastCapability[i] = capability.getTankCapacity(i);
             }
             return true;

@@ -70,7 +70,7 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
     @Override
     public void detectAndSendChanges() {
         if (handler != null) {
-            if (handler.getTankCapacity(index) != lastCapability || lastStack == null || handler.getChemicalInTank(index).isStackIdentical(lastStack)) {
+            if (handler.getTankCapacity(index) != lastCapability || lastStack == null || !handler.getChemicalInTank(index).isStackIdentical(lastStack)) {
                 lastCapability = handler.getTankCapacity(index);
                 lastStack = handler.getChemicalInTank(index);
                 writeUpdateInfo(-3, this::writeTank);
@@ -112,7 +112,7 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
 
     @Override
     public void drawHookBackground(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        if (content != null) {
+        if (content != null && !content.isEmpty()) {
             Position pos = getPosition();
             Size size = getSize();
             Minecraft minecraft = Minecraft.getInstance();
@@ -120,7 +120,7 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
             RenderSystem.enableBlend();
             drawChemical(stack, pos.x + 1, pos.y + 1, 18, 18, content);
             stack.scale(0.5f, 0.5f, 1);
-            String s = TextFormattingUtil.formatLongToCompactStringBuckets(content.getAmount(), 3);
+            String s = TextFormattingUtil.formatLongToCompactStringBuckets(content.getAmount(), 3) + "B";
             FontRenderer fontRenderer = minecraft.font;
             fontRenderer.drawShadow(stack, s, (pos.x + (size.width / 3f)) * 2 - fontRenderer.width(s) + 21, (pos.y + (size.height / 3f) + 6) * 2, 0xFFFFFF);
             stack.popPose();

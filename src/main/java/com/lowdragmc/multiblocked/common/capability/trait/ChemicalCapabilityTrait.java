@@ -97,7 +97,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
                             TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 AtomicBoolean r = new AtomicBoolean(false);
-                                te.getCapability(getCap().capability, facing.getOpposite()).ifPresent(handler -> {
+                                te.getCapability(getCap().capability.get(), facing.getOpposite()).ifPresent(handler -> {
                                     if (!already.insert(handler.extractChemical(getCap().createStack.apply(stack.getRaw(), need), Action.EXECUTE), Action.EXECUTE, AutomationType.INTERNAL).isEmpty()) {
                                         r.set(true);
                                     }
@@ -114,7 +114,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
                             TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
                             if (te != null) {
                                 AtomicBoolean r = new AtomicBoolean(false);
-                                te.getCapability(getCap().capability, facing.getOpposite()).ifPresent(handler -> {
+                                te.getCapability(getCap().capability.get(), facing.getOpposite()).ifPresent(handler -> {
                                     if (!already.extract(handler.insertChemical((STACK) stack.copy(), Action.EXECUTE).getAmount(), Action.EXECUTE, AutomationType.INTERNAL).isEmpty()) {
                                         r.set(true);
                                     }
@@ -188,13 +188,13 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return getCap().capability.orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(capabilityIO, false)));
+        return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(capabilityIO, false)));
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return getCap().capability.orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(capabilityIO, true)));
+        return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(capabilityIO, true)));
     }
 
     public class ProxyChemicalHandler implements IChemicalHandler<CHEMICAL, STACK> {

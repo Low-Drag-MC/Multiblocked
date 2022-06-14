@@ -247,6 +247,7 @@
   "multiblocked.gui.condition.thunder.level": "Thunder Level",
   "multiblocked.gui.condition.pos_y.min": "Min Position Y",
   "multiblocked.gui.condition.pos_y.max": "Max Position Y",
+  "multiblocked.gui.condition.block.count": "Minimum Count",
 
   "multiblocked.recipe.condition.thunder": "Thunder",
   "multiblocked.recipe.condition.thunder.tooltip": "Rain Level: %d",

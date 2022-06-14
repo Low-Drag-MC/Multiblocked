@@ -5,15 +5,12 @@ import com.google.common.collect.ImmutableMap;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.*;
-import com.lowdragmc.multiblocked.common.recipe.conditions.BiomeCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.DimensionCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.PositionYCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.RainingCondition;
-import com.lowdragmc.multiblocked.common.recipe.conditions.ThunderCondition;
+import com.lowdragmc.multiblocked.common.recipe.conditions.*;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -299,6 +296,14 @@ public class RecipeBuilder {
 
     public RecipeBuilder posY(int min, int max) {
         return posY(min, max, false);
+    }
+
+    public RecipeBuilder block(BlockState blockState, int count, boolean reverse) {
+        return addCondition(new BlockCondition(blockState, count).setReverse(reverse));
+    }
+
+    public RecipeBuilder block(BlockState blockState, int count) {
+        return block(blockState, count, false);
     }
 
     public Recipe build() {

@@ -1,8 +1,10 @@
 package com.lowdragmc.multiblocked;
 
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.client.renderer.impl.BlockStateRenderer;
 import com.lowdragmc.multiblocked.api.block.ItemComponent;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
+import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.dialogs.JsonBlockPatternWidget;
@@ -17,6 +19,7 @@ import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileTesterEntity;
+import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
@@ -121,7 +124,8 @@ public class CommonProxy {
         MbdComponents.registerComponentFromFile(
                 Multiblocked.GSON,
                 new File(Multiblocked.location, "definition/part"),
-                PartDefinition.class, null);
+                PartDefinition.class,
+                CommonProxy::componentPost);
 
         if (Multiblocked.isCreateLoaded()) {
 
@@ -134,12 +138,25 @@ public class CommonProxy {
                     CreatePartDefinition.class,
                     CreateBlockComponent::new,
                     ItemComponent::new,
-                    null);
+                    CommonProxy::componentPost);
+        }
+    }
+
+    private static void componentPost(ComponentDefinition definition, JsonObject config) {
+        if (definition.baseRenderer instanceof BlockStateRenderer) {
+            definition.baseRenderer = Multiblocked.GSON.fromJson(config.get("baseRenderer"), IMultiblockedRenderer.class);
+        }
+        if (definition.formedRenderer instanceof BlockStateRenderer) {
+            definition.formedRenderer = Multiblocked.GSON.fromJson(config.get("formedRenderer"), IMultiblockedRenderer.class);
+        }
+        if (definition.workingRenderer instanceof BlockStateRenderer) {
+            definition.workingRenderer = Multiblocked.GSON.fromJson(config.get("workingRenderer"), IMultiblockedRenderer.class);
         }
     }
 
     public static void controllerPost(ControllerDefinition definition, JsonObject config) {
         definition.basePattern = Multiblocked.GSON.fromJson(config.get("basePattern"), JsonBlockPattern.class).build();
         definition.recipeMap = RecipeMap.RECIPE_MAP_REGISTRY.getOrDefault(config.get("recipeMap").getAsString(), RecipeMap.EMPTY);
+        componentPost(definition, config);
     }
 }

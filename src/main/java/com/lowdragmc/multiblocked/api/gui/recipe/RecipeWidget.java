@@ -15,6 +15,8 @@ import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Map;
 import java.util.function.DoubleSupplier;
@@ -88,8 +90,14 @@ public class RecipeWidget extends WidgetGroup {
         index = 0;
         for (RecipeCondition condition : recipe.conditions) {
             index++;
-            this.addWidget(new ImageWidget(168 - index * 16, 70, 16, 16, condition.getValidTexture())
-                    .setHoverTooltips(condition.getTooltips()));
+            if (condition.isReverse()) {
+                this.addWidget(new ImageWidget(168 - index * 16, 70, 16, 16, condition.getValidTexture())
+                        .setHoverTooltips(new TranslationTextComponent("multiblocked.gui.condition.reverse"), condition.getTooltips()));
+            } else {
+                this.addWidget(new ImageWidget(168 - index * 16, 70, 16, 16, condition.getValidTexture())
+                        .setHoverTooltips(condition.getTooltips()));
+            }
+
         }
     }
 }

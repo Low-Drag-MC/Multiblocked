@@ -206,6 +206,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
         public ChemicalMekanismCapabilityProxy(ChemicalMekanismCapability<CHEMICAL, STACK> cap, BlockEntity tileEntity) {
             super(cap, tileEntity, cap.capability.get());
+        }
 
         @Override
         protected List<STACK> handleRecipeInner(IO io, Recipe recipe, List<STACK> left, boolean simulate) {

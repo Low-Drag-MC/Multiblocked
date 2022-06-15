@@ -229,6 +229,13 @@ jar {
     }
 }
 
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveBaseName.set(project.archivesBaseName)
+    archiveVersion.set("${project.version}")
+    archiveClassifier.set('sources')
+}
+
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar') 
@@ -242,6 +249,7 @@ publishing {
             artifactId project.archivesBaseName
             version project.version
             artifact jar
+            artifact sourcesJar
         }
     }
     repositories {

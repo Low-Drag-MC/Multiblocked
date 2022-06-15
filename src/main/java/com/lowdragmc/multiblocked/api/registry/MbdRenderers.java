@@ -8,6 +8,7 @@ import com.lowdragmc.multiblocked.client.renderer.impl.GTRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.GeoComponentRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDIModelRenderer;
+import com.lowdragmc.multiblocked.client.renderer.impl.ParticleRenderer;
 
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class MbdRenderers {
     public static void registerRenderers() {
         registerRenderer(MBDIModelRenderer.INSTANCE);
         registerRenderer(MBDBlockStateRenderer.INSTANCE);
-//        registerRenderer(TextureParticleRenderer.INSTANCE);
+        registerRenderer(ParticleRenderer.INSTANCE);
         registerRenderer(GTRenderer.INSTANCE);
         if (Multiblocked.isGeoLoaded()) {
             registerRenderer(GeoComponentRenderer.INSTANCE);

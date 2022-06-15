@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.network.chat.TextComponent;
@@ -30,11 +31,11 @@ public abstract class RecipeCondition {
     }
 
     public IGuiTexture getInValidTexture() {
-        return new ResourceTexture("multiblocked:textures/gui/condition_" + getType() + ".png").getSubTexture(0,0,1,0.5f);
+        return new ResourceTexture("multiblocked:textures/gui/condition_" + getType() + ".png").getSubTexture(0, 0, 1, 0.5f);
     }
 
     public IGuiTexture getValidTexture() {
-        return new ResourceTexture("multiblocked:textures/gui/condition_" + getType() + ".png").getSubTexture(0,0.5f,1,0.5f);
+        return new ResourceTexture("multiblocked:textures/gui/condition_" + getType() + ".png").getSubTexture(0, 0.5f, 1, 0.5f);
     }
 
     public boolean isReverse() {
@@ -66,11 +67,20 @@ public abstract class RecipeCondition {
         return this;
     }
 
+    public void toNetwork(FriendlyByteBuf buf) {
+        buf.writeBoolean(isReverse);
+    }
+
+    public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
+        isReverse = buf.readBoolean();
+        return this;
+    }
+
     @OnlyIn(Dist.CLIENT)
     public void openConfigurator(WidgetGroup group) {
-        group.addWidget(new SwitchWidget(0 , 0, 15, 15, (cd, r) -> isReverse = r)
-                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
-                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
+        group.addWidget(new SwitchWidget(0, 0, 15, 15, (cd, r) -> isReverse = r)
+                .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0, 0, 1, 0.5))
+                .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0, 0.5, 1, 0.5))
                 .setHoverBorderTexture(1, -1)
                 .setPressed(isReverse)
                 .setHoverTooltips("multiblocked.gui.condition.reverse"));

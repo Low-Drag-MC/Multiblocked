@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
@@ -36,7 +35,7 @@ public class RecipeTypeAdapter implements JsonSerializer<Recipe>,
                 deserializeIO(json.has("tickOutputs") ? json.get("tickOutputs") : new JsonObject()),
                 (json.has("conditions") ? json.getAsJsonObject("conditions") : new JsonObject())
                         .entrySet().stream()
-                        .map(entry -> MbdRecipeConditions.getCondition(entry.getKey()).deserialize(entry.getValue().getAsJsonObject()))
+                        .map(entry -> MbdRecipeConditions.getCondition(entry.getKey()).createTemplate().deserialize(entry.getValue().getAsJsonObject()))
                         .collect(ImmutableList.toImmutableList()),
                 json.get("duration").getAsInt());
     }
@@ -76,19 +75,7 @@ public class RecipeTypeAdapter implements JsonSerializer<Recipe>,
             if (capability != null) {
                 ImmutableList.Builder<Content> listBuilder = new ImmutableList.Builder<>();
                 for (JsonElement element : entry.getValue().getAsJsonArray()) {
-                    JsonObject recipe = element.getAsJsonObject();
-                    Object content;
-                    try {
-                        content = capability.deserialize(recipe.get("content"));
-                    } catch (Exception e) {
-                        Multiblocked.LOGGER.error(e);
-                        content = null;
-                    }
-                    if (content != null) {
-                        Content c = Multiblocked.GSON.fromJson(recipe, Content.class);
-                        c.content = content;
-                        listBuilder.add(c);
-                    }
+                    listBuilder.add(capability.serializer.fromJsonContent(element));
                 }
                 builder.put(capability, listBuilder.build());
             }
@@ -102,9 +89,7 @@ public class RecipeTypeAdapter implements JsonSerializer<Recipe>,
             JsonArray jsonArray = new JsonArray();
             results.add(capability.name, jsonArray);
             for (Content content : tuples) {
-                JsonObject result = Multiblocked.GSON.toJsonTree(content).getAsJsonObject();
-                jsonArray.add(result);
-                result.add("content", capability.serialize(content.content));
+                jsonArray.add(capability.serializer.toJsonContent(content));
             }
         });
         return results;

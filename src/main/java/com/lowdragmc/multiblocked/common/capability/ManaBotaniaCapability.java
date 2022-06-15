@@ -1,6 +1,5 @@
 package com.lowdragmc.multiblocked.common.capability;
 
-import com.google.gson.*;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -8,6 +7,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerInteger;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -16,7 +16,6 @@ import vazkii.botania.api.mana.IManaReceiver;
 import vazkii.botania.common.block.ModBlocks;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
     public static final ManaBotaniaCapability CAP = new ManaBotaniaCapability();
 
     private ManaBotaniaCapability() {
-        super("bot_mana", 0xFF06D2D9);
+        super("bot_mana", 0xFF06D2D9, new SerializerInteger());
     }
 
     @Override
@@ -44,7 +43,7 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
 
     @Override
     public ManaBotainaCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return new ManaBotainaCapabilityProxy(tileEntity);
     }
 
@@ -62,16 +61,6 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
                 BlockInfo.fromBlock(ModBlocks.manaVoid),
                 BlockInfo.fromBlock(ModBlocks.terraPlate)
         };
-    }
-
-    @Override
-    public Integer deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        return jsonElement.getAsInt();
-    }
-
-    @Override
-    public JsonElement serialize(Integer integer, Type type, JsonSerializationContext jsonSerializationContext) {
-        return new JsonPrimitive(integer);
     }
 
     @Override

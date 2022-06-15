@@ -14,6 +14,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerFloat;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
@@ -36,7 +37,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
     public static final CreateStressCapacityCapability CAP = new CreateStressCapacityCapability();
 
     private CreateStressCapacityCapability() {
-        super("create_stress", 0xFFd9d06f);
+        super("create_stress", 0xFFd9d06f, new SerializerFloat());
     }
 
     @Override
@@ -46,15 +47,12 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
 
     @Override
     public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         if (tileEntity instanceof CreateKineticSourceTileEntity) {
             if (io == IO.IN && ((CreateKineticSourceTileEntity) tileEntity).isGenerator()) {
                 return false;
             }
-            if (io == IO.OUT && !((CreateKineticSourceTileEntity) tileEntity).isGenerator()) {
-                return false;
-            }
-            return true;
+            return io != IO.OUT || ((CreateKineticSourceTileEntity) tileEntity).isGenerator();
         }
         return false;
     }
@@ -66,7 +64,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
 
     @Override
     public CreateStressCapacityCapability.ManaBotainaCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return new CreateStressCapacityCapability.ManaBotainaCapabilityProxy(tileEntity);
     }
 
@@ -112,7 +110,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
         }
 
         public CreateKineticSourceTileEntity getCapability() {
-            return (CreateKineticSourceTileEntity)getTileEntity();
+            return (CreateKineticSourceTileEntity) getTileEntity();
         }
 
         @Override

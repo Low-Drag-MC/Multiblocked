@@ -10,6 +10,8 @@ import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.dialogs.JsonBlockPatternWidget;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MBDRecipeReloadListener;
+import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MultiBlockRecipe;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.registry.MbdItems;
@@ -25,10 +27,14 @@ import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.simibubi.create.foundation.block.BlockStressDefaults;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -39,6 +45,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 import software.bernie.geckolib3.GeckoLib;
 
 import java.io.File;
+
+import static com.lowdragmc.multiblocked.api.recipe.serde.recipe.MBDRecipeType.MULTIBLOCK_RECIPE_SERIALIZER;
+import static com.lowdragmc.multiblocked.api.recipe.serde.recipe.MBDRecipeType.MULTIBLOCK_RECIPE_TYPE;
 
 public class CommonProxy {
     public CommonProxy() {
@@ -56,7 +65,7 @@ public class CommonProxy {
 
     @SubscribeEvent
     public void commonSetup(FMLCommonSetupEvent e) {
-        e.enqueueWork(()->{
+        e.enqueueWork(() -> {
             for (MultiblockCapability<?> capability : MbdCapabilities.CAPABILITY_REGISTRY.values()) {
                 capability.getAnyBlock().definition.baseRenderer = new CycleBlockStateRenderer(capability.getCandidates());
             }
@@ -64,8 +73,7 @@ public class CommonProxy {
             MbdComponents.commonLastWork();
             if (Multiblocked.isCreateLoaded()) {
                 MbdComponents.DEFINITION_REGISTRY.forEach((r, d) -> {
-                    if (d instanceof CreatePartDefinition) {
-                        CreatePartDefinition definition = (CreatePartDefinition) d;
+                    if (d instanceof CreatePartDefinition definition) {
                         if (definition.isOutput) {
                             BlockStressDefaults.setDefaultCapacity(d.location, definition.stress);
                         } else {
@@ -90,6 +98,14 @@ public class CommonProxy {
         MbdComponents.registerTileEntity(registry);
     }
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void registerRecipes(RegistryEvent.Register<RecipeSerializer<?>> event) {
+        IForgeRegistry<RecipeSerializer<?>> registry = event.getRegistry();
+        Registry.register(Registry.RECIPE_TYPE, MultiBlockRecipe.MultiBlockRecipeType.TYPE_ID, MULTIBLOCK_RECIPE_TYPE);
+        MULTIBLOCK_RECIPE_SERIALIZER.setRegistryName(MultiBlockRecipe.MultiBlockRecipeType.TYPE_ID);
+        registry.register(MULTIBLOCK_RECIPE_SERIALIZER);
+    }
+
     @SubscribeEvent
     public void registerItems(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();
@@ -97,7 +113,7 @@ public class CommonProxy {
         MbdItems.registerItems(registry);
     }
 
-    public static void registerComponents(){
+    public static void registerComponents() {
         // register any capability block
         MbdCapabilities.registerAnyCapabilityBlocks();
         // register blueprint table

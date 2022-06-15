@@ -1,8 +1,6 @@
 package com.lowdragmc.multiblocked.api.capability;
 
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
@@ -12,6 +10,7 @@ import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.IContentSerializer;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Direction;
@@ -20,20 +19,22 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
  * Used to detect whether a machine has a certain capability. And provide its capability in proxy {@link CapabilityProxy}.
- *
  */
 public abstract class MultiblockCapability<T> implements JsonSerializer<T>, JsonDeserializer<T> {
     public final String name;
     public final int color;
+    public IContentSerializer<T> serializer;
 
-    protected MultiblockCapability(String name, int color) {
+    protected MultiblockCapability(String name, int color, IContentSerializer<T> serializer) {
         this.name = name;
         this.color = color;
+        this.serializer = serializer;
     }
 
     public String getUnlocalizedName() {
@@ -49,18 +50,18 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
      * detect whether this block has capability
      */
     public abstract boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity);
+            BlockEntity tileEntity);
 
     /**
      * deep copy of this content. recipe need it for searching and such things
      */
     public abstract T copyInner(T content);
-    
+
     /**
      * create a proxy of this block.
      */
     public abstract CapabilityProxy<? extends T> createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity);
+            BlockEntity tileEntity);
 
     /**
      * Create a Widget of given contents
@@ -92,7 +93,7 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
     }
 
     public <C> Set<C> getCapability(Capability<C> capability, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         Set<C> found = new LinkedHashSet<>();
         for (Direction facing : Direction.values()) {
             tileEntity.getCapability(capability, facing).ifPresent(found::add);
@@ -114,12 +115,23 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
         return (BlockComponent) MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, name + ".any"));
     }
 
-    public final JsonElement serialize(Object obj) {
-        return serialize((T)obj, null, null);
+    @Override
+    public JsonElement serialize(T src, Type typeOfSrc, JsonSerializationContext context) {
+        return serializer.toJson(src);
     }
 
-    public final T deserialize(JsonElement jsonElement){
-        return deserialize(jsonElement, null, null);
+    @Override
+    public T deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        return serializer.fromJson(json);
+    }
+
+    @SuppressWarnings("unchecked")
+    public final JsonElement serialize(Object obj) {
+        return serializer.toJson((T) obj);
+    }
+
+    public final T deserialize(JsonElement jsonElement) {
+        return serializer.fromJson(jsonElement);
     }
 
     /**

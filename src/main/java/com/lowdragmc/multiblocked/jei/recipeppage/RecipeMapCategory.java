@@ -5,12 +5,12 @@ import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
-import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
 import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
+import com.lowdragmc.multiblocked.core.mixins.NBTIngredientMixin;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.pigment.PigmentStack;
@@ -25,12 +25,14 @@ import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Tuple;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraftforge.common.crafting.NBTIngredient;
 import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
     private final RecipeMap recipeMap;
@@ -77,17 +79,16 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
     public void setIngredients(@Nonnull RecipeWrapper wrapper, @Nonnull IIngredients ingredients) {
         Recipe recipe = wrapper.recipe;
         if (recipe.inputs.containsKey(ItemMultiblockCapability.CAP)) {
-            ingredients.setInputs(VanillaTypes.ITEM, recipe.inputs.get(ItemMultiblockCapability.CAP).stream()
+            ingredients.setInputIngredients(recipe.inputs.get(ItemMultiblockCapability.CAP).stream()
                     .map(Content::getContent)
-                    .map(ItemsIngredient.class::cast)
-                    .flatMap(r-> Arrays.stream(r.ingredient.getItems()))
+                    .map(Ingredient.class::cast)
                     .collect(Collectors.toList()));
         }
         if (recipe.outputs.containsKey(ItemMultiblockCapability.CAP)) {
             ingredients.setOutputs(VanillaTypes.ITEM, recipe.outputs.get(ItemMultiblockCapability.CAP).stream()
                     .map(Content::getContent)
-                    .map(ItemsIngredient.class::cast)
-                    .flatMap(r -> Arrays.stream(r.ingredient.getItems()))
+                    .map(Ingredient.class::cast)
+                    .flatMap(r -> r instanceof NBTIngredient ? Stream.of(((NBTIngredientMixin) r).getStack()) : Arrays.stream(r.getItems()))
                     .collect(Collectors.toList()));
         }
 

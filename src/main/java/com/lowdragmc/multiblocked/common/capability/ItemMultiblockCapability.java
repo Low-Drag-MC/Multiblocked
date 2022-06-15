@@ -1,10 +1,5 @@
 package com.lowdragmc.multiblocked.common.capability;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -12,52 +7,54 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
-import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
-import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerIngredient;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.ItemCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.ItemsContentWidget;
+import com.lowdragmc.multiblocked.core.mixins.NBTIngredientMixin;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.common.crafting.NBTIngredient;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
 
-public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredient> {
+public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
     public static final ItemMultiblockCapability CAP = new ItemMultiblockCapability();
 
     private ItemMultiblockCapability() {
-        super("item", 0xFFD96106);
+        super("item", 0xFFD96106, new SerializerIngredient());
     }
 
     @Override
-    public ItemsIngredient defaultContent() {
-        return new ItemsIngredient(Ingredient.of(Items.IRON_INGOT), 1);
+    public Ingredient defaultContent() {
+        return Ingredient.of(Items.IRON_INGOT);
     }
 
     @Override
     public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return !getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, tileEntity).isEmpty();
     }
 
     @Override
-    public ItemsIngredient copyInner(ItemsIngredient content) {
-        return content.copy();
+    public Ingredient copyInner(Ingredient content) {
+        return Ingredient.merge(List.of(content));
     }
 
     @Override
     public ItemCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return new ItemCapabilityProxy(tileEntity);
     }
 
@@ -71,13 +68,13 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     }
 
     @Override
-    public ContentWidget<? super ItemsIngredient> createContentWidget() {
+    public ContentWidget<? super Ingredient> createContentWidget() {
         return new ItemsContentWidget();
     }
 
     @Override
     public BlockInfo[] getCandidates() {
-        return new BlockInfo[] {
+        return new BlockInfo[]{
                 BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState()),
                 BlockInfo.fromBlockState(Blocks.WHITE_SHULKER_BOX.defaultBlockState()),
                 BlockInfo.fromBlockState(Blocks.TRAPPED_CHEST.defaultBlockState()),
@@ -87,73 +84,59 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
     }
 
     @Override
-    public ItemsIngredient of(Object o) {
-        if (o instanceof ItemsIngredient) {
-            return ((ItemsIngredient) o).copy();
-        } else if (Multiblocked.isKubeJSLoaded()) {
-            return MultiblockedJSPlugin.ItemsIngredientWrapper(o);
+    @SuppressWarnings("unchecked")
+    public Ingredient of(Object o) {
+        if (o instanceof Ingredient ingredient) {
+            return ingredient;
+        } else if (o instanceof ItemStack itemStack) {
+            return Ingredient.of(itemStack);
+        } else if (o instanceof ItemLike itemLike) {
+            return Ingredient.of(itemLike);
+        } else if (o instanceof TagKey tag) {
+            return Ingredient.of(tag);
         }
-        return new ItemsIngredient(ItemStack.EMPTY);
+        return Ingredient.EMPTY;
     }
 
-    @Override
-    public ItemsIngredient deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
-        if (jsonObject.has("tag")) {
-            return new ItemsIngredient(jsonObject.get("tag").getAsString(), jsonObject.get("amount").getAsInt());
-        } else {
-            return new ItemsIngredient(Ingredient.fromJson(jsonObject.get("matches")), jsonObject.get("amount").getAsInt());
-        }
-    }
-
-    @Override
-    public JsonElement serialize(ItemsIngredient itemsIngredient, Type type, JsonSerializationContext jsonSerializationContext) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("amount", itemsIngredient.getAmount());
-        if (itemsIngredient.isTag()) {
-            jsonObject.addProperty("tag", itemsIngredient.getTag());
-        } else {
-            jsonObject.add("matches", itemsIngredient.ingredient.toJson());
-        }
-        return jsonObject;
-    }
-
-    public static class ItemCapabilityProxy extends CapCapabilityProxy<IItemHandler, ItemsIngredient> {
+    public static class ItemCapabilityProxy extends CapCapabilityProxy<IItemHandler, Ingredient> {
 
         public ItemCapabilityProxy(BlockEntity tileEntity) {
             super(ItemMultiblockCapability.CAP, tileEntity, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
         }
 
         @Override
-        protected List<ItemsIngredient> handleRecipeInner(IO io, Recipe recipe, List<ItemsIngredient> left, boolean simulate) {
+        protected List<Ingredient> handleRecipeInner(IO io, Recipe recipe, List<Ingredient> left, boolean simulate) {
             IItemHandler capability = getCapability();
             if (capability == null) return left;
-            Iterator<ItemsIngredient> iterator = left.iterator();
+            Iterator<Ingredient> iterator = left.iterator();
             if (io == IO.IN) {
                 while (iterator.hasNext()) {
-                    ItemsIngredient ingredient = iterator.next();
+                    Ingredient ingredient = iterator.next();
+                    SLOT_LOOKUP:
                     for (int i = 0; i < capability.getSlots(); i++) {
                         ItemStack itemStack = capability.getStackInSlot(i);
-                        if (ingredient.ingredient.test(itemStack)) {
-                            ItemStack extracted = capability.extractItem(i, ingredient.getAmount(), simulate);
-                            ingredient.setAmount(ingredient.getAmount() - extracted.getCount());
-                            if (ingredient.getAmount() <= 0) {
-                                iterator.remove();
-                                break;
+                        //Does not look like a good implementation, but I think it's at least equal to vanilla Ingredient::test
+                        ItemStack[] ingredientStacks = ingredient.getItems();
+                        for (ItemStack ingredientStack : ingredientStacks) {
+                            if (ingredientStack.is(itemStack.getItem())) {
+                                ItemStack extracted = capability.extractItem(i, ingredientStack.getCount(), simulate);
+                                if (extracted.getCount() >= ingredientStack.getCount()) {
+                                    iterator.remove();
+                                    break SLOT_LOOKUP;
+                                }
                             }
                         }
                     }
                 }
-            } else if (io == IO.OUT){
+            } else if (io == IO.OUT) {
                 while (iterator.hasNext()) {
-                    ItemsIngredient ingredient = iterator.next();
-                    ItemStack output = ingredient.getOutputStack();
+                    Ingredient ingredient = iterator.next();
+                    ItemStack output = ingredient instanceof NBTIngredient nbtIngredient ? ((NBTIngredientMixin) nbtIngredient).getStack().copy() : ingredient.getItems()[0];
                     for (int i = 0; i < capability.getSlots(); i++) {
                         output = capability.insertItem(i, output.copy(), simulate);
                         if (output.isEmpty()) break;
                     }
                     if (output.isEmpty()) iterator.remove();
-                    else ingredient.setAmount(output.getCount());
                 }
             }
             return left.isEmpty() ? null : left;

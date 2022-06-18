@@ -46,12 +46,14 @@ public class MultiblockRecipeJS extends RecipeJS {
     private float chance = 1;
     private boolean perTick = false;
 
-    public void setChance(float chance) {
+    public MultiblockRecipeJS setChance(float chance) {
         this.chance = chance;
+        return this;
     }
 
-    public void setPerTick(boolean perTick) {
+    public MultiblockRecipeJS setPerTick(boolean perTick) {
         this.perTick = perTick;
+        return this;
     }
 
     @Override

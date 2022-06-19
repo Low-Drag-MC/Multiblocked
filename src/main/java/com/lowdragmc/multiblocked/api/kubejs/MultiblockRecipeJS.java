@@ -88,6 +88,13 @@ public class MultiblockRecipeJS extends RecipeJS {
     }
 
     //CAUTION: special handling is needed for certain objects, especially KubeJS wrapped ones (Ingredient, FluidStack, etc)
+    public MultiblockRecipeJS inputFluids(FluidStackJS... fluidStacks) {
+        for (FluidStackJS fluidStack : fluidStacks) {
+            inputFluid(fluidStack);
+        }
+        return this;
+    }
+
     public MultiblockRecipeJS inputFluid(FluidStackJS fluidStack) {
         return inputFluid(fluidStack, null);
     }
@@ -103,6 +110,13 @@ public class MultiblockRecipeJS extends RecipeJS {
             contentJson.addProperty("slotName", slotName);
         (perTick ? tickInputs : inputs).computeIfAbsent(FluidMultiblockCapability.CAP, c -> new ArrayList<>())
                 .add(contentJson);
+        return this;
+    }
+
+    public MultiblockRecipeJS outputFluids(FluidStackJS... fluidStacks) {
+        for (FluidStackJS fluidStack : fluidStacks) {
+            outputFluid(fluidStack);
+        }
         return this;
     }
 
@@ -125,6 +139,12 @@ public class MultiblockRecipeJS extends RecipeJS {
     }
 
     //CAUTION: special handling is needed for certain objects, especially KubeJS wrapped ones (Ingredient, FluidStack, etc)
+    public MultiblockRecipeJS inputItems(IngredientJS... ingredients) {
+        for (IngredientJS ingredient : ingredients)
+            inputItem(ingredient);
+        return this;
+    }
+
     public MultiblockRecipeJS inputItem(IngredientJS ingredient) {
         return inputItem(ingredient, null);
     }
@@ -143,6 +163,13 @@ public class MultiblockRecipeJS extends RecipeJS {
             contentJson.addProperty("slotName", slotName);
         (perTick ? tickInputs : inputs).computeIfAbsent(ItemMultiblockCapability.CAP, c -> new ArrayList<>())
                 .add(contentJson);
+        return this;
+    }
+
+    public MultiblockRecipeJS outputItems(IngredientJS... ingredients) {
+        for (IngredientJS ingredient : ingredients) {
+            outputItem(ingredient);
+        }
         return this;
     }
 

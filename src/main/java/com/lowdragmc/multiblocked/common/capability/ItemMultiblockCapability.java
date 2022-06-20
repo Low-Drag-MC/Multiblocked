@@ -116,6 +116,8 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
                     for (int i = 0; i < capability.getSlots(); i++) {
                         ItemStack itemStack = capability.getStackInSlot(i);
                         //Does not look like a good implementation, but I think it's at least equal to vanilla Ingredient::test
+                        if (!ingredient.test(itemStack))
+                            continue;
                         ItemStack[] ingredientStacks = ingredient.getItems();
                         for (ItemStack ingredientStack : ingredientStacks) {
                             if (ingredientStack.is(itemStack.getItem())) {

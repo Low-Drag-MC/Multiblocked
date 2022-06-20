@@ -6,6 +6,24 @@ The goal was to make it as easy as possible for modpack/mod authors to create mu
 
 #### Other versions: [1.12.2](https://github.com/CleanroomMC/Multiblocked)
 
+Maven
+
+```gradle
+maven {
+    url "https://maven.firstdarkdev.xyz/snapshots"
+}
+
+implementation fg.deobf("com.lowdragmc.ldlib:LowDragLib:1.16.5-0.4")
+// or
+implementation fg.deobf("com.lowdragmc.ldlib:LowDragLib:1.18.2-0.5.1")
+
+
+implementation fg.deobf("com.lowdragmc.multiblocked:Multiblocked:1.18.2-0.8.1")
+//or
+implementation fg.deobf("com.lowdragmc.multiblocked:Multiblocked:1.18.2-0.9")
+```
+
+
 ------
 
 #### Features:

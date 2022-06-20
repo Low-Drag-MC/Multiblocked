@@ -250,6 +250,7 @@
   "multiblocked.gui.condition.block.count": "Minimum Count",
 
   "multiblocked.recipe.condition.thunder": "Thunder",
+  "multiblocked.recipe.condition.block": "Block",
   "multiblocked.recipe.condition.thunder.tooltip": "Rain Level: %d",
   "multiblocked.recipe.condition.rain": "Rain",
   "multiblocked.recipe.condition.rain.tooltip": "Rain Level: %d",

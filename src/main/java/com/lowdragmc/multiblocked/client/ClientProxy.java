@@ -19,7 +19,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ClientProxy extends CommonProxy {
 
     public ClientProxy() {
-        Minecraft.getInstance().getResourcePackRepository().addPackFinder(new CustomResourcePack(Multiblocked.location, IPackNameDecorator.DEFAULT, Multiblocked.MODID, "Multiblocked Extended Resources", 6));
+        if (Minecraft.getInstance() != null) {
+            Minecraft.getInstance().getResourcePackRepository().addPackFinder(new CustomResourcePack(Multiblocked.location, IPackNameDecorator.DEFAULT, Multiblocked.MODID, "Multiblocked Extended Resources", 6));
+        }
     }
 
     @SubscribeEvent

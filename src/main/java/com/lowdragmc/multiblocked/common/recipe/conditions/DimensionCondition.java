@@ -9,11 +9,13 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -31,7 +33,8 @@ public class DimensionCondition extends RecipeCondition {
     public final static DimensionCondition INSTANCE = new DimensionCondition();
     private ResourceLocation dimension = new ResourceLocation("dummy");
 
-    private DimensionCondition() {}
+    private DimensionCondition() {
+    }
 
     public DimensionCondition(ResourceLocation dimension) {
         this.dimension = dimension;
@@ -75,12 +78,25 @@ public class DimensionCondition extends RecipeCondition {
     }
 
     @Override
+    public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
+        super.fromNetwork(buf);
+        buf.writeUtf(dimension.toString());
+        return this;
+    }
+
+    @Override
+    public void toNetwork(FriendlyByteBuf buf) {
+        super.toNetwork(buf);
+        dimension = new ResourceLocation(buf.readUtf());
+    }
+
+    @Override
     @OnlyIn(Dist.CLIENT)
     public void openConfigurator(WidgetGroup group) {
         super.openConfigurator(group);
         Set<ResourceLocation> types = Minecraft.getInstance().level.registryAccess().registry(
                 Registry.DIMENSION_TYPE_REGISTRY).get().keySet();
-        group.addWidget(new SelectorWidget(0,20, 80, 15, types.stream().map(ResourceLocation::toString).collect(Collectors.toList()), -1)
+        group.addWidget(new SelectorWidget(0, 20, 80, 15, types.stream().map(ResourceLocation::toString).collect(Collectors.toList()), -1)
                 .setButtonBackground(new ColorRectTexture(0x7f2e2e2e))
                 .setOnChanged(dim -> {
                     if (dim != null && !dim.isEmpty() && ResourceLocation.isValidResourceLocation(dim)) {

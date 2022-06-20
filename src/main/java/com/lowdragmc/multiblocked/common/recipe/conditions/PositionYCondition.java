@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.GsonHelper;
@@ -23,7 +24,8 @@ public class PositionYCondition extends RecipeCondition {
     private int min;
     private int max;
 
-    private PositionYCondition() {}
+    private PositionYCondition() {
+    }
 
     public PositionYCondition(int min, int max) {
         this.min = min;
@@ -69,14 +71,29 @@ public class PositionYCondition extends RecipeCondition {
     }
 
     @Override
+    public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
+        super.fromNetwork(buf);
+        min = buf.readVarInt();
+        max = buf.readVarInt();
+        return this;
+    }
+
+    @Override
+    public void toNetwork(FriendlyByteBuf buf) {
+        super.toNetwork(buf);
+        buf.writeVarInt(min);
+        buf.writeVarInt(max);
+    }
+
+    @Override
     public void openConfigurator(WidgetGroup group) {
         super.openConfigurator(group);
-        group.addWidget(new TextFieldWidget(0, 20, 60, 15, null, s->min = Integer.parseInt(s))
+        group.addWidget(new TextFieldWidget(0, 20, 60, 15, null, s -> min = Integer.parseInt(s))
                 .setCurrentString(min + "")
                 .setNumbersOnly(Integer.MIN_VALUE, Integer.MAX_VALUE)
                 .setHoverTooltips("multiblocked.gui.condition.pos_y.min"));
 
-        group.addWidget(new TextFieldWidget(0, 40, 60, 15, null, s->max = Integer.parseInt(s))
+        group.addWidget(new TextFieldWidget(0, 40, 60, 15, null, s -> max = Integer.parseInt(s))
                 .setCurrentString(max + "")
                 .setNumbersOnly(Integer.MIN_VALUE, Integer.MAX_VALUE)
                 .setHoverTooltips("multiblocked.gui.condition.pos_y.max"));

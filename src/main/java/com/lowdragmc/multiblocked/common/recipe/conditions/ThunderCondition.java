@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.GsonHelper;
@@ -63,6 +64,19 @@ public class ThunderCondition extends RecipeCondition {
         super.deserialize(config);
         level = GsonHelper.getAsFloat(config, "level", 0);
         return this;
+    }
+
+    @Override
+    public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
+        super.fromNetwork(buf);
+        level = buf.readFloat();
+        return this;
+    }
+
+    @Override
+    public void toNetwork(FriendlyByteBuf buf) {
+        super.toNetwork(buf);
+        buf.writeFloat(level);
     }
 
     @Override

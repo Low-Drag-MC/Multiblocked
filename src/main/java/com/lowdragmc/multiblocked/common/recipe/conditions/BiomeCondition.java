@@ -9,6 +9,7 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -33,7 +34,8 @@ public class BiomeCondition extends RecipeCondition {
     public final static BiomeCondition INSTANCE = new BiomeCondition();
     private ResourceLocation biome = new ResourceLocation("dummy");
 
-    private BiomeCondition() {}
+    private BiomeCondition() {
+    }
 
     public BiomeCondition(ResourceLocation biome) {
         this.biome = biome;
@@ -79,11 +81,24 @@ public class BiomeCondition extends RecipeCondition {
     }
 
     @Override
+    public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
+        super.fromNetwork(buf);
+        biome = new ResourceLocation(buf.readUtf());
+        return this;
+    }
+
+    @Override
+    public void toNetwork(FriendlyByteBuf buf) {
+        super.toNetwork(buf);
+        buf.writeUtf(biome.toString());
+    }
+
+    @Override
     @OnlyIn(Dist.CLIENT)
     public void openConfigurator(WidgetGroup group) {
         super.openConfigurator(group);
         Set<ResourceLocation> types = Minecraft.getInstance().level.registryAccess().registry(Registry.BIOME_REGISTRY).get().keySet();
-        group.addWidget(new SelectorWidget(0,20, 80, 15, types.stream().map(ResourceLocation::toString).collect(
+        group.addWidget(new SelectorWidget(0, 20, 80, 15, types.stream().map(ResourceLocation::toString).collect(
                 Collectors.toList()), -1)
                 .setButtonBackground(new ColorRectTexture(0x7f2e2e2e))
                 .setOnChanged(dim -> {

@@ -10,9 +10,11 @@ import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -29,7 +31,7 @@ public class RecipeBuilder {
     public final Map<MultiblockCapability<?>, ImmutableList.Builder<Content>> tickInputBuilder = new HashMap<>();
     public final Map<MultiblockCapability<?>, ImmutableList.Builder<Content>> outputBuilder = new HashMap<>();
     public final Map<MultiblockCapability<?>, ImmutableList.Builder<Content>> tickOutputBuilder = new HashMap<>();
-    public final Map<String, Object> data = new HashMap<>();
+    public CompoundTag data = new CompoundTag();
     public final Map<String, RecipeCondition> conditions = new HashMap<>();
     protected int duration;
     protected Component text;
@@ -45,23 +47,23 @@ public class RecipeBuilder {
 
     public RecipeBuilder copy() {
         RecipeBuilder copy = new RecipeBuilder(recipeMap);
-        inputBuilder.forEach((k, v)->{
+        inputBuilder.forEach((k, v) -> {
             ImmutableList.Builder<Content> builder = ImmutableList.builder();
             copy.inputBuilder.put(k, builder.addAll(v.build()));
         });
-        outputBuilder.forEach((k, v)->{
+        outputBuilder.forEach((k, v) -> {
             ImmutableList.Builder<Content> builder = ImmutableList.builder();
             copy.outputBuilder.put(k, builder.addAll(v.build()));
         });
-        tickInputBuilder.forEach((k, v)->{
+        tickInputBuilder.forEach((k, v) -> {
             ImmutableList.Builder<Content> builder = ImmutableList.builder();
             copy.tickInputBuilder.put(k, builder.addAll(v.build()));
         });
-        tickOutputBuilder.forEach((k, v)->{
+        tickOutputBuilder.forEach((k, v) -> {
             ImmutableList.Builder<Content> builder = ImmutableList.builder();
             copy.tickOutputBuilder.put(k, builder.addAll(v.build()));
         });
-        copy.data.putAll(data);
+        copy.data.merge(data);
         copy.conditions.putAll(conditions);
         copy.duration = this.duration;
         copy.fixedName = null;
@@ -75,8 +77,8 @@ public class RecipeBuilder {
         return this;
     }
 
-    public RecipeBuilder data(String key, Object object) {
-        this.data.put(key, object);
+    public RecipeBuilder data(String key, CompoundTag tag) {
+        this.data = tag;
         return this;
     }
 
@@ -107,26 +109,26 @@ public class RecipeBuilder {
     }
 
     public <T> RecipeBuilder input(MultiblockCapability<T> capability, T... obj) {
-        (perTick ? tickInputBuilder : inputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o->new Content(o, chance, slotName)).iterator());
+        (perTick ? tickInputBuilder : inputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o -> new Content(o, chance, slotName)).iterator());
         return this;
     }
 
     public <T> RecipeBuilder output(MultiblockCapability<T> capability, T... obj) {
-        (perTick ? tickOutputBuilder : outputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o->new Content(o, chance, slotName)).iterator());
+        (perTick ? tickOutputBuilder : outputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o -> new Content(o, chance, slotName)).iterator());
         return this;
     }
 
     public <T> RecipeBuilder inputs(MultiblockCapability<T> capability, Object... obj) {
         (perTick ? tickInputBuilder : inputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o->new Content(o, chance, slotName)).iterator());
+                .map(o -> new Content(o, chance, slotName)).iterator());
         return this;
     }
 
     public <T> RecipeBuilder outputs(MultiblockCapability<T> capability, Object... obj) {
         (perTick ? tickOutputBuilder : outputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o->new Content(o, chance, slotName)).iterator());
+                .map(o -> new Content(o, chance, slotName)).iterator());
         return this;
     }
 
@@ -143,12 +145,12 @@ public class RecipeBuilder {
         return output(FEMultiblockCapability.CAP, forgeEnergy);
     }
 
-    public RecipeBuilder inputItems(ItemsIngredient... inputs) {
+    public RecipeBuilder inputItems(Ingredient... inputs) {
         return input(ItemMultiblockCapability.CAP, inputs);
     }
 
     public RecipeBuilder outputItems(ItemStack... outputs) {
-        return output(ItemMultiblockCapability.CAP, Arrays.stream(outputs).map(ItemsIngredient::new).toArray(ItemsIngredient[]::new));
+        return output(ItemMultiblockCapability.CAP, Arrays.stream(outputs).map(Ingredient::of).toArray(Ingredient[]::new));
     }
 
     public RecipeBuilder inputFluids(FluidStack... inputs) {
@@ -323,10 +325,10 @@ public class RecipeBuilder {
         for (Map.Entry<MultiblockCapability<?>, ImmutableList.Builder<Content>> entry : this.tickOutputBuilder.entrySet()) {
             tickOutputBuilder.put(entry.getKey(), entry.getValue().build());
         }
-        return new Recipe(fixedName == null ? UUID.randomUUID().toString() : fixedName, inputBuilder.build(), outputBuilder.build(), tickInputBuilder.build(), tickOutputBuilder.build(), ImmutableList.copyOf(conditions.values()), data.isEmpty() ? Recipe.EMPTY : ImmutableMap.copyOf(data), text, duration);
+        return new Recipe(fixedName == null ? UUID.randomUUID().toString() : fixedName, inputBuilder.build(), outputBuilder.build(), tickInputBuilder.build(), tickOutputBuilder.build(), ImmutableList.copyOf(conditions.values()), data, text, duration);
     }
 
-    public void buildAndRegister(){
+    public void buildAndRegister() {
         recipeMap.addRecipe(build());
     }
 }

@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.GsonHelper;
@@ -23,7 +24,8 @@ public class RainingCondition extends RecipeCondition {
     public final static RainingCondition INSTANCE = new RainingCondition();
     private float level;
 
-    private RainingCondition() {}
+    private RainingCondition() {
+    }
 
     public RainingCondition(float level) {
         this.level = level;
@@ -66,9 +68,22 @@ public class RainingCondition extends RecipeCondition {
     }
 
     @Override
+    public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
+        super.fromNetwork(buf);
+        level = buf.readFloat();
+        return this;
+    }
+
+    @Override
+    public void toNetwork(FriendlyByteBuf buf) {
+        super.toNetwork(buf);
+        buf.writeFloat(level);
+    }
+
+    @Override
     public void openConfigurator(WidgetGroup group) {
         super.openConfigurator(group);
-        group.addWidget(new TextFieldWidget(0, 20, 60, 15, null, s->level = Float.parseFloat(s))
+        group.addWidget(new TextFieldWidget(0, 20, 60, 15, null, s -> level = Float.parseFloat(s))
                 .setCurrentString(level + "")
                 .setNumbersOnly(0f, 1f)
                 .setHoverTooltips("multiblocked.gui.condition.rain.level"));

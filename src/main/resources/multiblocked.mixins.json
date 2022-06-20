@@ -14,6 +14,9 @@
     "ServerChunkProviderMixin",
     "WorldMixin",
     "rubidium.BlockOcclusionCacheMixin",
-    "rubidium.ChunkRenderRebuildTaskMixin"
+    "rubidium.ChunkRenderRebuildTaskMixin",
+    "RecipeManagerMixin",
+    "NBTIngredientMixin",
+    "ReloadMixin"
   ]
 }

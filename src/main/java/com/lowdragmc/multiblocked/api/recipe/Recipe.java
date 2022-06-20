@@ -9,6 +9,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
@@ -28,7 +29,7 @@ public class Recipe {
     public final ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> outputs;
     public final ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickInputs;
     public final ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs;
-    public final ImmutableMap<String, Object> data;
+    public final CompoundTag data;
     public final int duration;
     public final Component text;
     public final ImmutableList<RecipeCondition> conditions;
@@ -40,7 +41,7 @@ public class Recipe {
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs,
                   ImmutableList<RecipeCondition> conditions,
                   int duration) {
-        this(uid, inputs, outputs, tickInputs, tickOutputs, conditions, EMPTY, null, duration);
+        this(uid, inputs, outputs, tickInputs, tickOutputs, conditions, new CompoundTag(), null, duration);
     }
 
     public Recipe(String uid,
@@ -49,7 +50,7 @@ public class Recipe {
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickInputs,
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs,
                   ImmutableList<RecipeCondition> conditions,
-                  ImmutableMap<String, Object> data,
+                  CompoundTag data,
                   Component text,
                   int duration) {
         this.uid = uid;
@@ -63,11 +64,8 @@ public class Recipe {
         this.conditions = conditions;
     }
 
-    public Object getData(String key) {
-        if (data.containsKey(key)) {
-            return data.get(key);
-        }
-        return null;
+    public CompoundTag getData() {
+        return data;
     }
 
     public List<Content> getInputContents(MultiblockCapability<?> capability) {
@@ -119,7 +117,7 @@ public class Recipe {
                 if (cont.slotName == null) {
                     content.add(cont.content);
                 } else {
-                    contentSlot.computeIfAbsent(cont.slotName, s->new ArrayList<>()).add(cont.content);
+                    contentSlot.computeIfAbsent(cont.slotName, s -> new ArrayList<>()).add(cont.content);
                 }
             }
             if (content.isEmpty() && contentSlot.isEmpty()) continue;
@@ -174,7 +172,7 @@ public class Recipe {
         return handleRecipe(io, holder, io == IO.IN ? tickInputs : tickOutputs);
     }
 
-    public boolean handleRecipeIO (IO io, ICapabilityProxyHolder holder) {
+    public boolean handleRecipeIO(IO io, ICapabilityProxyHolder holder) {
         if (!holder.hasProxies() || io == IO.BOTH) return false;
         return handleRecipe(io, holder, io == IO.IN ? inputs : outputs);
     }
@@ -191,7 +189,7 @@ public class Recipe {
                     if (cont.slotName == null) {
                         content.add(cont.content);
                     } else {
-                        contentSlot.computeIfAbsent(cont.slotName, s->new ArrayList<>()).add(cont.content);
+                        contentSlot.computeIfAbsent(cont.slotName, s -> new ArrayList<>()).add(cont.content);
                     }
                 }
             }
@@ -217,7 +215,7 @@ public class Recipe {
                 }
             }
             if (content == null && contentSlot.isEmpty()) continue;
-            if (capabilityProxies.contains(IO.BOTH, entry.getKey())){
+            if (capabilityProxies.contains(IO.BOTH, entry.getKey())) {
                 for (CapabilityProxy<?> proxy : capabilityProxies.get(IO.BOTH, entry.getKey()).values()) { // search both type
                     if (used.contains(proxy)) continue;
                     used.add(proxy);

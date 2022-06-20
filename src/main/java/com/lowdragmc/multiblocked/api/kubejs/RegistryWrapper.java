@@ -18,10 +18,6 @@ public class RegistryWrapper {
         return MbdComponents.DEFINITION_REGISTRY.get(new ResourceLocation(name));
     }
 
-    public static RecipeMap getRecipeMap(String name) {
-        return RecipeMap.RECIPE_MAP_REGISTRY.get(name);
-    }
-
     public static MultiblockCapability<?> getCapability(String name) {
         return MbdCapabilities.get(name);
     }

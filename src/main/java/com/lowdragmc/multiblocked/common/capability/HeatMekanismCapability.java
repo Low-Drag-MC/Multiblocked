@@ -12,6 +12,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerDouble;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.common.capabilities.Capabilities;
@@ -28,7 +29,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
     public static final HeatMekanismCapability CAP = new HeatMekanismCapability();
 
     private HeatMekanismCapability() {
-        super("mek_heat", new Color(0xD9068D).getRGB());
+        super("mek_heat", new Color(0xD9068D).getRGB(), new SerializerDouble());
     }
 
     @Override
@@ -48,7 +49,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
 
     @Override
     public HeatMekanismCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return new HeatMekanismCapabilityProxy(tileEntity);
     }
 

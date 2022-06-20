@@ -14,6 +14,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerInteger;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.FECapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
@@ -37,7 +38,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     public static final FEMultiblockCapability CAP = new FEMultiblockCapability();
 
     private FEMultiblockCapability() {
-        super("forge_energy", 0xFFCB0000);
+        super("forge_energy", 0xFFCB0000, new SerializerInteger());
     }
 
     @Override
@@ -47,7 +48,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
 
     @Override
     public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return !getCapability(CapabilityEnergy.ENERGY, tileEntity).isEmpty();
     }
 
@@ -58,7 +59,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
 
     @Override
     public FECapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return new FECapabilityProxy(tileEntity);
     }
 
@@ -91,7 +92,8 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
                                 list.add(new BlockInfo(block.defaultBlockState(), true));
                             }
                         }
-                    } catch (Throwable ignored) { }
+                    } catch (Throwable ignored) {
+                    }
                 }
             }
         }

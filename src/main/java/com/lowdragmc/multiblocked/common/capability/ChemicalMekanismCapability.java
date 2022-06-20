@@ -8,6 +8,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.IContentSerializer;
 import com.lowdragmc.multiblocked.common.capability.trait.ChemicalCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.ChemicalStackWidget;
 import mekanism.api.Action;
@@ -48,7 +49,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                     GasStack::new,
                     ChemicalTankBuilder.GAS,
                     GasStack::readFromPacket,
-                    () -> new BlockInfo[] {
+                    () -> new BlockInfo[]{
                             BlockInfo.fromBlock(MekanismBlocks.BASIC_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.ADVANCED_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.CREATIVE_CHEMICAL_TANK.getBlock()),
@@ -63,7 +64,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                     InfusionStack::new,
                     ChemicalTankBuilder.INFUSION,
                     InfusionStack::readFromPacket,
-                    () -> new BlockInfo[] {
+                    () -> new BlockInfo[]{
                             BlockInfo.fromBlock(MekanismBlocks.BASIC_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.ADVANCED_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.CREATIVE_CHEMICAL_TANK.getBlock()),
@@ -78,7 +79,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                     PigmentStack::new,
                     ChemicalTankBuilder.PIGMENT,
                     PigmentStack::readFromPacket,
-                    () -> new BlockInfo[] {
+                    () -> new BlockInfo[]{
                             BlockInfo.fromBlock(MekanismBlocks.BASIC_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.ADVANCED_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.CREATIVE_CHEMICAL_TANK.getBlock()),
@@ -93,7 +94,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                     SlurryStack::new,
                     ChemicalTankBuilder.SLURRY,
                     SlurryStack::readFromPacket,
-                    () -> new BlockInfo[] {
+                    () -> new BlockInfo[]{
                             BlockInfo.fromBlock(MekanismBlocks.BASIC_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.ADVANCED_CHEMICAL_TANK.getBlock()),
                             BlockInfo.fromBlock(MekanismBlocks.CREATIVE_CHEMICAL_TANK.getBlock()),
@@ -118,14 +119,42 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                                        ChemicalTankBuilder<CHEMICAL, STACK, ? extends IChemicalTank<CHEMICAL, STACK>> tankBuilder,
                                        Function<FriendlyByteBuf, STACK> readFromBuffer,
                                        Supplier<BlockInfo[]> candidates) {
-        super(key, color);
-        this.capability = (Supplier<Capability<IChemicalHandler<CHEMICAL, STACK>>>)(Object)capability;
+        super(key, color, null);
+        this.capability = (Supplier<Capability<IChemicalHandler<CHEMICAL, STACK>>>) (Object) capability;
         this.empty = empty;
         this.registry = registry;
         this.createStack = createStack;
         this.candidates = candidates;
         this.tankBuilder = tankBuilder;
         this.readFromBuffer = readFromBuffer;
+        //I don't know what the fuck is happening on this stupid piece of registration shit
+        this.serializer = new IContentSerializer<>() {
+            @Override
+            public void toNetwork(FriendlyByteBuf buf, STACK content) {
+                content.writeToPacket(buf);
+            }
+
+            @Override
+            public STACK fromNetwork(FriendlyByteBuf buf) {
+                return readFromBuffer.apply(buf);
+            }
+
+            @Override
+            public STACK fromJson(JsonElement json) {
+                ResourceLocation type = new ResourceLocation(json.getAsJsonObject().get("type").getAsString());
+                long amount = json.getAsJsonObject().get("amount").getAsLong();
+                CHEMICAL chemical = ChemicalUtils.readChemicalFromRegistry(type, empty, registry.get());
+                return createStack.apply(chemical, amount);
+            }
+
+            @Override
+            public JsonElement toJson(STACK content) {
+                JsonObject jsonObj = new JsonObject();
+                jsonObj.addProperty("type", content.getType().getRegistryName().toString());
+                jsonObj.addProperty("amount", content.getAmount());
+                return jsonObj;
+            }
+        };
     }
 
     @Override
@@ -135,7 +164,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     @Override
     public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return !getCapability(Capabilities.GAS_HANDLER_CAPABILITY, tileEntity).isEmpty();
     }
 
@@ -146,7 +175,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     @Override
     public ChemicalMekanismCapabilityProxy<CHEMICAL, STACK> createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return new ChemicalMekanismCapabilityProxy<>(this, tileEntity);
     }
 
@@ -172,19 +201,12 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     @Override
     public STACK deserialize(JsonElement jsonElement, Type jsonType, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        ResourceLocation
-                type = new ResourceLocation(jsonElement.getAsJsonObject().get("type").getAsString());
-        long amount = jsonElement.getAsJsonObject().get("amount").getAsLong();
-        CHEMICAL chemical = ChemicalUtils.readChemicalFromRegistry(type, empty, registry.get());
-        return createStack.apply(chemical, amount);
+        return serializer.fromJson(jsonElement);
     }
 
     @Override
     public JsonElement serialize(STACK chemicalStack, Type jsonType, JsonSerializationContext jsonSerializationContext) {
-        JsonObject jsonObj = new JsonObject();
-        jsonObj.addProperty("type", chemicalStack.getType().getRegistryName().toString());
-        jsonObj.addProperty("amount", chemicalStack.getAmount());
-        return jsonObj;
+        return serializer.toJson(chemicalStack);
     }
 
     public STACK of(Object o) {
@@ -226,7 +248,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                         iterator.remove();
                     }
                 }
-            } else if (io == IO.OUT){
+            } else if (io == IO.OUT) {
                 while (iterator.hasNext()) {
                     STACK chemicalStack = iterator.next();
                     if (chemicalStack.isEmpty()) {

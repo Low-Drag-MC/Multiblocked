@@ -1,11 +1,6 @@
 package com.lowdragmc.multiblocked.common.capability;
 
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -15,6 +10,7 @@ import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerFluidStack;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.FluidCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.FluidContentWidget;
@@ -30,7 +26,6 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,8 +33,8 @@ import java.util.List;
 public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> {
     public static final FluidMultiblockCapability CAP = new FluidMultiblockCapability();
 
-    private  FluidMultiblockCapability() {
-        super("fluid", 0xFF3C70EE);
+    private FluidMultiblockCapability() {
+        super("fluid", 0xFF3C70EE, new SerializerFluidStack());
     }
 
     @Override
@@ -49,7 +44,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
 
     @Override
     public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return !getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, tileEntity).isEmpty();
     }
 
@@ -61,7 +56,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
 
     @Override
     public FluidCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-    BlockEntity tileEntity) {
+            BlockEntity tileEntity) {
         return new FluidCapabilityProxy(tileEntity);
     }
 
@@ -94,7 +89,8 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
                                 list.add(new BlockInfo(block.defaultBlockState(), true));
                             }
                         }
-                    } catch (Throwable ignored) { }
+                    } catch (Throwable ignored) {
+                    }
                 }
             }
         }
@@ -111,16 +107,6 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
             return MultiblockedJSPlugin.FluidStackWrapper(o);
         }
         return FluidStack.EMPTY;
-    }
-
-    @Override
-    public FluidStack deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        return FluidStackTypeAdapter.INSTANCE.deserialize(jsonElement, type, jsonDeserializationContext);
-    }
-
-    @Override
-    public JsonElement serialize(FluidStack fluidStack, Type type, JsonSerializationContext jsonSerializationContext) {
-        return FluidStackTypeAdapter.INSTANCE.serialize(fluidStack, type, jsonSerializationContext);
     }
 
     public static class FluidCapabilityProxy extends CapCapabilityProxy<IFluidHandler, FluidStack> {
@@ -152,7 +138,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
                         iterator.remove();
                     }
                 }
-            } else if (io == IO.OUT){
+            } else if (io == IO.OUT) {
                 while (iterator.hasNext()) {
                     FluidStack fluidStack = iterator.next();
                     int filled = capability.fill(fluidStack.copy(), simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);

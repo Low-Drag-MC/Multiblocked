@@ -14,14 +14,18 @@ import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.ManaBotaniaCapability;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class MbdCapabilities {
 
     public static final Map<String, MultiblockCapability<?>> CAPABILITY_REGISTRY = Maps.newHashMap();
+    public static final List<String> CAPABILITY_ORDER = new ArrayList<>();
 
     public static void registerCapability(MultiblockCapability<?> capability) {
         CAPABILITY_REGISTRY.put(capability.name, capability);
+        CAPABILITY_ORDER.add(capability.name);
     }
 
     public static void registerCapabilities() {
@@ -45,6 +49,17 @@ public class MbdCapabilities {
 
     public static MultiblockCapability<?> get(String s) {
         return CAPABILITY_REGISTRY.get(s);
+    }
+
+    /**
+     * Uses VarInt instead of direct strings in Network to reduce payload.
+     */
+    public static MultiblockCapability<?> getByIndex(int idx) {
+        return CAPABILITY_REGISTRY.get(CAPABILITY_ORDER.get(idx));
+    }
+
+    public static int indexOf(MultiblockCapability<?> capability) {
+        return CAPABILITY_ORDER.indexOf(capability.name);
     }
 
     public static void registerAnyCapabilityBlocks() {

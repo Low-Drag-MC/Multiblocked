@@ -9,8 +9,10 @@ import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 
@@ -27,7 +29,8 @@ public class BlockCondition extends RecipeCondition {
     public BlockState blockState = Blocks.AIR.defaultBlockState();
     public int count = 0;
 
-    private BlockCondition() {}
+    private BlockCondition() {
+    }
 
     public BlockCondition(BlockState blockState, int count) {
         this.blockState = blockState;
@@ -80,10 +83,23 @@ public class BlockCondition extends RecipeCondition {
     }
 
     @Override
+    public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
+        super.fromNetwork(buf);
+        blockState = Block.stateById(buf.readVarInt());
+        return this;
+    }
+
+    @Override
+    public void toNetwork(FriendlyByteBuf buf) {
+        super.toNetwork(buf);
+        buf.writeVarInt(Block.getId(blockState));
+    }
+
+    @Override
     public void openConfigurator(WidgetGroup group) {
         super.openConfigurator(group);
         group.addWidget(new BlockSelectorWidget(0, 20, true).setOnBlockStateUpdate(state -> blockState = state).setBlock(blockState));
-        group.addWidget(new TextFieldWidget(0, 45, 60, 15, null, s->count = Integer.parseInt(s))
+        group.addWidget(new TextFieldWidget(0, 45, 60, 15, null, s -> count = Integer.parseInt(s))
                 .setCurrentString(count + "")
                 .setNumbersOnly(Integer.MIN_VALUE, Integer.MAX_VALUE)
                 .setHoverTooltips("multiblocked.gui.condition.block.count"));

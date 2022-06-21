@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.kubejs;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -14,6 +15,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import dev.latvian.mods.kubejs.item.ItemStackJS;
 import dev.latvian.mods.kubejs.item.ingredient.IngredientJS;
+import dev.latvian.mods.kubejs.item.ingredient.IngredientStackJS;
 import dev.latvian.mods.kubejs.recipe.RecipeJS;
 import dev.latvian.mods.kubejs.util.ListJS;
 import dev.latvian.mods.kubejs.util.MapJS;
@@ -25,6 +27,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +62,7 @@ public class MultiblockRecipeJS extends RecipeJS {
     @Override
     public void create(ListJS args) {
         machineType = args.get(0).toString();
+        currentRecipe = this;
     }
 
     //TODO: Figure a way to (de)serialize components
@@ -489,5 +493,14 @@ public class MultiblockRecipeJS extends RecipeJS {
         json.addProperty("data", data.getAsString());
         json.addProperty("duration", duration);
 
+    }
+
+    @Override
+    public @Nullable JsonElement serializeIngredientStack(IngredientStackJS in) {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", "multiblocked:sized");
+        json.add("ingredient", in.ingredient.toJson());
+        json.addProperty("count", in.getCount());
+        return json;
     }
 }

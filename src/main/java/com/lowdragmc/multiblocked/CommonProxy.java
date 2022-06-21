@@ -10,7 +10,7 @@ import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.dialogs.JsonBlockPatternWidget;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
-import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MBDRecipeReloadListener;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
 import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MultiBlockRecipe;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -33,8 +33,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -83,6 +82,8 @@ public class CommonProxy {
                 });
             }
         });
+
+        CraftingHelper.register(new ResourceLocation("multiblocked:sized"), SizedIngredient.SERIALIZER);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

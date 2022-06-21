@@ -58,19 +58,20 @@ public abstract class CapabilityProxy<K> {
     /**
      * matching or handling the given recipe.
      *
-     * @param io the IO type of this recipe. always be one of the {@link IO#IN} or {@link IO#OUT}
-     * @param recipe recipe.
-     * @param left left contents for to be handled.
+     * @param io       the IO type of this recipe. always be one of the {@link IO#IN} or {@link IO#OUT}
+     * @param recipe   recipe.
+     * @param left     left contents for to be handled.
      * @param simulate simulate.
      * @return left contents for continue handling by other proxies.
      * <br>
-     *      null - nothing left. handling successful/finish. you should always return null as a handling-done mark.
+     * null - nothing left. handling successful/finish. you should always return null as a handling-done mark.
      */
     protected abstract List<K> handleRecipeInner(IO io, Recipe recipe, List<K> left, boolean simulate);
 
     /**
      * Check whether scheduling recipe checking. Check to see if any changes have occurred.
      * Do not do anything that causes conflicts here.
+     *
      * @return if changed.
      */
     protected boolean hasInnerChanged() {
@@ -79,7 +80,7 @@ public abstract class CapabilityProxy<K> {
 
     @SuppressWarnings("unchecked")
     public final K copyContent(Object content) {
-        return (K) capability.copyInner((K)content);
+        return (K) capability.copyInner((K) content);
     }
 
     public final List<K> searchingRecipe(IO io, Recipe recipe, List<?> left) {

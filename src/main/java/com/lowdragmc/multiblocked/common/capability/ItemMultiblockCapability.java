@@ -13,6 +13,8 @@ import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.ItemCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.ItemsContentWidget;
 import com.lowdragmc.multiblocked.core.mixins.NBTIngredientMixin;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
@@ -49,7 +51,10 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
 
     @Override
     public Ingredient copyInner(Ingredient content) {
-        return Ingredient.merge(List.of(content));
+        //Use network serialization to reduce overhead
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        content.toNetwork(buf);
+        return Ingredient.fromNetwork(buf);
     }
 
     @Override

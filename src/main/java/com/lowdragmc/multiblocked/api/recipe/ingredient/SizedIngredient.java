@@ -3,7 +3,10 @@ package com.lowdragmc.multiblocked.api.recipe.ingredient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
@@ -15,13 +18,19 @@ import java.util.stream.Stream;
 
 public class SizedIngredient extends Ingredient {
     private final int amount;
+    private String tag;
     private final Ingredient inner;
     private ItemStack[] itemStacks = null;
 
-    protected SizedIngredient(Ingredient inner, int amount) {
+    public SizedIngredient(Ingredient inner, int amount) {
         super(Stream.empty());
         this.amount = amount;
         this.inner = inner;
+    }
+
+    public SizedIngredient(String tag, int amount) {
+        this(Ingredient.of(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tag.toLowerCase()))), amount);
+        this.tag = tag;
     }
 
     public int getAmount() {
@@ -35,9 +44,13 @@ public class SizedIngredient extends Ingredient {
     @Override
     public @NotNull JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", "multiblocked:tag_stack");
-        json.add("ingredient", inner.toJson());
+        json.addProperty("type", "multiblocked:sized");
         json.addProperty("count", amount);
+        if (tag != null) {
+            json.addProperty("tag", tag);
+        } else {
+            json.add("ingredient", inner.toJson());
+        }
         return json;
     }
 
@@ -81,20 +94,42 @@ public class SizedIngredient extends Ingredient {
         @Override
         public @NotNull SizedIngredient parse(FriendlyByteBuf buffer) {
             int amount = buffer.readVarInt();
-            return new SizedIngredient(Ingredient.fromNetwork(buffer), amount);
+            if (buffer.readBoolean()) {
+                return new SizedIngredient(buffer.readUtf(), amount);
+            } else {
+                return new SizedIngredient(Ingredient.fromNetwork(buffer), amount);
+            }
         }
 
         @Override
         public @NotNull SizedIngredient parse(JsonObject json) {
             int amount = json.get("count").getAsInt();
-            Ingredient inner = Ingredient.fromJson(json.get("ingredient").getAsJsonObject());
-            return new SizedIngredient(inner, amount);
+            if (json.has("tag")) {
+                return new SizedIngredient(json.get("tag").getAsString(), amount);
+            } else {
+                Ingredient inner = Ingredient.fromJson(json.get("ingredient").getAsJsonObject());
+                return new SizedIngredient(inner, amount);
+            }
         }
 
         @Override
         public void write(FriendlyByteBuf buffer, SizedIngredient ingredient) {
             buffer.writeVarInt(ingredient.getAmount());
-            ingredient.inner.toNetwork(buffer);
+            if (ingredient.tag != null) {
+                buffer.writeBoolean(true);
+                buffer.writeUtf(ingredient.tag);
+            } else {
+                buffer.writeBoolean(false);
+                ingredient.inner.toNetwork(buffer);
+            }
         }
     };
+
+    public boolean isTag() {
+        return tag != null;
+    }
+
+    public String getTag() {
+        return tag;
+    }
 }

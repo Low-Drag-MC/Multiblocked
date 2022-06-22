@@ -11,12 +11,12 @@
   "mixins": [
     "BlockMixin",
     "ChunkMixin",
+    "NBTIngredientMixin",
+    "RecipeManagerMixin",
+    "ReloadMixin",
     "ServerChunkProviderMixin",
     "WorldMixin",
     "rubidium.BlockOcclusionCacheMixin",
-    "rubidium.ChunkRenderRebuildTaskMixin",
-    "RecipeManagerMixin",
-    "NBTIngredientMixin",
-    "ReloadMixin"
+    "rubidium.ChunkRenderRebuildTaskMixin"
   ]
 }

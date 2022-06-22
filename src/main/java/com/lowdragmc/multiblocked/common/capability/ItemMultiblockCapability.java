@@ -8,6 +8,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerIngredient;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.common.capability.trait.ItemCapabilityTrait;
@@ -40,7 +41,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
 
     @Override
     public Ingredient defaultContent() {
-        return Ingredient.of(Items.IRON_INGOT);
+        return new SizedIngredient(Ingredient.of(Items.IRON_INGOT), 1);
     }
 
     @Override

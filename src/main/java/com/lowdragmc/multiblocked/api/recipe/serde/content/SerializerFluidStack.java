@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.api.recipe.serde.content;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,20 +25,26 @@ public class SerializerFluidStack implements IContentSerializer<FluidStack> {
 
     @Override
     public FluidStack fromJson(JsonElement json) {
-        if (!json.isJsonObject())
-            return FluidStack.EMPTY;
-        var jObj = json.getAsJsonObject();
-        var fluid = new ResourceLocation(jObj.get("fluid").getAsString());
-        var amount = jObj.get("amount").getAsInt();
-        var fluidStack = new FluidStack(Objects.requireNonNull(ForgeRegistries.FLUIDS.getValue(fluid)), amount);
-        if (jObj.has("nbt")) {
-            try {
-                fluidStack.setTag(TagParser.parseTag(jObj.get("nbt").getAsString()));
-            } catch (CommandSyntaxException e) {
-                e.printStackTrace();
+        try {
+            if (!json.isJsonObject()) {
+                return FluidStack.loadFluidStackFromNBT(TagParser.parseTag(json.getAsString()));
             }
+            var jObj = json.getAsJsonObject();
+            var fluid = new ResourceLocation(jObj.get("fluid").getAsString());
+            var amount = jObj.get("amount").getAsInt();
+            var fluidStack = new FluidStack(Objects.requireNonNull(ForgeRegistries.FLUIDS.getValue(fluid)), amount);
+            if (jObj.has("nbt")) {
+                try {
+                    fluidStack.setTag(TagParser.parseTag(jObj.get("nbt").getAsString()));
+                } catch (CommandSyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
+            return fluidStack;
+        } catch (Exception e) {
+            Multiblocked.LOGGER.error("cant parse the fluid ingredient: {}", json.toString());
+            return FluidStack.EMPTY;
         }
-        return fluidStack;
     }
 
     @Override

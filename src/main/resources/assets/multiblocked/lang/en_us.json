@@ -239,6 +239,7 @@
   "multiblocked.gui.label.save_pattern": "Save Pattern",
   "multiblocked.gui.label.save_recipe_map": "Save Recipe Map",
   "multiblocked.gui.label.pattern_settings": "Pattern Settings",
+  "multiblocked.gui.label.unsupported_ingredient": "Unsupported Ingredient",
   "multiblocked.jei.multiblock_info": "Multiblock Page",
 
   "multiblocked.gui.condition.reverse": "reverse (executed if condition failed)",
@@ -250,6 +251,7 @@
   "multiblocked.gui.condition.block.count": "Minimum Count",
 
   "multiblocked.recipe.condition.thunder": "Thunder",
+  "multiblocked.recipe.condition.block": "Block",
   "multiblocked.recipe.condition.thunder.tooltip": "Rain Level: %d",
   "multiblocked.recipe.condition.rain": "Rain",
   "multiblocked.recipe.condition.rain.tooltip": "Rain Level: %d",

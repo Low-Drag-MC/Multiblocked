@@ -154,6 +154,21 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
                 jsonObj.addProperty("amount", content.getAmount());
                 return jsonObj;
             }
+
+            public STACK of(Object o) {
+                if (o instanceof ChemicalStack<?> && ((ChemicalStack<?>) o).getType().getClass() == empty.getClass()) {
+                    return (STACK) ((ChemicalStack<?>) o).copy();
+                } else if (o instanceof CharSequence) {
+                    String s = o.toString();
+                    if (!s.isEmpty() && !s.equals("-") && !s.equals("empty") && !s.equals("minecraft:empty")) {
+                        String[] s1 = s.split(" ", 2);
+                        CHEMICAL chemical = registry.get().getValue(new ResourceLocation(s1[0]));
+                        long amount = s1.length == 2 ? NumberUtils.toLong(s1[1], 1) : 1;
+                        return createStack.apply(chemical, amount);
+                    }
+                }
+                return (STACK) empty.getStack(0);
+            }
         };
     }
 
@@ -207,21 +222,6 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     @Override
     public JsonElement serialize(STACK chemicalStack, Type jsonType, JsonSerializationContext jsonSerializationContext) {
         return serializer.toJson(chemicalStack);
-    }
-
-    public STACK of(Object o) {
-        if (o instanceof ChemicalStack<?> && ((ChemicalStack<?>) o).getType().getClass() == empty.getClass()) {
-            return (STACK) ((ChemicalStack<?>) o).copy();
-        } else if (o instanceof CharSequence) {
-            String s = o.toString();
-            if (!s.isEmpty() && !s.equals("-") && !s.equals("empty") && !s.equals("minecraft:empty")) {
-                String[] s1 = s.split(" ", 2);
-                CHEMICAL chemical = registry.get().getValue(new ResourceLocation(s1[0]));
-                long amount = s1.length == 2 ? NumberUtils.toLong(s1[1], 1) : 1;
-                return createStack.apply(chemical, amount);
-            }
-        }
-        return (STACK) empty.getStack(0);
     }
 
     public static class ChemicalMekanismCapabilityProxy<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends CapCapabilityProxy<IChemicalHandler<CHEMICAL, STACK>, STACK> {

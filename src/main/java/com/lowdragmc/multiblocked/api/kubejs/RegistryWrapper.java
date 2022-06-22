@@ -22,4 +22,8 @@ public class RegistryWrapper {
         return MbdCapabilities.get(name);
     }
 
+    public static RecipeMap getRecipeMap(String name) {
+        return RecipeMap.RECIPE_MAP_REGISTRY.get(name);
+    }
+
 }

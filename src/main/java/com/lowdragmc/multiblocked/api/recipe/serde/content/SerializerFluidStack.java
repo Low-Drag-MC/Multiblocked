@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.api.recipe.serde.content;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,6 +14,11 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.Objects;
 
 public class SerializerFluidStack implements IContentSerializer<FluidStack> {
+
+    public static SerializerFluidStack INSTANCE = new SerializerFluidStack();
+
+    private SerializerFluidStack() {}
+
     @Override
     public void toNetwork(FriendlyByteBuf buf, FluidStack content) {
         content.writeToPacket(buf);
@@ -55,5 +61,15 @@ public class SerializerFluidStack implements IContentSerializer<FluidStack> {
         if (content.hasTag())
             json.addProperty("nbt", content.getTag().toString());
         return json;
+    }
+
+    @Override
+    public FluidStack of(Object o) {
+        if (o instanceof FluidStack) {
+            return ((FluidStack) o).copy();
+        } else if (Multiblocked.isKubeJSLoaded()) {
+            return MultiblockedJSPlugin.FluidStackWrapper(o);
+        }
+        return FluidStack.EMPTY;
     }
 }

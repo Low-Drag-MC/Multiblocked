@@ -3,8 +3,13 @@ package com.lowdragmc.multiblocked.api.recipe.serde.content;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.network.FriendlyByteBuf;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class SerializerFloat implements IContentSerializer<Float> {
+
+    public static SerializerFloat INSTANCE = new SerializerFloat();
+
+    private SerializerFloat() {}
 
     @Override
     public void toNetwork(FriendlyByteBuf buf, Float content) {
@@ -24,5 +29,17 @@ public class SerializerFloat implements IContentSerializer<Float> {
     @Override
     public JsonElement toJson(Float content) {
         return new JsonPrimitive(content);
+    }
+
+    @Override
+    public Float of(Object o) {
+        if (o instanceof Float) {
+            return (Float) o;
+        } else if (o instanceof Number) {
+            return ((Number) o).floatValue();
+        } else if (o instanceof CharSequence) {
+            return NumberUtils.toFloat(o.toString(), 1);
+        }
+        return 1f;
     }
 }

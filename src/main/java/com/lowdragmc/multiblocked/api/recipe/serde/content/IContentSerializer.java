@@ -15,6 +15,8 @@ public interface IContentSerializer<T> {
 
     JsonElement toJson(T content);
 
+    T of(Object o);
+
 
     @SuppressWarnings("unchecked")
     default void toNetworkContent(FriendlyByteBuf buf, Content content) {

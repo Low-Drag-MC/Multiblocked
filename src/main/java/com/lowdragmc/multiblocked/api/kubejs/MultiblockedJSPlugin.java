@@ -21,6 +21,7 @@ import net.minecraftforge.fluids.FluidStack;
 public class MultiblockedJSPlugin extends KubeJSPlugin {
     @Override
     public void addBindings(BindingsEvent event) {
+        event.add("MbdRecipeMap", RecipeMap.class);
         event.add("MbdRegistry", RegistryWrapper.class);
         event.add("MbdFactoryBlockPattern", FactoryBlockPattern.class);
         event.add("MbdRelativeDirection", RelativeDirection.class);

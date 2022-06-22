@@ -21,7 +21,6 @@ import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -37,7 +36,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
     public static final CreateStressCapacityCapability CAP = new CreateStressCapacityCapability();
 
     private CreateStressCapacityCapability() {
-        super("create_stress", 0xFFd9d06f, new SerializerFloat());
+        super("create_stress", 0xFFd9d06f, SerializerFloat.INSTANCE);
     }
 
     @Override
@@ -89,18 +88,6 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
     @Override
     public JsonElement serialize(Float value, Type type, JsonSerializationContext jsonSerializationContext) {
         return new JsonPrimitive(value);
-    }
-
-    @Override
-    public Float of(Object o) {
-        if (o instanceof Float) {
-            return (Float) o;
-        } else if (o instanceof Number) {
-            return ((Number) o).floatValue();
-        } else if (o instanceof CharSequence) {
-            return NumberUtils.toFloat(o.toString(), 1);
-        }
-        return 1f;
     }
 
     public static class ManaBotainaCapabilityProxy extends CapabilityProxy<Float> {

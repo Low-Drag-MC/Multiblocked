@@ -23,7 +23,7 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
     public static final ManaBotaniaCapability CAP = new ManaBotaniaCapability();
 
     private ManaBotaniaCapability() {
-        super("bot_mana", 0xFF06D2D9, new SerializerInteger());
+        super("bot_mana", 0xFF06D2D9, SerializerInteger.INSTANCE);
     }
 
     @Override
@@ -61,18 +61,6 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
                 BlockInfo.fromBlock(ModBlocks.manaVoid),
                 BlockInfo.fromBlock(ModBlocks.terraPlate)
         };
-    }
-
-    @Override
-    public Integer of(Object o) {
-        if (o instanceof Integer) {
-            return (Integer) o;
-        } else if (o instanceof Number) {
-            return ((Number) o).intValue();
-        } else if (o instanceof CharSequence) {
-            return NumberUtils.toInt(o.toString(), 1);
-        }
-        return 1;
     }
 
     public static class ManaBotainaCapabilityProxy extends CapCapabilityProxy<IManaReceiver, Integer> {

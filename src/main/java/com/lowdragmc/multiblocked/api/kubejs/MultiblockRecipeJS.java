@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
+import com.lowdragmc.multiblocked.api.recipe.RecipeBuilder;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
@@ -29,6 +30,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -272,6 +274,54 @@ public class MultiblockRecipeJS extends RecipeJS {
     public MultiblockRecipeJS outputStress(float stress, String slotName) {
         if (Multiblocked.isCreateLoaded())
             output(CreateStressCapacityCapability.CAP, stress, slotName);
+        return this;
+    }
+
+    public MultiblockRecipeJS inputEMC(long emc) {
+        inputEMC(emc, null);
+        return this;
+    }
+
+    public MultiblockRecipeJS outputEMC(long emc) {
+        outputEMC(emc, null);
+        return this;
+    }
+
+    public MultiblockRecipeJS inputEMC(long emc, String slotName) {
+        if (Multiblocked.isProjectELoaded()) {
+            input(EMCProjectECapability.CAP, BigInteger.valueOf(emc), slotName);
+        }
+        return this;
+    }
+
+    public MultiblockRecipeJS outputEMC(long emc, String slotName) {
+        if (Multiblocked.isProjectELoaded()) {
+            output(EMCProjectECapability.CAP, BigInteger.valueOf(emc), slotName);
+        }
+        return this;
+    }
+
+    public MultiblockRecipeJS inputAura(int aura) {
+        inputAura(aura, null);
+        return this;
+    }
+
+    public MultiblockRecipeJS outputAura(int aura) {
+        outputAura(aura, null);
+        return this;
+    }
+
+    public MultiblockRecipeJS inputAura(int aura, String slotName) {
+        if (Multiblocked.isNaturesAuraLoaded()) {
+            input(AuraMultiblockCapability.CAP, aura, slotName);
+        }
+        return this;
+    }
+
+    public MultiblockRecipeJS outputAura(int aura, String slotName) {
+        if (Multiblocked.isNaturesAuraLoaded()) {
+            output(AuraMultiblockCapability.CAP, aura, slotName);
+        }
         return this;
     }
 

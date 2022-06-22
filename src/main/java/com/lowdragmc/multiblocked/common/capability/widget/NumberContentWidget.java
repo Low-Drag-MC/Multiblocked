@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 
 import javax.annotation.Nullable;
+import java.math.BigInteger;
 
 public class NumberContentWidget extends ContentWidget<Number> {
     protected boolean isDecimal;
@@ -63,13 +64,15 @@ public class NumberContentWidget extends ContentWidget<Number> {
                 content = Integer.parseInt(number);
             } else if (content instanceof Long) {
                 content = Long.parseLong(number);
+            } else if (content instanceof BigInteger) {
+                content = new BigInteger(number);
             }
             onContentUpdate();
         }).setCurrentString(content.toString()));
         if (isDecimal) {
             textFieldWidget.setNumbersOnly(0f, Integer.MAX_VALUE);
         } else {
-            if (content instanceof Long) {
+            if (content instanceof Long || content instanceof BigInteger) {
                 textFieldWidget.setNumbersOnly(0, Long.MAX_VALUE);
             } else {
                 textFieldWidget.setNumbersOnly(0, Integer.MAX_VALUE);
@@ -105,6 +108,11 @@ public class NumberContentWidget extends ContentWidget<Number> {
                     } else if (content instanceof Long) {
                         if (Long.parseLong(number) + scale >= 0) {
                             newValue = Long.parseLong(number) + scale;
+                        }
+                    } else if (content instanceof BigInteger) {
+                        BigInteger add = new BigInteger(number).add(BigInteger.valueOf((scale)));
+                        if (add.compareTo(BigInteger.ZERO) >= 0) {
+                            newValue = add;
                         }
                     }
                     if (newValue != null) {

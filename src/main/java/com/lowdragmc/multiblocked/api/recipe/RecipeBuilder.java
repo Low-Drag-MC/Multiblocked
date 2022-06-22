@@ -18,6 +18,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidStack;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -255,6 +256,34 @@ public class RecipeBuilder {
     public RecipeBuilder outputCreate(float capacity) {
         if (Multiblocked.isCreateLoaded()) {
             return output(CreateStressCapacityCapability.CAP, capacity);
+        }
+        return this;
+    }
+
+    public RecipeBuilder inputAura(int aura) {
+        if (Multiblocked.isNaturesAuraLoaded()) {
+            return input(AuraMultiblockCapability.CAP, aura);
+        }
+        return this;
+    }
+
+    public RecipeBuilder outputAura(int aura) {
+        if (Multiblocked.isCreateLoaded()) {
+            return output(AuraMultiblockCapability.CAP, aura);
+        }
+        return this;
+    }
+
+    public RecipeBuilder inputEMC(BigInteger emc) {
+        if (Multiblocked.isProjectELoaded()) {
+            return input(EMCProjectECapability.CAP, emc);
+        }
+        return this;
+    }
+
+    public RecipeBuilder outputEMC(BigInteger emc) {
+        if (Multiblocked.isProjectELoaded()) {
+            return output(EMCProjectECapability.CAP, emc);
         }
         return this;
     }

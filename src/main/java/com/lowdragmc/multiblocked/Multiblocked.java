@@ -45,6 +45,8 @@ public class Multiblocked {
     public static final String MODID_GTCE = "gregtech";
     public static final String MODID_KUBEJS = "kubejs";
     private static final String MODID_CREATE = "create";
+    private static final String MODID_PE = "projecte";
+    private static final String MODID_NA = "naturesaura";
     public static final String MODNAME = "Multiblocked";
     public static final Logger LOGGER = LogManager.getLogger(MODNAME);
     public static final CreativeModeTab
@@ -69,6 +71,7 @@ public class Multiblocked {
         location = new File(FMLPaths.GAMEDIR.get().toFile(), "multiblocked");
         location.mkdir();
         DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
+        MbdConfig.registerConfig();
     }
 
     public static boolean isClient() {
@@ -106,5 +109,12 @@ public class Multiblocked {
 
     public static boolean isCreateLoaded() {
         return isModLoaded(MODID_CREATE);
+    }
+
+    public static boolean isProjectELoaded() {
+        return isModLoaded(MODID_PE);
+    }
+    public static boolean isNaturesAuraLoaded() {
+        return isModLoaded(MODID_NA);
     }
 }

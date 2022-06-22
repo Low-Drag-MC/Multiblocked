@@ -34,7 +34,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
     public static final FluidMultiblockCapability CAP = new FluidMultiblockCapability();
 
     private FluidMultiblockCapability() {
-        super("fluid", 0xFF3C70EE, new SerializerFluidStack());
+        super("fluid", 0xFF3C70EE, SerializerFluidStack.INSTANCE);
     }
 
     @Override
@@ -97,16 +97,6 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
         list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "fluid_input"))));
         list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "fluid_output"))));
         return list.toArray(new BlockInfo[0]);
-    }
-
-    @Override
-    public FluidStack of(Object o) {
-        if (o instanceof FluidStack) {
-            return ((FluidStack) o).copy();
-        } else if (Multiblocked.isKubeJSLoaded()) {
-            return MultiblockedJSPlugin.FluidStackWrapper(o);
-        }
-        return FluidStack.EMPTY;
     }
 
     public static class FluidCapabilityProxy extends CapCapabilityProxy<IFluidHandler, FluidStack> {

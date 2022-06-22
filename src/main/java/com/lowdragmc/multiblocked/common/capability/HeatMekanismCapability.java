@@ -29,7 +29,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
     public static final HeatMekanismCapability CAP = new HeatMekanismCapability();
 
     private HeatMekanismCapability() {
-        super("mek_heat", new Color(0xD9068D).getRGB(), new SerializerDouble());
+        super("mek_heat", new Color(0xD9068D).getRGB(), SerializerDouble.INSTANCE);
     }
 
     @Override
@@ -64,18 +64,6 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
                 BlockInfo.fromBlock(MekanismBlocks.FUELWOOD_HEATER.getBlock()),
                 BlockInfo.fromBlock(MekanismBlocks.RESISTIVE_HEATER.getBlock()),
         };
-    }
-
-    @Override
-    public Double of(Object o) {
-        if (o instanceof Double) {
-            return (Double) o;
-        } else if (o instanceof Number) {
-            return ((Number) o).doubleValue();
-        } else if (o instanceof CharSequence) {
-            return NumberUtils.toDouble(o.toString(), 1);
-        }
-        return 1d;
     }
 
     @Override

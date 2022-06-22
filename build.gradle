@@ -183,17 +183,23 @@ dependencies {
     compileOnly fg.deobf("curse.maven:rubidium-574856:3749094")
 
     //botania
-    compileOnly fg.deobf("curse.maven:botania-225643:${botania_file}")
+    compileOnly fg.deobf("curse.maven:botania-225643:3789677")
     //mekanism
-    compileOnly fg.deobf("curse.maven:mekanism-268560:${mekanism_file}")
+    compileOnly fg.deobf("curse.maven:mekanism-268560:3743835")
     // patchouli
-    compileOnly fg.deobf("curse.maven:patchouli-306770:${patchouli_file}")
+    compileOnly fg.deobf("curse.maven:patchouli-306770:3729975")
     // curios
-    compileOnly fg.deobf("curse.maven:curios-309927:${curios_file}")
+    compileOnly fg.deobf("curse.maven:curios-309927:3748873")
     // create
     compileOnly fg.deobf("curse.maven:create-328085:3737418")
     // flywheel
     compileOnly fg.deobf("curse.maven:flywheel-486392:3737402")
+    // projecte
+    compileOnly fg.deobf("curse.maven:projecte-226410:3722831")
+    // nature's aura
+    compileOnly fg.deobf("curse.maven:natures-aura-306626:3813427")
+    // pneumaticcraft
+    compileOnly fg.deobf("curse.maven:pneumaticcraft-repressurized-281849:3837268")
 
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.18')

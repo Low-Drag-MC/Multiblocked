@@ -36,7 +36,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
     public static final ItemMultiblockCapability CAP = new ItemMultiblockCapability();
 
     private ItemMultiblockCapability() {
-        super("item", 0xFFD96106, new SerializerIngredient());
+        super("item", 0xFFD96106, SerializerIngredient.INSTANCE);
     }
 
     @Override
@@ -87,21 +87,6 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
                 BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "item_input"))),
                 BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "item_output")))
         };
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Ingredient of(Object o) {
-        if (o instanceof Ingredient ingredient) {
-            return ingredient;
-        } else if (o instanceof ItemStack itemStack) {
-            return Ingredient.of(itemStack);
-        } else if (o instanceof ItemLike itemLike) {
-            return Ingredient.of(itemLike);
-        } else if (o instanceof TagKey tag) {
-            return Ingredient.of(tag);
-        }
-        return Ingredient.EMPTY;
     }
 
     public static class ItemCapabilityProxy extends CapCapabilityProxy<IItemHandler, Ingredient> {

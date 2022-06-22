@@ -38,7 +38,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     public static final FEMultiblockCapability CAP = new FEMultiblockCapability();
 
     private FEMultiblockCapability() {
-        super("forge_energy", 0xFFCB0000, new SerializerInteger());
+        super("forge_energy", 0xFFCB0000, SerializerInteger.INSTANCE);
     }
 
     @Override
@@ -101,18 +101,6 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
                 Multiblocked.MODID, "energy_input"))));
         list.add(BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "energy_output"))));
         return list.toArray(new BlockInfo[0]);
-    }
-
-    @Override
-    public Integer of(Object o) {
-        if (o instanceof Integer) {
-            return (Integer) o;
-        } else if (o instanceof Number) {
-            return ((Number) o).intValue();
-        } else if (o instanceof CharSequence) {
-            return NumberUtils.toInt(o.toString(), 1);
-        }
-        return 1;
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
-import com.lowdragmc.multiblocked.api.recipe.RecipeBuilder;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;

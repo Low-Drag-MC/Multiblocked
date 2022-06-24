@@ -9,7 +9,7 @@ version="${file.jarVersion}" #mandatory
 displayName="Multiblocked" #mandatory
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 #displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
-logoFile="examplemod.png" #optional
+logoFile="icon.png" #optional
 credits="" #optional
 authors="KilaBash" #optional
 # The description text for the mod (multi line!) (#mandatory)
@@ -32,6 +32,6 @@ description='''Multiblocked, a mod for custom multiblock.'''
 [[dependencies.multiblocked]]
     modId="ldlib"
     mandatory=true
-    versionRange="[0.5,)"
+    versionRange="[0.6.1,)"
     ordering="AFTER"
     side="BOTH"

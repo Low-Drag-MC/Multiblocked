@@ -1,5 +1,12 @@
 package com.lowdragmc.multiblocked.api.kubejs;
 
+import com.lowdragmc.lowdraglib.client.particle.impl.ShaderBeamParticle;
+import com.lowdragmc.lowdraglib.client.particle.impl.ShaderParticle;
+import com.lowdragmc.lowdraglib.client.particle.impl.ShaderTrailParticle;
+import com.lowdragmc.lowdraglib.client.particle.impl.TextureBeamParticle;
+import com.lowdragmc.lowdraglib.client.particle.impl.TextureParticle;
+import com.lowdragmc.lowdraglib.client.particle.impl.TextureTrailParticle;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
@@ -25,6 +32,16 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdRegistry", RegistryWrapper.class);
         event.add("MbdFactoryBlockPattern", FactoryBlockPattern.class);
         event.add("MbdRelativeDirection", RelativeDirection.class);
+        if (Multiblocked.isClient()) {
+            event.add("TextureParticle", TextureParticle.class);
+            event.add("ShaderParticle", ShaderParticle.class);
+
+            event.add("TextureTrailParticle", TextureTrailParticle.class);
+            event.add("ShaderTrailParticle", ShaderTrailParticle.class);
+
+            event.add("TextureBeamParticle", TextureBeamParticle.class);
+            event.add("ShaderBeamParticle", ShaderBeamParticle.class);
+        }
     }
 
     @Override

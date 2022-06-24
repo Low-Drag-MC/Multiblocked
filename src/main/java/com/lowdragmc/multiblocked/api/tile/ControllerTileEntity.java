@@ -44,6 +44,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
@@ -73,6 +74,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     private Map<Long, Map<MultiblockCapability<?>, Tuple<IO, Direction>>> settings;
     protected LongOpenHashSet parts;
     protected RecipeLogic recipeLogic;
+    protected AxisAlignedBB renderBox;
 
     public ControllerTileEntity(ControllerDefinition definition) {
         super(definition);
@@ -275,6 +277,18 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             for (long blockPos : disabled) {
                 buffer.writeLong(blockPos);
             }
+            int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
+            for (BlockPos pos : state.getCache()) {
+                minX = Math.min(minX, pos.getX());
+                minY = Math.min(minY, pos.getY());
+                minZ = Math.min(minZ, pos.getZ());
+
+                maxX = Math.max(maxX, pos.getX());
+                maxY = Math.max(maxY, pos.getY());
+                maxZ = Math.max(maxZ, pos.getZ());
+            }
+            buffer.writeBlockPos(new BlockPos(minX, minY, minZ));
+            buffer.writeBlockPos(new BlockPos(maxX + 1, maxY + 1, maxZ + 1));
         }
     }
 
@@ -290,11 +304,13 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                 }
                 MultiblockWorldSavedData.addDisableModel(state.controllerPos, listBuilder.build());
             }
+            renderBox = new AxisAlignedBB(buffer.readBlockPos(), buffer.readBlockPos());
         } else {
             if (state != null) {
                 MultiblockWorldSavedData.removeDisableModel(state.controllerPos);
             }
             state = null;
+            renderBox = null;
         }
     }
 
@@ -421,6 +437,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             new StructurePageWidget(this.definition, tabContainer);
         }
         return new ModularUI(196, 256, this, entityPlayer).widget(tabContainer);
+    }
+
+    @Nonnull
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        return getRenderer().isGlobalRenderer(this) ? INFINITE_EXTENT_AABB : renderBox == null ? super.getRenderBoundingBox() : renderBox;
     }
 
     @Override

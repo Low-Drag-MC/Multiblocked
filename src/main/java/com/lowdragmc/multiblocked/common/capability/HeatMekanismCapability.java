@@ -18,10 +18,8 @@ import mekanism.api.heat.IHeatHandler;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -29,7 +27,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
     public static final HeatMekanismCapability CAP = new HeatMekanismCapability();
 
     private HeatMekanismCapability() {
-        super("mek_heat", new Color(0xD9068D).getRGB(), SerializerDouble.INSTANCE);
+        super("mek_heat", 0xFFD9068D, SerializerDouble.INSTANCE);
     }
 
     @Override

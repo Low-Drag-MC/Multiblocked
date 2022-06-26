@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class AuraMultiblockCapability extends MultiblockCapability<Integer> {
     public static final AuraMultiblockCapability CAP = new AuraMultiblockCapability();
 
     private AuraMultiblockCapability() {
-        super("natures_aura", new Color(0x95EF95).getRGB(), SerializerInteger.INSTANCE);
+        super("natures_aura", 0xFF95EF95, SerializerInteger.INSTANCE);
     }
 
     @Override

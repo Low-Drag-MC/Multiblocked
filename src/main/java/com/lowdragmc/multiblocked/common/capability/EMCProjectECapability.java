@@ -22,7 +22,6 @@ import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nonnull;
-import java.awt.Color;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.Collections;
@@ -33,7 +32,7 @@ public class EMCProjectECapability extends MultiblockCapability<BigInteger> {
     public static final EMCProjectECapability CAP = new EMCProjectECapability();
 
     protected EMCProjectECapability() {
-        super("projecte_emc", new Color(0xAC2D5E).getRGB(), SerializerBigInteger.INSTANCE);
+        super("projecte_emc", 0xFFAC2D5E, SerializerBigInteger.INSTANCE);
     }
 
     @Override

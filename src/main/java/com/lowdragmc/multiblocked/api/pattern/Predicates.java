@@ -1,15 +1,15 @@
 package com.lowdragmc.multiblocked.api.pattern;
 
+import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateAnyCapability;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateBlocks;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateStates;
-import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
+import com.lowdragmc.multiblocked.api.pattern.predicates.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class Predicates {
 
@@ -33,12 +33,18 @@ public class Predicates {
         return definition instanceof ControllerDefinition ? predicate.setCenter() : predicate;
     }
 
+    public static TraceabilityPredicate customAny() {
+        return new TraceabilityPredicate(new PredicateCustomAny());
+    }
+
+    public static TraceabilityPredicate custom(Predicate<MultiblockState> predicate, Supplier<BlockInfo[]> candidates) {
+        return new TraceabilityPredicate(predicate, candidates);
+    }
     public static TraceabilityPredicate any() {
         return new TraceabilityPredicate(SimplePredicate.ANY);
     }
 
     public static TraceabilityPredicate air() {
         return new TraceabilityPredicate(SimplePredicate.AIR);
-
     }
 }

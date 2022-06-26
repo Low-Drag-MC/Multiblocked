@@ -45,16 +45,6 @@ public class MultiblockShapeInfo {
             return where(symbol, BlockInfo.fromBlockState(blockState));
         }
 
-        /**
-         * @param partSupplier Should supply either a MetaTileEntity or an IBlockState.
-         */
-        public Builder where(char symbol, Supplier<?> partSupplier) {
-            Object part = partSupplier.get();
-            if (part instanceof BlockState) {
-                return where(symbol, (BlockState) part);
-            } else throw new IllegalArgumentException("Supplier must supply either a MetaTileEntity or an IBlockState! Actual: " + part.getClass());
-        }
-
         private BlockInfo[][][] bakeArray() {
             BlockInfo[][][] blockInfos = (BlockInfo[][][]) Array.newInstance(BlockInfo.class, shape.get(0)[0].length(), shape.get(0).length, shape.size());
             for (int z = 0; z < blockInfos.length; z++) { //z

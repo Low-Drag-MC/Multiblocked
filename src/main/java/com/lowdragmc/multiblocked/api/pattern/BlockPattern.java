@@ -453,6 +453,8 @@ public class BlockPattern {
                 if (blockInfo == null || blockInfo.getBlockState().getBlock() == Blocks.AIR) {
                     if (blocks.get(pos).getBlockState().getBlock() instanceof BlockComponent component) {
                         if (component.definition instanceof ControllerDefinition) {
+                            return false;
+                        } else {
                             BlockEntity te = component.newBlockEntity(BlockPos.ZERO, component.defaultBlockState());
                             if (te instanceof ComponentTileEntity) {
                                 return ((ComponentTileEntity<?>) te).isValidFrontFacing(f);

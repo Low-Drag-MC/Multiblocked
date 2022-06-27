@@ -451,7 +451,9 @@ public class BlockPattern {
             resetFacing(pos, info.getBlockState(), null, (p, f) -> {
                 BlockInfo blockInfo = blocks.get(p.relative(f));
                 if (blockInfo == null || blockInfo.getBlockState().getBlock() == Blocks.AIR) {
-                    if (te instanceof ComponentTileEntity) {
+                    if (te instanceof ControllerTileEntity) {
+                        return false;
+                    } else if (te instanceof ComponentTileEntity) {
                         return ((ComponentTileEntity<?>) te).isValidFrontFacing(f);
                     }
                     return true;

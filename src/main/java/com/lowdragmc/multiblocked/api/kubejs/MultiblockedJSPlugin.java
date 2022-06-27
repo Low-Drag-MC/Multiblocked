@@ -1,6 +1,9 @@
 package com.lowdragmc.multiblocked.api.kubejs;
 
+import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
+import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
+import com.lowdragmc.multiblocked.api.pattern.Predicates;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
@@ -25,6 +28,9 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdRegistry", RegistryWrapper.class);
         event.add("MbdFactoryBlockPattern", FactoryBlockPattern.class);
         event.add("MbdRelativeDirection", RelativeDirection.class);
+        event.add("MbdPredicates", Predicates.class);
+        event.add("MbdShapeInfo", MultiblockShapeInfo.class);
+        event.add("MbdBlockInfo", BlockInfo.class);
     }
 
     @Override

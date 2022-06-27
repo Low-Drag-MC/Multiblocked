@@ -27,7 +27,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
     public static final HeatMekanismCapability CAP = new HeatMekanismCapability();
 
     private HeatMekanismCapability() {
-        super("mek_heat", 0xFFD9068D;
+        super("mek_heat", 0xFFD9068D);
     }
 
     @Override

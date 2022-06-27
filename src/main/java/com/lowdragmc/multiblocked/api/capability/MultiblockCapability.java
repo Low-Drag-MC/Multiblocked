@@ -17,6 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
+import org.checkerframework.checker.units.qual.K;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -56,6 +57,11 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
      * deep copy of this content. recipe need it for searching and such things
      */
     public abstract T copyInner(T content);
+
+    @SuppressWarnings("unchecked")
+    public final T copyContent(Object content) {
+        return copyInner((T) content);
+    }
 
     /**
      * create a proxy of this block.

@@ -78,17 +78,12 @@ public abstract class CapabilityProxy<K> {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
-    public final K copyContent(Object content) {
-        return (K) capability.copyInner((K) content);
-    }
-
     public final List<K> searchingRecipe(IO io, Recipe recipe, List<?> left) {
-        return handleRecipeInner(io, recipe, left.stream().map(this::copyContent).collect(Collectors.toList()), true);
+        return handleRecipeInner(io, recipe, left.stream().map(c -> (K)c).collect(Collectors.toList()), true);
     }
 
     public final List<K> handleRecipe(IO io, Recipe recipe, List<?> left) {
-        return handleRecipeInner(io, recipe, left.stream().map(this::copyContent).collect(Collectors.toList()), false);
+        return handleRecipeInner(io, recipe, left.stream().map(c -> (K)c).collect(Collectors.toList()), false);
     }
 
     public final void updateChangedState(long periodID) {

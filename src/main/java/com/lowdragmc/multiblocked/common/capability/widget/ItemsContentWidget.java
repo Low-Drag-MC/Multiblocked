@@ -48,7 +48,12 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
 
     @Override
     public Ingredient getJEIContent(Object content) {
-        return (Ingredient) content;
+        if (content instanceof Ingredient) {
+            return (Ingredient) content;
+        } else if (content instanceof ItemStack itemStack) {
+            return new SizedIngredient(Ingredient.of(itemStack), this.content.getItems()[0].getCount());
+        }
+        return null;
     }
 
     @Override

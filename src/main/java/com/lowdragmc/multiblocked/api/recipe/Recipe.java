@@ -120,9 +120,11 @@ public class Recipe {
                     contentSlot.computeIfAbsent(cont.slotName, s -> new ArrayList<>()).add(cont.content);
                 }
             }
+            MultiblockCapability<?> capability = entry.getKey();
+            content = content.stream().map(capability::copyContent).toList();
             if (content.isEmpty() && contentSlot.isEmpty()) continue;
-            if (capabilityProxies.contains(io, entry.getKey())) {
-                for (CapabilityProxy<?> proxy : capabilityProxies.get(io, entry.getKey()).values()) { // search same io type
+            if (capabilityProxies.contains(io, capability)) {
+                for (CapabilityProxy<?> proxy : capabilityProxies.get(io, capability).values()) { // search same io type
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {
@@ -142,8 +144,8 @@ public class Recipe {
                 }
             }
             if (content == null && contentSlot.isEmpty()) continue;
-            if (capabilityProxies.contains(IO.BOTH, entry.getKey())) {
-                for (CapabilityProxy<?> proxy : capabilityProxies.get(IO.BOTH, entry.getKey()).values()) { // search both type
+            if (capabilityProxies.contains(IO.BOTH, capability)) {
+                for (CapabilityProxy<?> proxy : capabilityProxies.get(IO.BOTH, capability).values()) { // search both type
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {
@@ -193,9 +195,11 @@ public class Recipe {
                     }
                 }
             }
+            MultiblockCapability<?> capability = entry.getKey();
+            content = content.stream().map(capability::copyContent).toList();
             if (content.isEmpty() && contentSlot.isEmpty()) continue;
-            if (capabilityProxies.contains(io, entry.getKey())) {
-                for (CapabilityProxy<?> proxy : capabilityProxies.get(io, entry.getKey()).values()) { // search same io type
+            if (capabilityProxies.contains(io, capability)) {
+                for (CapabilityProxy<?> proxy : capabilityProxies.get(io, capability).values()) { // search same io type
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {
@@ -215,8 +219,8 @@ public class Recipe {
                 }
             }
             if (content == null && contentSlot.isEmpty()) continue;
-            if (capabilityProxies.contains(IO.BOTH, entry.getKey())) {
-                for (CapabilityProxy<?> proxy : capabilityProxies.get(IO.BOTH, entry.getKey()).values()) { // search both type
+            if (capabilityProxies.contains(IO.BOTH, capability)) {
+                for (CapabilityProxy<?> proxy : capabilityProxies.get(IO.BOTH, capability).values()) { // search both type
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {

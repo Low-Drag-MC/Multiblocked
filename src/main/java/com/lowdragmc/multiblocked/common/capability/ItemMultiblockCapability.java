@@ -17,11 +17,9 @@ import com.lowdragmc.multiblocked.core.mixins.NBTIngredientMixin;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.crafting.NBTIngredient;
@@ -107,15 +105,16 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
                     for (int i = 0; i < capability.getSlots(); i++) {
                         ItemStack itemStack = capability.getStackInSlot(i);
                         //Does not look like a good implementation, but I think it's at least equal to vanilla Ingredient::test
-                        if (!ingredient.test(itemStack))
-                            continue;
-                        ItemStack[] ingredientStacks = ingredient.getItems();
-                        for (ItemStack ingredientStack : ingredientStacks) {
-                            if (ingredientStack.is(itemStack.getItem())) {
-                                ItemStack extracted = capability.extractItem(i, ingredientStack.getCount(), simulate);
-                                if (extracted.getCount() >= ingredientStack.getCount()) {
-                                    iterator.remove();
-                                    break SLOT_LOOKUP;
+                        if (ingredient.test(itemStack)) {
+                            ItemStack[] ingredientStacks = ingredient.getItems();
+                            for (ItemStack ingredientStack : ingredientStacks) {
+                                if (ingredientStack.is(itemStack.getItem())) {
+                                    ItemStack extracted = capability.extractItem(i, ingredientStack.getCount(), simulate);
+                                    ingredientStack.setCount(ingredientStack.getCount() - extracted.getCount());
+                                    if (ingredientStack.isEmpty()) {
+                                        iterator.remove();
+                                        break SLOT_LOOKUP;
+                                    }
                                 }
                             }
                         }
@@ -124,9 +123,10 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
             } else if (io == IO.OUT) {
                 while (iterator.hasNext()) {
                     Ingredient ingredient = iterator.next();
-                    ItemStack output = ingredient instanceof NBTIngredient nbtIngredient ? ((NBTIngredientMixin) nbtIngredient).getStack().copy() : ingredient.getItems()[0];
+                    ItemStack output = ingredient instanceof NBTIngredient nbtIngredient ? ((NBTIngredientMixin) nbtIngredient).getStack() : ingredient.getItems()[0];
                     for (int i = 0; i < capability.getSlots(); i++) {
-                        output = capability.insertItem(i, output.copy(), simulate);
+                        ItemStack leftStack = capability.insertItem(i, output.copy(), simulate);
+                        output.setCount(leftStack.getCount());
                         if (output.isEmpty()) break;
                     }
                     if (output.isEmpty()) iterator.remove();

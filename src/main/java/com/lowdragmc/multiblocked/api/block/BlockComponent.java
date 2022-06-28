@@ -14,7 +14,6 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -75,7 +74,8 @@ public class BlockComponent extends Block implements IBlockRendererProvider, Ent
     }
 
     @Override
-    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+        super.neighborChanged(state, level, pos, pBlock, pFromPos, pIsMoving);
         IComponent instance = getComponent(level, pos);
         if (instance != null) {
             instance.onNeighborChange();

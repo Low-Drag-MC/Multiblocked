@@ -74,8 +74,9 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
     }
 
     @Override
-    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
-        IComponent instance = getComponent(world, pos);
+    public void neighborChanged(BlockState pState, World pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+        super.neighborChanged(pState, pLevel, pPos, pBlock, pFromPos, pIsMoving);
+        IComponent instance = getComponent(pLevel, pPos);
         if (instance != null) {
             instance.onNeighborChange();
         }

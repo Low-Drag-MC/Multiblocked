@@ -379,7 +379,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
     }
 
     public static void registerBlock() {
-        PartDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "symbol"), SymbolTileEntity::new);
+        PartDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "symbol"), SymbolTileEntity.class);
         definition.properties.isOpaque = false;
         definition.properties.tabGroup = null;
         definition.showInJei = false;

@@ -42,7 +42,7 @@ public class MbdComponents {
     public static final ItemComponent DummyComponentItem;
 
     static {
-        ComponentDefinition definition = new ComponentDefinition(new ResourceLocation(Multiblocked.MODID, "dummy_component"), DummyComponentTileEntity::new);
+        ComponentDefinition definition = new ComponentDefinition(new ResourceLocation(Multiblocked.MODID, "dummy_component"), DummyComponentTileEntity.class);
         definition.properties.isOpaque = false;
         definition.properties.tabGroup = null;
         definition.showInJei = false;

@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class PartTileTesterEntity extends PartTileEntity<PartDefinition> {
-    public final static PartDefinition DEFAULT_DEFINITION = new PartDefinition(new ResourceLocation("multiblocked:part_tester"), PartTileTesterEntity::new);
+    public final static PartDefinition DEFAULT_DEFINITION = new PartDefinition(new ResourceLocation("multiblocked:part_tester"), PartTileTesterEntity.class);
 
     public PartTileTesterEntity(PartDefinition definition, BlockPos pos, BlockState state) {
         super(definition, pos, state);

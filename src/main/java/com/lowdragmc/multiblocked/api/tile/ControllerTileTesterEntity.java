@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nonnull;
 
 public class ControllerTileTesterEntity extends ControllerTileEntity {
-    public final static ControllerDefinition DEFAULT_DEFINITION = new ControllerDefinition(new ResourceLocation("multiblocked:controller_tester"), ControllerTileTesterEntity::new);
+    public final static ControllerDefinition DEFAULT_DEFINITION = new ControllerDefinition(new ResourceLocation("multiblocked:controller_tester"), ControllerTileTesterEntity.class);
 
     public ControllerTileTesterEntity(ControllerDefinition definition, BlockPos pos, BlockState state) {
         super(definition, pos, state);

@@ -15,6 +15,7 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
+import com.lowdragmc.multiblocked.api.capability.trait.InterfaceUser;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.kubejs.events.*;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
@@ -59,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -92,6 +94,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         initTrait();
     }
 
+    @SuppressWarnings("unchecked")
     protected void initTrait() {
         for (Map.Entry<String, JsonElement> entry : this.definition.traits.entrySet()) {
             MultiblockCapability<?> capability = MbdCapabilities.get(entry.getKey());
@@ -100,6 +103,16 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
                 trait.serialize(entry.getValue());
                 trait.setComponent(this);
                 traits.put(capability, trait);
+            }
+        }
+        if (this instanceof IDynamicComponentTile) {
+            IDynamicComponentTile<Object> dynamicComponentTile = (IDynamicComponentTile<Object>) this;
+            Map<String, ? extends BiConsumer<Object, CapabilityTrait>> traitSetters = dynamicComponentTile.getTraitSetters();
+            for (CapabilityTrait trait : traits.values()) {
+                Class<? extends CapabilityTrait> traitClass = trait.getClass();
+                if (traitClass.isAnnotationPresent(InterfaceUser.class)) {
+                    traitSetters.get(traitClass.getAnnotation(InterfaceUser.class).value().getSimpleName()).accept(this, trait);
+                }
             }
         }
     }

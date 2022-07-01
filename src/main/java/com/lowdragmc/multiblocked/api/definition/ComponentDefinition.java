@@ -80,7 +80,7 @@ public class ComponentDefinition {
                     if (c.getParameterCount() != 3) return false;
                     Class<?>[] classes = c.getParameterTypes();
                     return ComponentDefinition.class.isAssignableFrom(classes[0]) && classes[1] == BlockPos.class && classes[2] == BlockState.class;
-                }).findFirst().get();
+                }).findFirst().orElseThrow(() -> new IllegalArgumentException("cant find the constructor with the parameters(definition, pos, state)"));
 
         tileType = BlockEntityType.Builder.of((pos, state) -> {
             try {

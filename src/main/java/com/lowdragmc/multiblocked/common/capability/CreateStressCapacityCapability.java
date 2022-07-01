@@ -62,9 +62,8 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
     }
 
     @Override
-    public CreateStressCapacityCapability.ManaBotainaCapabilityProxy createProxy(@Nonnull IO io, @Nonnull
-            BlockEntity tileEntity) {
-        return new CreateStressCapacityCapability.ManaBotainaCapabilityProxy(tileEntity);
+    public CreateStressCapabilityProxy createProxy(@Nonnull IO io, @Nonnull BlockEntity tileEntity) {
+        return new CreateStressCapabilityProxy(tileEntity);
     }
 
     @Override
@@ -90,9 +89,9 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
         return new JsonPrimitive(value);
     }
 
-    public static class ManaBotainaCapabilityProxy extends CapabilityProxy<Float> {
+    public static class CreateStressCapabilityProxy extends CapabilityProxy<Float> {
 
-        public ManaBotainaCapabilityProxy(BlockEntity tileEntity) {
+        public CreateStressCapabilityProxy(BlockEntity tileEntity) {
             super(CreateStressCapacityCapability.CAP, tileEntity);
         }
 

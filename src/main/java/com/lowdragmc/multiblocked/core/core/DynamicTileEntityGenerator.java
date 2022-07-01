@@ -38,12 +38,14 @@ public class DynamicTileEntityGenerator implements Opcodes {
             }
             interfaces.add(clazz);
         }
+        
         Constructor<?> constructor = Arrays.stream(superClass.getDeclaredConstructors())
                 .filter(c -> {
                     if (c.getParameterCount() != 3) return false;
                     Class<?>[] classes = c.getParameterTypes();
                     return ComponentDefinition.class.isAssignableFrom(classes[0]) && classes[1] == BlockPos.class && classes[2] == BlockState.class;
-                }).findFirst().get();
+                }).findFirst().orElseThrow(() -> new IllegalArgumentException("cant find the constructor with the parameters(definition, pos, state)"));
+
         superConstructor = "(" +
                 constructor.getParameterTypes()[0].descriptorString() +
                 "Lnet/minecraft/core/BlockPos;" +

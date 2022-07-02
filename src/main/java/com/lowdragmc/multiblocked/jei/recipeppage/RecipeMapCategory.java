@@ -79,14 +79,14 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
             ingredients.setInputs(VanillaTypes.ITEM, recipe.inputs.get(ItemMultiblockCapability.CAP).stream()
                     .map(Content::getContent)
                     .map(ItemsIngredient.class::cast)
-                    .flatMap(r-> Arrays.stream(r.ingredient.getItems()))
+                    .flatMap(r-> Arrays.stream(r.getIngredient().getItems()))
                     .collect(Collectors.toList()));
         }
         if (recipe.outputs.containsKey(ItemMultiblockCapability.CAP)) {
             ingredients.setOutputs(VanillaTypes.ITEM, recipe.outputs.get(ItemMultiblockCapability.CAP).stream()
                     .map(Content::getContent)
                     .map(ItemsIngredient.class::cast)
-                    .flatMap(r -> Arrays.stream(r.ingredient.getItems()))
+                    .flatMap(r -> Arrays.stream(r.getIngredient().getItems()))
                     .collect(Collectors.toList()));
         }
 

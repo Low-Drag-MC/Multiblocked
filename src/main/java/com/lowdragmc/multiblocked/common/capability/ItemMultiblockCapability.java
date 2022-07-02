@@ -111,7 +111,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
         if (itemsIngredient.isTag()) {
             jsonObject.addProperty("tag", itemsIngredient.getTag());
         } else {
-            jsonObject.add("matches", itemsIngredient.ingredient.toJson());
+            jsonObject.add("matches", itemsIngredient.getIngredient().toJson());
         }
         return jsonObject;
     }
@@ -132,7 +132,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
                     ItemsIngredient ingredient = iterator.next();
                     for (int i = 0; i < capability.getSlots(); i++) {
                         ItemStack itemStack = capability.getStackInSlot(i);
-                        if (ingredient.ingredient.test(itemStack)) {
+                        if (ingredient.getIngredient().test(itemStack)) {
                             ItemStack extracted = capability.extractItem(i, ingredient.getAmount(), simulate);
                             ingredient.setAmount(ingredient.getAmount() - extracted.getCount());
                             if (ingredient.getAmount() <= 0) {

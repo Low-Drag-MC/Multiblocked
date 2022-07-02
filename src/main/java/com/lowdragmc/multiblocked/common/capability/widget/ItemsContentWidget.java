@@ -40,7 +40,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
 
     @Override
     protected void onContentUpdate() {
-        List<List<ItemStack>> stacks = Collections.singletonList(Arrays.stream(content.ingredient.getItems()).map(stack -> {
+        List<List<ItemStack>> stacks = Collections.singletonList(Arrays.stream(content.getIngredient().getItems()).map(stack -> {
             ItemStack copy = stack.copy();
             copy.setCount(content.getAmount());
             return copy;
@@ -80,7 +80,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         int y = 25;
         dialog.addWidget(new LabelWidget(5, y + 3, "multiblocked.gui.label.amount"));
         dialog.addWidget(new TextFieldWidget(125 - 60, y, 60, 15,  null, number -> {
-            content = content.isTag() ? new ItemsIngredient(content.getTag(), Integer.parseInt(number)) : new ItemsIngredient(content.ingredient, Integer.parseInt(number));
+            content = content.isTag() ? new ItemsIngredient(content.getTag(), Integer.parseInt(number)) : new ItemsIngredient(content.getIngredient(), Integer.parseInt(number));
             onContentUpdate();
         }).setNumbersOnly(1, Integer.MAX_VALUE).setCurrentString(content.getAmount()+""));
 
@@ -116,7 +116,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         }).setBackgroundTexture(new ColorRectTexture(0xaf444444));
         tag.setTextResponder(tagS -> {
             content = new ItemsIngredient(tagS, content.getAmount());
-            ItemStack[] matches = content.ingredient.getItems();
+            ItemStack[] matches = content.getIngredient().getItems();
             handler.setStackInSlot(0, matches.length > 0 ? matches[0] : ItemStack.EMPTY);
             phantomSlotWidget.setHoverTooltips(LocalizationUtils.format("multiblocked.gui.trait.item.ore_dict") + ":\n"  + content.getTag());
             onContentUpdate();
@@ -124,10 +124,10 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         tag.setHoverTooltips("multiblocked.gui.trait.item.ore_dic");
         dialog.addWidget(new SwitchWidget(x, y + 22, 50, 15, (cd, r)->{
             groupOre.setVisible(r);
-            content = r ? new ItemsIngredient(tag.getCurrentString(), content.getAmount()) : new ItemsIngredient(content.ingredient, content.getAmount());
+            content = r ? new ItemsIngredient(tag.getCurrentString(), content.getAmount()) : new ItemsIngredient(content.getIngredient(), content.getAmount());
             groupIngredient.setVisible(!r);
             if (r) {
-                ItemStack[] matches = content.ingredient.getItems();
+                ItemStack[] matches = content.getIngredient().getItems();
                 handler.setStackInSlot(0, matches.length > 0 ? matches[0] : ItemStack.EMPTY);
                 phantomSlotWidget.setHoverTooltips("oreDict: \n" + content.getTag());
             } else {
@@ -142,7 +142,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         groupIngredient.setVisible(!content.isTag());
         groupOre.setVisible(content.isTag());
         if (content.isTag()) {
-            ItemStack[] matches = content.ingredient.getItems();
+            ItemStack[] matches = content.getIngredient().getItems();
             handler.setStackInSlot(0, matches.length > 0 ? matches[0] : ItemStack.EMPTY);
             phantomSlotWidget.setHoverTooltips(LocalizationUtils.format("multiblocked.gui.trait.item.ore_dict") + ":\n"  + content.getTag());
         } else {
@@ -150,7 +150,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         }
         groupIngredient.addWidget(new LabelWidget(x + 50, 5, "multiblocked.gui.tips.settings"));
         groupIngredient.addWidget(new ButtonWidget(100, 0, 20, 20, cd -> {
-            ItemStack[] stacks = content.ingredient.getItems();
+            ItemStack[] stacks = content.getIngredient().getItems();
             content = new ItemsIngredient(Ingredient.of(ArrayUtils.add(stacks, new ItemStack(Items.IRON_INGOT))), content.getAmount());
             updateIngredientWidget(container);
             onContentUpdate();
@@ -159,7 +159,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
 
     private void updateIngredientWidget(DraggableScrollableWidgetGroup container) {
         container.widgets.forEach(container::waitToRemoved);
-        ItemStack[] matchingStacks = ArrayUtils.clone(content.ingredient.getItems());
+        ItemStack[] matchingStacks = ArrayUtils.clone(content.getIngredient().getItems());
         for (int i = 0; i < matchingStacks.length; i++) {
             ItemStack stack = matchingStacks[i];
             IItemHandlerModifiable handler;

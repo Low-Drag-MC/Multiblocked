@@ -8,7 +8,8 @@ import net.minecraft.tags.TagCollectionManager;
 import net.minecraft.util.ResourceLocation;
 
 public class ItemsIngredient {
-    public final Ingredient ingredient;
+
+    private Ingredient ingredient;
     private int amount;
     private String tag;
 
@@ -22,22 +23,28 @@ public class ItemsIngredient {
     }
 
     public ItemsIngredient(String tag, int amount) {
-        ITag<Item> itag = null;
-        try {
-            itag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tag.toLowerCase()));
-        } catch (Exception ignored) {}
         this.tag = tag;
-        if (itag != null) {
-            this.ingredient = Ingredient.of(itag);
-        } else {
-            this.ingredient = Ingredient.of(ItemStack.EMPTY);
-        }
         this.amount = amount;
     }
 
     public ItemsIngredient(Ingredient ingredient) {
         this.ingredient = ingredient;
         this.amount = ingredient.isEmpty() ? 0 : ingredient.getItems()[0].getCount();
+    }
+
+    public Ingredient getIngredient() {
+        if (ingredient == null) {
+            ITag<Item> itag = null;
+            try {
+                itag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tag.toLowerCase()));
+            } catch (Exception ignored) {}
+            if (itag != null) {
+                this.ingredient = Ingredient.of(itag);
+            } else {
+                this.ingredient = Ingredient.of(ItemStack.EMPTY);
+            }
+        }
+        return ingredient;
     }
 
     public int getAmount() {
@@ -49,7 +56,7 @@ public class ItemsIngredient {
     }
 
     public ItemsIngredient copy() {
-        return new ItemsIngredient(ingredient, amount);
+        return isTag() ? new ItemsIngredient(tag, amount) : new ItemsIngredient(ingredient, amount);
     }
 
     public ItemStack getOutputStack() {

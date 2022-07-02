@@ -180,7 +180,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     @Override
     public boolean isBlockHasCapability(@Nonnull IO io, @Nonnull
             BlockEntity tileEntity) {
-        return !getCapability(Capabilities.GAS_HANDLER_CAPABILITY, tileEntity).isEmpty();
+        return !getCapability(capability.get(), tileEntity).isEmpty();
     }
 
     @Override

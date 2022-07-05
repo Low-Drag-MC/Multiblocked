@@ -47,6 +47,7 @@ public class Multiblocked {
     private static final String MODID_CREATE = "create";
     private static final String MODID_PE = "projecte";
     private static final String MODID_NA = "naturesaura";
+    private static final String MODID_PNC = "pneumaticcraft";
     public static final String MODNAME = "Multiblocked";
     public static final Logger LOGGER = LogManager.getLogger(MODNAME);
     public static final CreativeModeTab
@@ -116,5 +117,9 @@ public class Multiblocked {
     }
     public static boolean isNaturesAuraLoaded() {
         return isModLoaded(MODID_NA);
+    }
+
+    public static boolean isPneumaticLoaded() {
+        return isModLoaded(MODID_PNC);
     }
 }

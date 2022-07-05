@@ -78,7 +78,7 @@ public class RecipeBuilder {
         return this;
     }
 
-    public RecipeBuilder data(String key, CompoundTag tag) {
+    public RecipeBuilder data(CompoundTag tag) {
         this.data = tag;
         return this;
     }
@@ -284,6 +284,20 @@ public class RecipeBuilder {
     public RecipeBuilder outputEMC(BigInteger emc) {
         if (Multiblocked.isProjectELoaded()) {
             return output(EMCProjectECapability.CAP, emc);
+        }
+        return this;
+    }
+
+    public RecipeBuilder inputPressure(float pressure) {
+        if (Multiblocked.isPneumaticLoaded()) {
+            return input(PneumaticPressureCapability.CAP, pressure);
+        }
+        return this;
+    }
+
+    public RecipeBuilder outputPressure(float pressure) {
+        if (Multiblocked.isPneumaticLoaded()) {
+            return output(PneumaticPressureCapability.CAP, pressure);
         }
         return this;
     }

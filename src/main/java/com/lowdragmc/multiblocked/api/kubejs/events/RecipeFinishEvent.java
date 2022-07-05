@@ -7,9 +7,11 @@ import dev.latvian.mods.kubejs.event.EventJS;
 public class RecipeFinishEvent extends EventJS {
     public static final String ID = "mbd.recipe_finish";
     private final RecipeLogic recipeLogic;
+    private Recipe recipe;
 
     public RecipeFinishEvent(RecipeLogic recipeLogic) {
         this.recipeLogic = recipeLogic;
+        this.recipe = recipeLogic.lastRecipe;
     }
 
     public RecipeLogic getRecipeLogic() {
@@ -17,11 +19,11 @@ public class RecipeFinishEvent extends EventJS {
     }
 
     public Recipe getRecipe() {
-        return recipeLogic.lastRecipe;
+        return recipe;
     }
 
     public void setRecipe(Recipe recipe) {
-        recipeLogic.lastRecipe = recipe;
+        this.recipe = recipe;
     }
 
     @Override

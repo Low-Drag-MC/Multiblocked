@@ -5,15 +5,7 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
-import com.lowdragmc.multiblocked.common.capability.AuraMultiblockCapability;
-import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
-import com.lowdragmc.multiblocked.common.capability.CreateStressCapacityCapability;
-import com.lowdragmc.multiblocked.common.capability.EMCProjectECapability;
-import com.lowdragmc.multiblocked.common.capability.FEMultiblockCapability;
-import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
-import com.lowdragmc.multiblocked.common.capability.HeatMekanismCapability;
-import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
-import com.lowdragmc.multiblocked.common.capability.ManaBotaniaCapability;
+import com.lowdragmc.multiblocked.common.capability.*;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -52,6 +44,9 @@ public class MbdCapabilities {
         }
         if (Multiblocked.isNaturesAuraLoaded()) {
             registerCapability(AuraMultiblockCapability.CAP);
+        }
+        if (Multiblocked.isPneumaticLoaded()) {
+            registerCapability(PneumaticPressureCapability.CAP);
         }
     }
 

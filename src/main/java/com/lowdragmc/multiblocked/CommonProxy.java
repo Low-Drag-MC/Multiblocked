@@ -29,6 +29,7 @@ import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.simibubi.create.foundation.block.BlockStressDefaults;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.item.Item;
@@ -174,6 +175,7 @@ public class CommonProxy {
     public static void controllerPost(ControllerDefinition definition, JsonObject config) {
         definition.basePattern = Multiblocked.GSON.fromJson(config.get("basePattern"), JsonBlockPattern.class).build();
         definition.recipeMap = RecipeMap.RECIPE_MAP_REGISTRY.getOrDefault(config.get("recipeMap").getAsString(), RecipeMap.EMPTY);
+        definition.catalyst = Multiblocked.GSON.fromJson(config.get("catalyst"), ItemStack.class);
         componentPost(definition, config);
     }
 }

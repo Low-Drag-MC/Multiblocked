@@ -161,6 +161,8 @@ public class MultiblockState {
             if (controller != null && !controller.checkPattern()) {
                 controller.onStructureInvalid();
                 MultiblockWorldSavedData.getOrCreate(world).removeMapping(this);
+            } else if (controller != null){
+                controller.onStructureFormed();
             }
         }
     }

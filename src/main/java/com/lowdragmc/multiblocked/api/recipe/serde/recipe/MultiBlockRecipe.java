@@ -129,8 +129,8 @@ public class MultiBlockRecipe implements Recipe<Container> {
             Component component = json.has("text") ? new TranslatableComponent(GsonHelper.getAsString(json, "text")) : null;
             CompoundTag data = new CompoundTag();
             try {
-                if (json.has("tag"))
-                    data = TagParser.parseTag(GsonHelper.getAsString(json, "tag"));
+                if (json.has("data"))
+                    data = TagParser.parseTag(GsonHelper.getAsString(json, "data"));
             } catch (CommandSyntaxException e) {
                 e.printStackTrace();
             }

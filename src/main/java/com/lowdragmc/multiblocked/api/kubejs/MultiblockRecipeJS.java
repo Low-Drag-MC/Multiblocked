@@ -324,6 +324,28 @@ public class MultiblockRecipeJS extends RecipeJS {
         return this;
     }
 
+    public MultiblockRecipeJS inputPressure(float pressure) {
+        return inputPressure(pressure, null);
+    }
+
+    public MultiblockRecipeJS outputPressure(float pressure) {
+        return outputPressure(pressure, null);
+    }
+
+    public MultiblockRecipeJS inputPressure(float pressure, String slotName) {
+        if (Multiblocked.isPneumaticLoaded()) {
+            input(PneumaticPressureCapability.CAP, pressure, slotName);
+        }
+        return this;
+    }
+
+    public MultiblockRecipeJS outputPressure(float pressure, String slotName) {
+        if (Multiblocked.isPneumaticLoaded()) {
+            output(PneumaticPressureCapability.CAP, pressure, slotName);
+        }
+        return this;
+    }
+
     private <T extends Chemical<T>, U extends ChemicalStack<T>> MultiblockRecipeJS inputMekanismStack(ChemicalMekanismCapability<T, U> capability, MapJS stack, String slotName) {
         if (Multiblocked.isMekLoaded()) {
             String type = (String) stack.get("type");

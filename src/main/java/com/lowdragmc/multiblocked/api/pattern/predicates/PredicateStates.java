@@ -64,7 +64,7 @@ public class PredicateStates extends SimplePredicate {
 
     private void addBlockSelectorWidget(List<BlockState> blockList, DraggableScrollableWidgetGroup container, BlockState blockState) {
         BlockSelectorWidget
-                bsw = new BlockSelectorWidget(0, container.widgets.size() * 21 + 1, true);
+                bsw = new BlockSelectorWidget(0, container.widgets.size() * 21 + 1, 160, true);
         container.addWidget(bsw);
         bsw.addWidget(new ButtonWidget(163, 1, 18, 18, cd -> {
             int index = (bsw.getSelfPosition().y - 1) / 21;

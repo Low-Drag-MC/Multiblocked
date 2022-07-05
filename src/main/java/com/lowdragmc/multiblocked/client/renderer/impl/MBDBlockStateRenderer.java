@@ -49,7 +49,7 @@ public class MBDBlockStateRenderer extends BlockStateRenderer implements IMultib
 
     @Override
     public Supplier<IMultiblockedRenderer> createConfigurator(WidgetGroup parent, DraggableScrollableWidgetGroup group, IMultiblockedRenderer current) {
-        BlockSelectorWidget blockSelectorWidget = new BlockSelectorWidget(0, 1, true);
+        BlockSelectorWidget blockSelectorWidget = new BlockSelectorWidget(0, 1, 180,true);
         if (current instanceof BlockStateRenderer) {
             blockSelectorWidget.setBlock(((BlockStateRenderer) current).blockInfo.getBlockState());
         }

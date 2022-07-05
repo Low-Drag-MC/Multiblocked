@@ -82,7 +82,7 @@ public class BlockCondition extends RecipeCondition {
     @Override
     public void openConfigurator(WidgetGroup group) {
         super.openConfigurator(group);
-        group.addWidget(new BlockSelectorWidget(0, 20, true).setOnBlockStateUpdate(state -> blockState = state).setBlock(blockState));
+        group.addWidget(new BlockSelectorWidget(0, 20, 80, true).setOnBlockStateUpdate(state -> blockState = state).setBlock(blockState));
         group.addWidget(new TextFieldWidget(0, 45, 60, 15, null, s->count = Integer.parseInt(s))
                 .setCurrentString(count + "")
                 .setNumbersOnly(Integer.MIN_VALUE, Integer.MAX_VALUE)

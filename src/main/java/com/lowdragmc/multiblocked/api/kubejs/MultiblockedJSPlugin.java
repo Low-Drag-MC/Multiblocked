@@ -11,7 +11,6 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.pattern.Predicates;
-import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MultiBlockRecipe;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
@@ -34,7 +33,6 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdRecipeMap", RecipeMap.class);
         event.add("MbdRegistry", RegistryWrapper.class);
         event.add("MbdFactoryBlockPattern", FactoryBlockPattern.class);
-        event.add("MbdRelativeDirection", RelativeDirection.class);
         event.add("MbdPredicates", Predicates.class);
         event.add("MbdShapeInfo", MultiblockShapeInfo.class);
         event.add("MbdBlockInfo", BlockInfo.class);

@@ -190,7 +190,9 @@ public class RecipeLogic {
 
     public void onRecipeFinish() {
         if (Multiblocked.isKubeJSLoaded()) {
-            new RecipeFinishEvent(this).post(ScriptType.SERVER, RecipeFinishEvent.ID, controller.getSubID());
+            if (new RecipeFinishEvent(this).post(ScriptType.SERVER, RecipeFinishEvent.ID, controller.getSubID())) {
+                return;
+            }
         }
         lastRecipe.postWorking(this.controller);
         lastRecipe.handleRecipeIO(IO.OUT, this.controller);

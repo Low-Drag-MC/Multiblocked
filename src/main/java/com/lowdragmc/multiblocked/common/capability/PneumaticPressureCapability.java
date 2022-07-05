@@ -81,7 +81,8 @@ public class PneumaticPressureCapability extends MultiblockCapability<Float> {
         @Override
         protected boolean hasInnerChanged() {
             IAirHandlerMachine airHandler = getCapability();
-            if (airHandler == null || airHandler.getAir() == air || airHandler.getVolume() == volume) {
+            if (airHandler == null) return false;
+            if (airHandler.getAir() == air && airHandler.getVolume() == volume) {
                 return false;
             }
             air = airHandler.getAir();

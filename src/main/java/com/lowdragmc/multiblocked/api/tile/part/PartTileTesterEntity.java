@@ -49,7 +49,7 @@ public class PartTileTesterEntity extends PartTileEntity<PartDefinition> {
     }
 
     @Override
-    public ModularUI createUI(Player entityPlayer) {
+    public ModularUI createComponentUI(Player entityPlayer) {
         if (Multiblocked.isClient() && Multiblocked.isSinglePlayer()) {
             TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
             new PartScriptWidget(this, tabContainer);

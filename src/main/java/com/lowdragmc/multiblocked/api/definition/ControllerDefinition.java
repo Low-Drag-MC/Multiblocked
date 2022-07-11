@@ -46,6 +46,10 @@ public class ControllerDefinition extends ComponentDefinition {
         return Collections.emptyList();
     }
 
+    public void setDesigns(List<MultiblockShapeInfo> shapeInfos) {
+        this.designs = shapeInfos;
+    }
+
     private List<MultiblockShapeInfo> autoGenDFS(BlockPattern structurePattern, List<MultiblockShapeInfo> pages, Stack<Integer> repetitionStack) {
         int[][] aisleRepetitions = structurePattern.aisleRepetitions;
         if (repetitionStack.size() == aisleRepetitions.length) {
@@ -79,5 +83,13 @@ public class ControllerDefinition extends ComponentDefinition {
 
     public RecipeMap getRecipeMap() {
         return recipeMap;
+    }
+
+    public void setBasePattern(BlockPattern basePattern) {
+        this.basePattern = basePattern;
+    }
+
+    public void setRecipeMap(RecipeMap recipeMap) {
+        this.recipeMap = recipeMap;
     }
 }

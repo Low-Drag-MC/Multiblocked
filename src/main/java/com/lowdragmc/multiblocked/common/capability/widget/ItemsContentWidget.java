@@ -51,7 +51,8 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
         if (content instanceof Ingredient) {
             return (Ingredient) content;
         } else if (content instanceof ItemStack itemStack) {
-            return new SizedIngredient(Ingredient.of(itemStack), this.content.getItems()[0].getCount());
+            ItemStack[] items = this.content.getItems();
+            return new SizedIngredient(Ingredient.of(itemStack), items.length > 0 ? items[0].getCount() : 1);
         }
         return null;
     }

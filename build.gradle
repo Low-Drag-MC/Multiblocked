@@ -191,9 +191,9 @@ dependencies {
     // curios
     compileOnly fg.deobf("curse.maven:curios-309927:3748873")
     // create
-    compileOnly fg.deobf("curse.maven:create-328085:3737418")
+    compileOnly fg.deobf("curse.maven:create-328085:3864525")
     // flywheel
-    compileOnly fg.deobf("curse.maven:flywheel-486392:3737402")
+    compileOnly fg.deobf("curse.maven:flywheel-486392:3864518")
     // projecte
     compileOnly fg.deobf("curse.maven:projecte-226410:3722831")
     // nature's aura

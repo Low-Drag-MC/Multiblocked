@@ -16,11 +16,18 @@ import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerFloat;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
+import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
+import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
+import com.simibubi.create.foundation.block.BlockStressDefaults;
+import com.simibubi.create.foundation.block.BlockStressValues;
+import com.simibubi.create.foundation.utility.Couple;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -154,4 +161,48 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
             }
         }
     }
+
+    public static BlockStressValues.IStressValueProvider STRESS_PROVIDER = new BlockStressValues.IStressValueProvider() {
+        @Override
+        public double getImpact(Block block) {
+            if (block instanceof CreateBlockComponent createBlockComponent && createBlockComponent.definition instanceof CreatePartDefinition definition) {
+                if (!definition.isOutput) {
+                    return definition.stress;
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        public double getCapacity(Block block) {
+            if (block instanceof CreateBlockComponent createBlockComponent && createBlockComponent.definition instanceof CreatePartDefinition definition) {
+                if (definition.isOutput) {
+                    return definition.stress;
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        public boolean hasImpact(Block block) {
+            if (block instanceof CreateBlockComponent createBlockComponent && createBlockComponent.definition instanceof CreatePartDefinition definition) {
+                return !definition.isOutput;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean hasCapacity(Block block) {
+            if (block instanceof CreateBlockComponent createBlockComponent && createBlockComponent.definition instanceof CreatePartDefinition definition) {
+                return definition.isOutput;
+            }
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public Couple<Integer> getGeneratedRPM(Block block) {
+            return null;
+        }
+    };
 }

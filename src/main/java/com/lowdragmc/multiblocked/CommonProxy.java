@@ -24,9 +24,11 @@ import com.lowdragmc.multiblocked.api.tile.part.PartTileTesterEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
+import com.lowdragmc.multiblocked.common.capability.CreateStressCapacityCapability;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.simibubi.create.foundation.block.BlockStressDefaults;
+import com.simibubi.create.foundation.block.BlockStressValues;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -74,11 +76,15 @@ public class CommonProxy {
             if (Multiblocked.isCreateLoaded()) {
                 MbdComponents.DEFINITION_REGISTRY.forEach((r, d) -> {
                     if (d instanceof CreatePartDefinition definition) {
-                        if (definition.isOutput) {
-                            BlockStressDefaults.setDefaultCapacity(d.location, definition.stress);
-                        } else {
-                            BlockStressDefaults.setDefaultImpact(d.location, definition.stress);
+                        BlockStressValues.IStressValueProvider provider = BlockStressValues.getProvider(r.getNamespace());
+                        if (provider == null) {
+                            BlockStressValues.registerProvider(r.getNamespace(), CreateStressCapacityCapability.STRESS_PROVIDER);
                         }
+//                        if (definition.isOutput) {
+//                            BlockStressDefaults.setDefaultCapacity(d.location, definition.stress);
+//                        } else {
+//                            BlockStressDefaults.setDefaultImpact(d.location, definition.stress);
+//                        }
                     }
                 });
             }

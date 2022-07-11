@@ -6,8 +6,17 @@ import com.lowdragmc.lowdraglib.client.particle.impl.ShaderTrailParticle;
 import com.lowdragmc.lowdraglib.client.particle.impl.TextureBeamParticle;
 import com.lowdragmc.lowdraglib.client.particle.impl.TextureParticle;
 import com.lowdragmc.lowdraglib.client.particle.impl.TextureTrailParticle;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.texture.*;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
+import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
+import com.lowdragmc.multiblocked.api.gui.controller.RecipePage;
+import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
+import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
+import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.pattern.Predicates;
@@ -46,6 +55,43 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
             event.add("TextureBeamParticle", TextureBeamParticle.class);
             event.add("ShaderBeamParticle", ShaderBeamParticle.class);
         }
+        // LDLib Widget
+        event.add("ModularUI", ModularUI.class);
+        event.add("BlockSelectorWidget", BlockSelectorWidget.class);
+        event.add("ButtonWidget", ButtonWidget.class);
+        event.add("DialogWidget", DialogWidget.class);
+        event.add("DraggableScrollableWidgetGroup", DraggableScrollableWidgetGroup.class);
+        event.add("DraggableWidgetGroup", DraggableWidgetGroup.class);
+        event.add("ImageWidget", ImageWidget.class);
+        event.add("LabelWidget", LabelWidget.class);
+        event.add("PhantomFluidWidget", PhantomFluidWidget.class);
+        event.add("PhantomSlotWidget", PhantomSlotWidget.class);
+        event.add("SceneWidget", SceneWidget.class);
+        event.add("SelectableWidgetGroup", SelectableWidgetGroup.class);
+        event.add("SlotWidget", SlotWidget.class);
+        event.add("SwitchWidget", SwitchWidget.class);
+        event.add("TabButton", TabButton.class);
+        event.add("TabContainer", TabContainer.class);
+        event.add("TankWidget", TankWidget.class);
+        event.add("TextBoxWidget", TextBoxWidget.class);
+        event.add("TextFieldWidget", TextFieldWidget.class);
+        event.add("TreeListWidget", TreeListWidget.class);
+        event.add("WidgetGroup", WidgetGroup.class);
+        event.add("ColorBorderTexture", ColorBorderTexture.class);
+        event.add("ColorRectTexture", ColorRectTexture.class);
+        event.add("GuiTextureGroup", GuiTextureGroup.class);
+        event.add("ItemStackTexture", ItemStackTexture.class);
+        event.add("ResourceBorderTexture", ResourceBorderTexture.class);
+        event.add("ResourceTexture", ResourceTexture.class);
+        event.add("ShaderTexture", ShaderTexture.class);
+        event.add("TextTexture", TextTexture.class);
+        //mbd widget
+        event.add("IOPageWidget", IOPageWidget.class);
+        event.add("PageWidget", PageWidget.class);
+        event.add("RecipePage", RecipePage.class);
+        event.add("ResourceTextureWidget", ResourceTextureWidget.class);
+        event.add("ProgressWidget", ProgressWidget.class);
+        event.add("RecipeWidget", RecipeWidget.class);
     }
 
     @Override

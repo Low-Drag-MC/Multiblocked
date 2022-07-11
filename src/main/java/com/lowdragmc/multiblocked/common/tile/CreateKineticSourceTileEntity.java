@@ -9,14 +9,12 @@ import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.simibubi.create.content.contraptions.KineticNetwork;
 import com.simibubi.create.content.contraptions.base.IRotate;
 import com.simibubi.create.content.contraptions.base.KineticTileEntity;
-import com.simibubi.create.content.contraptions.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.utility.Lang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -206,8 +204,8 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
         boolean added = super.addToGoggleTooltip(tooltip, isPlayerSneaking);
         float stressBase = this.calculateAddedStressCapacity();
         if (stressBase != 0.0F && IRotate.StressImpact.isEnabled()) {
-            tooltip.add(componentSpacing.plainCopy().append(Lang.translate("gui.goggles.generator_stats")));
-            tooltip.add(componentSpacing.plainCopy().append(Lang.translate("tooltip.capacityProvided").withStyle(ChatFormatting.GRAY)));
+            Lang.translate("gui.goggles.generator_stats").forGoggles(tooltip);
+            Lang.translate("tooltip.capacityProvided").style(ChatFormatting.GRAY).forGoggles(tooltip);
             float speed = this.getTheoreticalSpeed();
             if (speed != this.getGeneratedSpeed() && speed != 0.0F) {
                 stressBase *= this.getGeneratedSpeed() / speed;
@@ -215,7 +213,7 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
 
             speed = Math.abs(speed);
             float stressTotal = stressBase * speed;
-            tooltip.add(componentSpacing.plainCopy().append((new TextComponent(" " + IHaveGoggleInformation.format(stressTotal))).append(Lang.translate("generic.unit.stress", new Object[0])).withStyle(ChatFormatting.AQUA)).append(" ").append(Lang.translate("gui.goggles.at_current_speed", new Object[0]).withStyle(ChatFormatting.DARK_GRAY)));
+            Lang.number(stressTotal).translate("generic.unit.stress").style(ChatFormatting.AQUA).space().add(Lang.translate("gui.goggles.at_current_speed").style(ChatFormatting.DARK_GRAY)).forGoggles(tooltip, 1);
             added = true;
         }
 

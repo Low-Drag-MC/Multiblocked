@@ -350,7 +350,19 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     @Override
-    public ModularUI createUI(Player PlayerEntity) {
+    public ModularUI createUI(Player entityPlayer) {
+        ModularUI modularUI = createComponentUI(entityPlayer);
+        if (Multiblocked.isKubeJSLoaded()) {
+            CreateUIEvent event = new CreateUIEvent(this, modularUI);
+            if (event.post(ScriptType.of(getLevel()), CreateUIEvent.ID, getSubID())) {
+                return null;
+            }
+            modularUI = event.getModularUI();
+        }
+        return modularUI;
+    }
+
+    public ModularUI createComponentUI(Player PlayerEntity) {
         if (traits.isEmpty()) return null;
         TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
         initTraitUI(tabContainer, PlayerEntity);
@@ -362,7 +374,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         return isRemoved();
     }
 
-    protected void initTraitUI(TabContainer tabContainer, Player PlayerEntity) {
+    public void initTraitUI(TabContainer tabContainer, Player PlayerEntity) {
         WidgetGroup group = new WidgetGroup(20, 0, 176, 256);
         tabContainer.addTab(new TabButton(0, tabContainer.containerGroup.widgets.size() * 20, 20, 20)
                 .setTexture(new ResourceTexture("multiblocked:textures/gui/custom_gui_tab_button.png").getSubTexture(0, 0, 1, 0.5),
@@ -381,6 +393,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         }
         for (CapabilityTrait trait : traits.values()) {
             trait.createUI(this, group, PlayerEntity);
+        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new InitTraitUIEvent(this, group).post(ScriptType.of(getLevel()), InitTraitUIEvent.ID, getSubID());
         }
     }
 

@@ -1,22 +1,17 @@
 package com.lowdragmc.multiblocked.api.definition;
 
-
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
-import net.minecraft.core.BlockPos;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
-import java.util.function.Function;
 
 /**
  * Definition of a controller, which define its structure, logic, recipe chain and so on.
@@ -34,11 +29,11 @@ public class ControllerDefinition extends ComponentDefinition {
     }
 
     public ControllerDefinition(ResourceLocation location) {
-        this(location, ControllerTileEntity::new);
+        this(location, ControllerTileEntity.class);
     }
 
-    public ControllerDefinition(ResourceLocation location, TriFunction<ControllerDefinition, BlockPos, BlockState, BlockEntity> teSupplier) {
-        super(location, (d, p, s) -> teSupplier.apply((ControllerDefinition) d, p, s));
+    public ControllerDefinition(ResourceLocation location, Class<? extends IControllerComponent> clazz) {
+        super(location, clazz);
         this.recipeMap = RecipeMap.EMPTY;
     }
 
@@ -49,6 +44,10 @@ public class ControllerDefinition extends ComponentDefinition {
             return autoGenDFS(basePattern, new ArrayList<>(), new Stack<>());
         }
         return Collections.emptyList();
+    }
+
+    public void setDesigns(List<MultiblockShapeInfo> shapeInfos) {
+        this.designs = shapeInfos;
     }
 
     private List<MultiblockShapeInfo> autoGenDFS(BlockPattern structurePattern, List<MultiblockShapeInfo> pages, Stack<Integer> repetitionStack) {
@@ -84,5 +83,13 @@ public class ControllerDefinition extends ComponentDefinition {
 
     public RecipeMap getRecipeMap() {
         return recipeMap;
+    }
+
+    public void setBasePattern(BlockPattern basePattern) {
+        this.basePattern = basePattern;
+    }
+
+    public void setRecipeMap(RecipeMap recipeMap) {
+        this.recipeMap = recipeMap;
     }
 }

@@ -20,7 +20,7 @@ public class CreatePartDefinition extends PartDefinition {
     }
 
     public CreatePartDefinition(ResourceLocation location) {
-        super(location, (partDefinition, pos, state) -> new CreateKineticSourceTileEntity((CreatePartDefinition) partDefinition, pos, state));
+        super(location, CreateKineticSourceTileEntity.class);
         canShared = false;
         stress = 4;
         isOutput = false;

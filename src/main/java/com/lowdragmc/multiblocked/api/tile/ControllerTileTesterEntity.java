@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nonnull;
 
 public class ControllerTileTesterEntity extends ControllerTileEntity {
-    public final static ControllerDefinition DEFAULT_DEFINITION = new ControllerDefinition(new ResourceLocation("multiblocked:controller_tester"), ControllerTileTesterEntity::new);
+    public final static ControllerDefinition DEFAULT_DEFINITION = new ControllerDefinition(new ResourceLocation("multiblocked:controller_tester"), ControllerTileTesterEntity.class);
 
     public ControllerTileTesterEntity(ControllerDefinition definition, BlockPos pos, BlockState state) {
         super(definition, pos, state);
@@ -74,7 +74,7 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
     }
 
     @Override
-    public ModularUI createUI(Player entityPlayer) {
+    public ModularUI createComponentUI(Player entityPlayer) {
         if (Multiblocked.isClient() && Multiblocked.isSinglePlayer()) {
             TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
             new ControllerScriptWidget(this, tabContainer);

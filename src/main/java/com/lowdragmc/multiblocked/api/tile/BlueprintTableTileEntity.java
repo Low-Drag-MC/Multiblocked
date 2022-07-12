@@ -34,7 +34,7 @@ public class BlueprintTableTileEntity extends ControllerTileEntity{
     }
 
     @Override
-    public ModularUI createUI(Player entityPlayer) {
+    public ModularUI createComponentUI(Player entityPlayer) {
         if (isFormed()) {
             return new ModularUI(384, 256, this, entityPlayer).widget(new BlueprintTableWidget(this));
         } else {
@@ -44,7 +44,7 @@ public class BlueprintTableTileEntity extends ControllerTileEntity{
         }
     }
 
-    public final static ControllerDefinition tableDefinition = new ControllerDefinition(new ResourceLocation(Multiblocked.MODID, "blueprint_table"), BlueprintTableTileEntity::new);
+    public final static ControllerDefinition tableDefinition = new ControllerDefinition(new ResourceLocation(Multiblocked.MODID, "blueprint_table"), BlueprintTableTileEntity.class);
     public final static PartDefinition partDefinition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "blueprint_table_part"));
 
     public static void registerBlueprintTable() {

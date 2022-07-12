@@ -9,8 +9,10 @@ import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.utils.Position;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
+import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
@@ -19,6 +21,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.GameRenderer;
@@ -179,7 +182,11 @@ public class RecipePage extends PageWidget{
             if (recipeWidget != null) {
                 removeWidget(recipeWidget);
             }
-            this.addWidget(recipeWidget = new RecipeWidget(recipe, controller.getDefinition().recipeMap.progressTexture, null));
+            recipeWidget = new RecipeWidget(recipe, controller.getDefinition().recipeMap.progressTexture, null);
+            if (Multiblocked.isKubeJSLoaded()) {
+                new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, controller.getDefinition().recipeMap.name);
+            }
+            this.addWidget(recipeWidget);
             recipeWidget.inputs.addSelfPosition(5, 0);
             recipeWidget.outputs.addSelfPosition(-5, 0);
             recipeWidget.setSelfPosition(new Position(0, 167));

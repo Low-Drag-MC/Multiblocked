@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.capability.ICapabilityProxyHolder;
 import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.RecipePage;
@@ -45,6 +46,7 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdPredicates", Predicates.class);
         event.add("MbdShapeInfo", MultiblockShapeInfo.class);
         event.add("MbdBlockInfo", BlockInfo.class);
+        event.add("ICapabilityProxyHolder", ICapabilityProxyHolder.class);
         if (Multiblocked.isClient()) {
             event.add("TextureParticle", TextureParticle.class);
             event.add("ShaderParticle", ShaderParticle.class);

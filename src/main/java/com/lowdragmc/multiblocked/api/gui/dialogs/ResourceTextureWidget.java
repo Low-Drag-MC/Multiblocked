@@ -14,10 +14,9 @@ import com.lowdragmc.lowdraglib.gui.widget.TreeListWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.Multiblocked;
+import net.minecraft.Util;
 
-import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -59,11 +58,7 @@ public class ResourceTextureWidget extends DialogWidget {
         }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/darkened_slot.png"), new TextTexture("multiblocked.gui.tips.cancel", 0xffff0000).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000));
         addWidget(imageWidget);
         addWidget(new ButtonWidget(x + 15, y + 15, 20, 20, cd -> {
-            try {
-                Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Util.getPlatform().openFile(dir.isDirectory() ? dir : dir.getParentFile());
         }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/darkened_slot.png"), new TextTexture("F", -1).setDropShadow(true)).setHoverBorderTexture(1, 0xff000000).setHoverTooltips("multiblocked.gui.tips.open_folder"));
         addWidget(new ImageWidget(x + 15, y + 20, WIDTH - 30,10, new TextTexture("multiblocked.gui.tips.texture", -1).setWidth(WIDTH - 30).setDropShadow(true)));
     }

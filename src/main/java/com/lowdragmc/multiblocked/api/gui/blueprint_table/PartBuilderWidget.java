@@ -28,12 +28,12 @@ import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.common.gui.component.CreatePartWidget;
 import com.simibubi.create.AllBlocks;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,12 +56,8 @@ public class PartBuilderWidget extends WidgetGroup {
         this.addWidget(containers = new DraggableScrollableWidgetGroup(200, 30, 150, 190));
         this.addWidget(new ButtonWidget(200 - 4 - 20, 30, 20, 20, new ResourceTexture("multiblocked:textures/gui/save.png"), cd -> {
             if (cd.isRemote) {
-                try {
-                    File dir = new File(Multiblocked.location, "definition/part");
-                    Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                File dir = new File(Multiblocked.location, "definition/part");
+                Util.getPlatform().openFile(dir.isDirectory() ? dir : dir.getParentFile());
             }
         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.open_folder"));
         this.addWidget(new ButtonWidget(200 - 4 - 20, 51, 20, 20, null, cd -> {

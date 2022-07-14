@@ -25,6 +25,7 @@ import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -39,7 +40,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.CapabilityItemHandler;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,12 +57,8 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
         templateButton.setHoverTooltips("multiblocked.gui.builder.controller.create");
         this.addWidget(new ButtonWidget(330, 96, 20, 20, new ResourceTexture("multiblocked:textures/gui/save.png"), cd->{
             if (cd.isRemote) {
-                try {
-                    File dir = new File(Multiblocked.location, "definition/controller");
-                    Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                File dir = new File(Multiblocked.location, "definition/controller");
+                Util.getPlatform().openFile(dir.isDirectory() ? dir : dir.getParentFile());
             }
         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.open_folder"));
     }

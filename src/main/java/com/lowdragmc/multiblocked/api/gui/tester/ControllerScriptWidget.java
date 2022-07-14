@@ -22,12 +22,11 @@ import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
-import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -47,12 +46,8 @@ public class ControllerScriptWidget extends PageWidget {
         this.addWidget(jsonList = new DraggableScrollableWidgetGroup(10, 10, 176 - 20, 150 - 10 - 55).setBackground(new ColorRectTexture(0xff000000)));
         this.addWidget(new ButtonWidget(5, 105, 20, 20, new ResourceTexture("multiblocked:textures/gui/save.png"), cd->{
             if (!cd.isRemote) return;
-            try {
-                File dir = new File(Multiblocked.location, "definition/controller");
-                Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            File dir = new File(Multiblocked.location, "definition/controller");
+            Util.getPlatform().openFile(dir.isDirectory() ? dir : dir.getParentFile());
         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.open_folder"));
         this.addWidget(new ButtonWidget(30, 105, 140, 20, null, this::loadJson).setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("load script", -1).setDropShadow(true)).setHoverBorderTexture(1, -1));
         tfGroup = new DraggableScrollableWidgetGroup(5, 130, 176 - 10, 120)

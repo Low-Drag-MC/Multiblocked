@@ -32,7 +32,7 @@ public class BlueprintTableTileEntity extends ControllerTileEntity{
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity entityPlayer) {
+    public ModularUI createComponentUI(PlayerEntity entityPlayer) {
         if (isFormed()) {
             return new ModularUI(384, 256, this, entityPlayer).widget(new BlueprintTableWidget(this));
         } else {

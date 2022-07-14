@@ -42,7 +42,6 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -333,7 +332,19 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity PlayerEntity) {
+    public ModularUI createUI(PlayerEntity entityPlayer) {
+        ModularUI modularUI = createComponentUI(entityPlayer);
+        if (Multiblocked.isKubeJSLoaded()) {
+            CreateUIEvent event = new CreateUIEvent(this, modularUI);
+            if (event.post(ScriptType.of(getLevel()), CreateUIEvent.ID, getSubID())) {
+                return null;
+            }
+            modularUI = event.getModularUI();
+        }
+        return modularUI;
+    }
+
+    public ModularUI createComponentUI(PlayerEntity PlayerEntity) {
         if (traits.isEmpty()) return null;
         TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
         initTraitUI(tabContainer, PlayerEntity);
@@ -363,6 +374,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         }
         for (CapabilityTrait trait : traits.values()) {
             trait.createUI(this, group, PlayerEntity);
+        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            new InitTraitUIEvent(this, group).post(ScriptType.of(getLevel()), InitTraitUIEvent.ID, getSubID());
         }
     }
 

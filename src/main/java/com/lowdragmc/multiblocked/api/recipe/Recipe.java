@@ -109,7 +109,7 @@ public class Recipe {
     }
 
     @SuppressWarnings("ALL")
-    private boolean matchRecipe(IO io, ICapabilityProxyHolder holder, ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents) {
+    public boolean matchRecipe(IO io, ICapabilityProxyHolder holder, ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents) {
         Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilityProxies = holder.getCapabilitiesProxy();
         for (Map.Entry<MultiblockCapability<?>, ImmutableList<Content>> entry : contents.entrySet()) {
             Set<CapabilityProxy<?>> used = new HashSet<>();
@@ -259,7 +259,7 @@ public class Recipe {
         handlePost(outputs, holder, IO.OUT);
     }
 
-    private void handlePre(ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents, ICapabilityProxyHolder holder, IO io) {
+    public void handlePre(ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents, ICapabilityProxyHolder holder, IO io) {
         contents.forEach(((capability, tuples) -> {
             if (holder.getCapabilitiesProxy().contains(io, capability)) {
                 for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability).values()) {
@@ -273,7 +273,7 @@ public class Recipe {
         }));
     }
 
-    private void handlePost(ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents, ICapabilityProxyHolder holder, IO io) {
+    public void handlePost(ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents, ICapabilityProxyHolder holder, IO io) {
         contents.forEach(((capability, tuples) -> {
             if (holder.getCapabilitiesProxy().contains(io, capability)) {
                 for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability).values()) {

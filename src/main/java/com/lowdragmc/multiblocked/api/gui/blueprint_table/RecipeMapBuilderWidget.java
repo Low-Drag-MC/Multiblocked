@@ -14,10 +14,9 @@ import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.gui.dialogs.RecipeMapWidget;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import net.minecraft.util.Util;
 
-import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -36,12 +35,8 @@ public class RecipeMapBuilderWidget extends WidgetGroup {
         this.addWidget(new ImageWidget(20, 0, width - 20, height, ResourceBorderTexture.BORDERED_BACKGROUND_BLUE));
         this.addWidget(recipeMapList = new DraggableScrollableWidgetGroup(20, 4, width - 20, height - 8));
         this.addWidget(new ButtonWidget(0, 5, 20, 20, new ResourceTexture("multiblocked:textures/gui/save.png"), cd->{
-            try {
-                File dir = new File(Multiblocked.location, "recipe_map");
-                Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            File dir = new File(Multiblocked.location, "recipe_map");
+            Util.getPlatform().openFile(dir.isDirectory() ? dir : dir.getParentFile());
         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.open_folder"));
         this.addWidget(new ButtonWidget(0, 26, 20, 20, new ResourceTexture("multiblocked:textures/gui/add.png"), cd-> new RecipeMapWidget(parent, new RecipeMap(UUID.randomUUID().toString()), recipeMap -> {
             if (recipeMap != null) {

@@ -33,13 +33,13 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.CapabilityItemHandler;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,12 +57,8 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
         templateButton.setHoverTooltips("multiblocked.gui.builder.controller.create");
         this.addWidget(new ButtonWidget(330, 96, 20, 20, new ResourceTexture("multiblocked:textures/gui/save.png"), cd->{
             if (cd.isRemote) {
-                try {
-                    File dir = new File(Multiblocked.location, "definition/controller");
-                    Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                File dir = new File(Multiblocked.location, "definition/controller");
+                Util.getPlatform().openFile(dir.isDirectory() ? dir : dir.getParentFile());
             }
         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.open_folder"));
     }

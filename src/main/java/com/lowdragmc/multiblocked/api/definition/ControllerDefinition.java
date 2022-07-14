@@ -82,4 +82,17 @@ public class ControllerDefinition extends ComponentDefinition {
     public RecipeMap getRecipeMap() {
         return recipeMap;
     }
+
+
+    public void setBasePattern(BlockPattern basePattern) {
+        this.basePattern = basePattern;
+    }
+
+    public void setRecipeMap(RecipeMap recipeMap) {
+        this.recipeMap = recipeMap;
+    }
+
+    public void setDesigns(List<MultiblockShapeInfo> designs) {
+        this.designs = designs;
+    }
 }

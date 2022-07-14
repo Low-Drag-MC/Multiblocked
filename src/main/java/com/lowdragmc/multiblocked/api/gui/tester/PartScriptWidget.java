@@ -20,10 +20,9 @@ import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileTesterEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 
-import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -43,12 +42,8 @@ public class PartScriptWidget extends PageWidget {
         this.addWidget(jsonList = new DraggableScrollableWidgetGroup(10, 10, 176 - 20, 150 - 10 - 55).setBackground(new ColorRectTexture(0xff000000)));
         this.addWidget(new ButtonWidget(5, 105, 20, 20, new ResourceTexture("multiblocked:textures/gui/save.png"), cd->{
             if (!cd.isRemote) return;
-            try {
-                File dir = new File(Multiblocked.location, "definition/part");
-                Desktop.getDesktop().open(dir.isDirectory() ? dir : dir.getParentFile());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            File dir = new File(Multiblocked.location, "definition/part");
+            Util.getPlatform().openFile(dir.isDirectory() ? dir : dir.getParentFile());
         }).setHoverBorderTexture(1, -1).setHoverTooltips("open folder"));
         this.addWidget(new ButtonWidget(30, 105, 140, 20, null, this::loadJson).setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("load script", -1).setDropShadow(true)).setHoverBorderTexture(1, -1));
         tfGroup = new DraggableScrollableWidgetGroup(5, 130, 176 - 10, 120)

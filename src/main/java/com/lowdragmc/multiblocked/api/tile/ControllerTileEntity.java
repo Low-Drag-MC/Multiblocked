@@ -427,7 +427,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     }
 
     @Override
-    public ModularUI createUI(PlayerEntity entityPlayer) {
+    public ModularUI createComponentUI(PlayerEntity entityPlayer) {
         TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
         if (!traits.isEmpty()) initTraitUI(tabContainer, entityPlayer);
         if (isFormed()) {

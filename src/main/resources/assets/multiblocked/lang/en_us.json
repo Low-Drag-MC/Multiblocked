@@ -20,6 +20,9 @@
   "block.multiblocked.bot_mana.any": "Any Botania Mana Containers",
   "multiblocked.capability.create_stress": "Create Stress",
   "block.multiblocked.create_stress.any": "Any Create Kinetic Part",
+  "itemGroup.multiblocked.all": "MBD",
+  "item.multiblocked.multiblock_builder": "Multiblock Builder",
+  "multiblocked.renderer.tparticle": "particle textures",
 
   "block.multiblocked.energy_output": "Energy Output Hatch",
   "block.multiblocked.energy_input": "Energy Input Hatch",

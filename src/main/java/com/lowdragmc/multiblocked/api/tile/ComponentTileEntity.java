@@ -45,6 +45,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.Constants;
@@ -551,6 +552,17 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     @Nonnull
     public AxisAlignedBB getRenderBoundingBox() {
         return getRenderer().isGlobalRenderer(this) ? INFINITE_EXTENT_AABB : super.getRenderBoundingBox();
+    }
+
+    @Override
+    public VoxelShape getShape() {
+        VoxelShape shape = IComponent.super.getShape();
+        if (Multiblocked.isKubeJSLoaded()) {
+            CustomShapeEvent event= new CustomShapeEvent(this, shape);
+            event.post(ScriptType.SERVER, CustomShapeEvent.ID, getSubID());
+            shape = event.getShape();
+        }
+        return shape;
     }
 
     @Override

@@ -12,6 +12,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.World;
 
 import java.util.UUID;
@@ -77,4 +78,7 @@ public interface IComponent {
 
     void setStatus(String status);
 
+    default VoxelShape getShape() {
+        return getDefinition().properties.shape;
+    }
 }

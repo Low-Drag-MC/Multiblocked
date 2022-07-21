@@ -3,11 +3,13 @@ package com.lowdragmc.multiblocked.jei;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
+import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeMapCategory;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeWrapper;
+import dev.latvian.kubejs.script.ScriptType;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
@@ -73,7 +75,13 @@ public class JEIPlugin implements IModPlugin {
             if (recipeMap == RecipeMap.EMPTY) continue;
             registration.addRecipes(recipeMap.recipes.values()
                             .stream()
-                            .map(recipe -> new RecipeWidget(recipe, recipeMap.progressTexture))
+                            .map(recipe -> {
+                                RecipeWidget recipeWidget = new RecipeWidget(recipe, recipeMap.progressTexture);
+                                if (Multiblocked.isKubeJSLoaded()) {
+                                    new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, recipeMap.name);
+                                }
+                                return recipeWidget;
+                            })
                             .map(RecipeWrapper::new)
                             .collect(Collectors.toList()), 
                     new ResourceLocation(Multiblocked.MODID, recipeMap.name));

@@ -9,7 +9,6 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.RecipePage;
-import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
@@ -25,6 +24,7 @@ import dev.latvian.kubejs.script.BindingsEvent;
 import dev.latvian.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.fluids.FluidStack;
 
 /**
@@ -43,6 +43,7 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdShapeInfo", MultiblockShapeInfo.class);
         event.add("MbdBlockInfo", BlockInfo.class);
         event.add("MbdIO", IO.class);
+        event.add("Shapes", VoxelShapes.class);
         event.add("ICapabilityProxyHolder", ICapabilityProxyHolder.class);
 
         // LDLib Widget
@@ -79,7 +80,6 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("IOPageWidget", IOPageWidget.class);
         event.add("PageWidget", PageWidget.class);
         event.add("RecipePage", RecipePage.class);
-        event.add("ResourceTextureWidget", ResourceTextureWidget.class);
         event.add("ProgressWidget", ProgressWidget.class);
         event.add("RecipeWidget", RecipeWidget.class);
     }

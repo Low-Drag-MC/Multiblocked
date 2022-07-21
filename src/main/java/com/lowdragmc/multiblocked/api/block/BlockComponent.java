@@ -23,6 +23,8 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IBlockReader;
@@ -175,5 +177,14 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
             }
             return 15 << 20 | j << 4; // 15 << 20
         }
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState pState, IBlockReader pLevel, BlockPos pPos, ISelectionContext pContext) {
+        TileEntity tileEntity = pLevel.getBlockEntity(pPos);
+        if (tileEntity instanceof IComponent) {
+            return ((IComponent) tileEntity).getShape();
+        }
+        return super.getShape(pState, pLevel, pPos, pContext);
     }
 }

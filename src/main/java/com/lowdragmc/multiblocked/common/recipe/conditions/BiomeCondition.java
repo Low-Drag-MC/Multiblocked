@@ -12,7 +12,6 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -54,7 +53,7 @@ public class BiomeCondition extends RecipeCondition {
         World level = recipeLogic.controller.getLevel();
         if (level == null) return false;
         Biome biome = level.getBiome(recipeLogic.controller.getBlockPos());
-        return biome.delegate.name().equals(this.biome);
+        return this.biome.equals(biome.delegate.name());
     }
 
     @Override

@@ -1,11 +1,12 @@
 package com.lowdragmc.multiblocked.api.block;
 
-import com.lowdragmc.multiblocked.Multiblocked;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.common.ToolType;
 
 /**
@@ -25,6 +26,7 @@ public class CustomProperties {
     public boolean hasCollision;
     public String tabGroup;
     public int stackSize;
+    public transient VoxelShape shape;
 
     public CustomProperties() {
         this.isOpaque = true;
@@ -38,6 +40,7 @@ public class CustomProperties {
         this.hasCollision = true;
         this.tabGroup = "multiblocked.all";
         this.stackSize = 64;
+        this.shape = VoxelShapes.block();
     }
 
     public AbstractBlock.Properties createBlock() {

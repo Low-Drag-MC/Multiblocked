@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.UUID;
 
@@ -77,4 +78,7 @@ public interface IComponent {
 
     void setStatus(String status);
 
+    default VoxelShape getShape() {
+        return getDefinition().properties.shape;
+    }
 }

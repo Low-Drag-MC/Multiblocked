@@ -15,7 +15,6 @@ import com.lowdragmc.multiblocked.api.capability.ICapabilityProxyHolder;
 import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.RecipePage;
-import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
@@ -30,6 +29,7 @@ import dev.latvian.mods.kubejs.recipe.RegisterRecipeHandlersEvent;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.fluids.FluidStack;
 
 /**
@@ -46,6 +46,7 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdPredicates", Predicates.class);
         event.add("MbdShapeInfo", MultiblockShapeInfo.class);
         event.add("MbdBlockInfo", BlockInfo.class);
+        event.add("Shapes", Shapes.class);
         event.add("ICapabilityProxyHolder", ICapabilityProxyHolder.class);
         if (Multiblocked.isClient()) {
             event.add("TextureParticle", TextureParticle.class);
@@ -91,7 +92,6 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("IOPageWidget", IOPageWidget.class);
         event.add("PageWidget", PageWidget.class);
         event.add("RecipePage", RecipePage.class);
-        event.add("ResourceTextureWidget", ResourceTextureWidget.class);
         event.add("ProgressWidget", ProgressWidget.class);
         event.add("RecipeWidget", RecipeWidget.class);
     }

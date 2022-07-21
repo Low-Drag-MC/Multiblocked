@@ -31,8 +31,8 @@ import java.util.*;
  */
 public class ComponentDefinition {
     private BlockEntityType<? extends BlockEntity> tileType;
-    public final ResourceLocation location;
     private transient final Class<? extends IComponent> clazz;
+    public final ResourceLocation location;
     public JsonObject traits;
     public boolean allowRotate;
     public boolean showInJei;
@@ -46,7 +46,7 @@ public class ComponentDefinition {
         this.baseRenderer = null;
         this.allowRotate = true;
         this.showInJei = true;
-        traits = new JsonObject();
+        this.traits = new JsonObject();
     }
 
     public BlockEntity createNewTileEntity(BlockPos pos, BlockState state){

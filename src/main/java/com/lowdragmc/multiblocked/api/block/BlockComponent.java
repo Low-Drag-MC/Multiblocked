@@ -30,6 +30,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -168,4 +170,12 @@ public class BlockComponent extends Block implements IBlockRendererProvider, Ent
         return definition.createNewTileEntity(pPos, pState);
     }
 
+    @Override
+    public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        BlockEntity tileEntity = pLevel.getBlockEntity(pPos);
+        if (tileEntity instanceof IComponent) {
+            return ((IComponent) tileEntity).getShape();
+        }
+        return super.getShape(pState, pLevel, pPos, pContext);
+    }
 }

@@ -47,6 +47,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
@@ -568,6 +569,17 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     @Nonnull
     public AABB getRenderBoundingBox() {
         return getRenderer().isGlobalRenderer(this) ? INFINITE_EXTENT_AABB : super.getRenderBoundingBox();
+    }
+
+    @Override
+    public VoxelShape getShape() {
+        VoxelShape shape = IComponent.super.getShape();
+        if (Multiblocked.isKubeJSLoaded()) {
+            var event= new CustomShapeEvent(this, shape);
+            event.post(ScriptType.SERVER, CustomShapeEvent.ID, getSubID());
+            shape = event.getShape();
+        }
+        return shape;
     }
 
     @Override

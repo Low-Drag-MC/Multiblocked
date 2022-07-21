@@ -1,6 +1,5 @@
 package com.lowdragmc.multiblocked.api.recipe.serde.recipe;
 
-import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.core.mixins.RecipeManagerMixin;
 import net.minecraft.resources.ResourceLocation;

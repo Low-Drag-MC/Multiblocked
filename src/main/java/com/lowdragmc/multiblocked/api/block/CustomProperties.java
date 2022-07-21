@@ -5,6 +5,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Author: KilaBash
@@ -22,6 +24,7 @@ public class CustomProperties {
     public boolean hasCollision;
     public String tabGroup;
     public int stackSize;
+    public transient VoxelShape shape;
 
     public CustomProperties() {
         this.isOpaque = true;
@@ -34,6 +37,7 @@ public class CustomProperties {
         this.hasCollision = true;
         this.tabGroup = "multiblocked.all";
         this.stackSize = 64;
+        this.shape = Shapes.block();
     }
 
     public BlockBehaviour.Properties createBlock() {

@@ -69,10 +69,10 @@ public class Multiblocked {
     
     
     public Multiblocked() {
-        location = new File(FMLPaths.GAMEDIR.get().toFile(), "multiblocked");
+        MbdConfig.registerConfig();
+        location = new File(FMLPaths.GAMEDIR.get().toFile(), MbdConfig.configPath.get());
         location.mkdir();
         DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
-        MbdConfig.registerConfig();
     }
 
     public static boolean isClient() {

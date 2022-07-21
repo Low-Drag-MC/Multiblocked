@@ -12,12 +12,7 @@ import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
 import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MultiBlockRecipe;
-import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
-import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import com.lowdragmc.multiblocked.api.registry.MbdItems;
-import com.lowdragmc.multiblocked.api.registry.MbdPredicates;
-import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
-import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
+import com.lowdragmc.multiblocked.api.registry.*;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileTesterEntity;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileTesterEntity;
@@ -26,15 +21,16 @@ import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
 import com.lowdragmc.multiblocked.common.capability.CreateStressCapacityCapability;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
+import com.lowdragmc.multiblocked.common.tile.JarTileEntity;
+import com.lowdragmc.multiblocked.common.tile.PedestalTileEntity;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
-import com.simibubi.create.foundation.block.BlockStressDefaults;
 import com.simibubi.create.foundation.block.BlockStressValues;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
@@ -130,6 +126,10 @@ public class CommonProxy {
         ControllerTileTesterEntity.registerTestController();
         // register part tester
         PartTileTesterEntity.registerTestPart();
+        // register part pedestal
+        PedestalTileEntity.registerPedestal();
+        // register part jar
+        JarTileEntity.registerJar();
         // register JsonBlockPatternBlock
         JsonBlockPatternWidget.registerBlock();
         // register builtin components

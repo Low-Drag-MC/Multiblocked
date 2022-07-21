@@ -105,8 +105,8 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
         GeoModel model = this.getModel(this.getModelLocation(itemFactory));
         this.setLivingAnimations(itemFactory, this.getUniqueID(itemFactory));
         matrixStack.pushPose();
+        net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(matrixStack, bakedModel, transformType, leftHand);
         matrixStack.translate(0, 0.01f, 0);
-        matrixStack.translate(0.5, 0, 0.5);
         render(model, itemFactory, Minecraft.getInstance().getFrameTime(), RenderType.entityTranslucent(getTextureLocation(itemFactory)),
                 matrixStack, buffer, null, combinedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
         matrixStack.popPose();

@@ -11,6 +11,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -40,12 +42,14 @@ public class PressureWidget extends Widget {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void drawInBackground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         super.drawInBackground(poseStack, mouseX, mouseY, partialTicks);
         PressureGaugeRenderer2D.drawPressureGauge(poseStack, Minecraft.getInstance().font, -1.0f, criticalPressure, dangerPressure,  -3.4028235E38F, pressure, getPosition().x, getPosition().y, 0);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void drawInForeground(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         if (gui != null && isMouseOverElement(mouseX + 22, mouseY + 22)) {
             RenderSystem.enableDepthTest();

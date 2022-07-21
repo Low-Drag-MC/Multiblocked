@@ -95,6 +95,10 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return recipeLogic;
     }
 
+    public RecipeLogic createRecipeLogic() {
+        return new RecipeLogic(this);
+    }
+
     public boolean checkPattern() {
         if (state == null) return false;
         BlockPattern pattern = getPattern();
@@ -152,7 +156,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
      */
     public void onStructureFormed() {
         if (recipeLogic == null) {
-            recipeLogic = new RecipeLogic(this);
+            recipeLogic = createRecipeLogic();
         }
         if (status.equals("unformed")) {
             setStatus("idle");
@@ -337,7 +341,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             asyncRecipeSearching = compound.getBoolean("ars");
         }
         if (compound.contains("recipeLogic")) {
-            recipeLogic = new RecipeLogic(this);
+            recipeLogic = createRecipeLogic();
             recipeLogic.readFromNBT(compound.getCompound("recipeLogic"));
             status = recipeLogic.getStatus().name;
         }

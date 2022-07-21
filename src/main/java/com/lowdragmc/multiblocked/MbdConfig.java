@@ -11,6 +11,7 @@ import net.minecraftforge.fml.config.ModConfig;
  */
 public class MbdConfig {
     public static ForgeConfigSpec.IntValue naturesAura;
+    public static ForgeConfigSpec.ConfigValue<String> configPath;
 
     public static void registerConfig(){
         ForgeConfigSpec.Builder commonBuilder = new ForgeConfigSpec.Builder();
@@ -23,6 +24,11 @@ public class MbdConfig {
                         "set the radius of aura value consumption.",
                         "Default: 20")
                 .defineInRange("Natures Aura Radius",20,1,64);
+        configPath = builder.comment(
+                        "Multiblocked Config Path.",
+                        "e.g. config/multiblocked",
+                        "Default: multiblocked")
+                .define("Config Path","multiblocked", s -> true);
 
     }
 }

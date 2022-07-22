@@ -71,7 +71,7 @@ public class JarRenderer extends MBDIModelRenderer{
             FluidStack fluidStack = tile.getFluidStack();
             Minecraft mc = Minecraft.getInstance();
             if (fluidStack != null && !fluidStack.isEmpty() && mc.level != null) {
-                float height = fluidStack.getAmount() / 5000f * (11.5f / 16);
+                float height = fluidStack.getAmount() / 5000f * (11f / 16);
                 ResourceLocation LOCATION_BLOCKS_TEXTURE = TextureAtlas.LOCATION_BLOCKS;
                 FluidAttributes fluid = fluidStack.getFluid().getAttributes();
                 ResourceLocation fluidStill = fluid.getStillTexture();
@@ -89,7 +89,7 @@ public class JarRenderer extends MBDIModelRenderer{
                 RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
                 bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
-                renderCubeFace(stack, bufferBuilder, 3.5f / 16, 0, 3.5f / 16, 12.5f / 16, height, 12.5f / 16, fluid.getColor(fluidStack) | 0xff000000, fluidStillSprite);
+                renderCubeFace(stack, bufferBuilder, 4f / 16, 1f / 16, 4f / 16, 12f / 16, height, 12f / 16, fluid.getColor(fluidStack) | 0xff000000, fluidStillSprite);
                 tessellator.end();
 
                 stack.popPose();

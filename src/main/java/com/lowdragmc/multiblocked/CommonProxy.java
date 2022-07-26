@@ -71,16 +71,11 @@ public class CommonProxy {
             MbdComponents.commonLastWork();
             if (Multiblocked.isCreateLoaded()) {
                 MbdComponents.DEFINITION_REGISTRY.forEach((r, d) -> {
-                    if (d instanceof CreatePartDefinition definition) {
+                    if (d instanceof CreatePartDefinition) {
                         BlockStressValues.IStressValueProvider provider = BlockStressValues.getProvider(r.getNamespace());
                         if (provider == null) {
                             BlockStressValues.registerProvider(r.getNamespace(), CreateStressCapacityCapability.STRESS_PROVIDER);
                         }
-//                        if (definition.isOutput) {
-//                            BlockStressDefaults.setDefaultCapacity(d.location, definition.stress);
-//                        } else {
-//                            BlockStressDefaults.setDefaultImpact(d.location, definition.stress);
-//                        }
                     }
                 });
             }

@@ -64,7 +64,7 @@ public abstract class WorldMixin implements LevelAccessor {
         if (!this.isClientSide && Thread.currentThread() != this.thread && MultiblockWorldSavedData.isThreadService() && isLoaded(pos)) {
             ChunkAccess chunk = this.getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk instanceof LevelChunk levelChunk) {
-                cir.setReturnValue(levelChunk.getBlockEntity(pos, LevelChunk.EntityCreationType.IMMEDIATE));
+                cir.setReturnValue(levelChunk.getBlockEntities().get(pos));
             }
         }
     }

@@ -42,7 +42,6 @@ public class Multiblocked {
     public static final String MODID_BOT = "botania";
     public static final String MODID_MEK = "mekanism";
     public static final String MODID_GEO = "geckolib3";
-    public static final String MODID_GTCE = "gregtech";
     public static final String MODID_KUBEJS = "kubejs";
     private static final String MODID_CREATE = "create";
     private static final String MODID_PE = "projecte";
@@ -66,11 +65,10 @@ public class Multiblocked {
             .registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
             .create();
     public static File location;
-    
-    
+
     public Multiblocked() {
         MbdConfig.registerConfig();
-        location = new File(FMLPaths.GAMEDIR.get().toFile(), MbdConfig.configPath.get());
+        location = new File(FMLPaths.GAMEDIR.get().toFile(), "multiblocked");
         location.mkdir();
         DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
     }

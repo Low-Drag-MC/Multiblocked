@@ -34,19 +34,23 @@ public abstract class ServerChunkProviderMixin {
     @Shadow @Nullable protected abstract ChunkHolder getVisibleChunkIfPresent(long p_217213_1_);
 
     private void storeInCache(long pos, LevelChunk chunkAccess) {
-        for(int i = 3; i > 0; --i) {
-            this.mbdLastChunkPos[i] = this.mbdLastChunkPos[i - 1];
-            this.mbdLastChunk[i] = this.mbdLastChunk[i - 1];
-        }
+        synchronized (this.mbdLastChunkPos) {
+            for(int i = 3; i > 0; --i) {
+                this.mbdLastChunkPos[i] = this.mbdLastChunkPos[i - 1];
+                this.mbdLastChunk[i] = this.mbdLastChunk[i - 1];
+            }
 
-        this.mbdLastChunkPos[0] = pos;
-        this.mbdLastChunk[0] = chunkAccess;
+            this.mbdLastChunkPos[0] = pos;
+            this.mbdLastChunk[0] = chunkAccess;
+        }
     }
 
     @Inject(method = "clearCache", at = @At(value = "TAIL"))
     private void injectClearCache(CallbackInfo ci) {
-        Arrays.fill(this.mbdLastChunkPos, ChunkPos.INVALID_CHUNK_POS);
-        Arrays.fill(this.mbdLastChunk, null);
+        synchronized (this.mbdLastChunkPos) {
+            Arrays.fill(this.mbdLastChunkPos, ChunkPos.INVALID_CHUNK_POS);
+            Arrays.fill(this.mbdLastChunk, null);
+        }
     }
 
     @Inject(method = "getChunkNow", at = @At(value = "HEAD"), cancellable = true)

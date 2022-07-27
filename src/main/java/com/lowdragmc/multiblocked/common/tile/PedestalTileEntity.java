@@ -125,6 +125,7 @@ public class PedestalTileEntity extends PartTileEntity.PartSimpleTileEntity {
 
     public static void registerPedestal() {
         pedestalDefinition.baseRenderer = new PedestalRenderer();
+        pedestalDefinition.allowRotate = false;
         pedestalDefinition.properties.isOpaque = false;
         pedestalDefinition.properties.shape = Shapes.or(
                 Shapes.box(2 / 16f, 0 / 16f, 2 / 16f, 14 / 16f, 3 / 16f, 14 / 16f),

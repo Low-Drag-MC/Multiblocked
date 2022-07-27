@@ -111,6 +111,7 @@ public class JarTileEntity extends PartTileEntity.PartSimpleTileEntity {
 
     public static void registerJar() {
         jarlDefinition.baseRenderer = new JarRenderer();
+        jarlDefinition.allowRotate = false;
         jarlDefinition.properties.isOpaque = false;
         jarlDefinition.properties.shape = Shapes.or(
                 Shapes.box(3 / 16f, 0 / 16f, 3 / 16f, 13 / 16f, 12 / 16f, 13 / 16f),

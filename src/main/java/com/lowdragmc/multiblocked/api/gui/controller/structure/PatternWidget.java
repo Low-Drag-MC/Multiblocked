@@ -92,7 +92,7 @@ public class PatternWidget extends WidgetGroup {
         predicates = new ArrayList<>();
 
         addWidget(new ImageWidget(7, 7, 162, 16,
-                new TextTexture(controllerDefinition.location.getPath() + ".name", -1)
+                new TextTexture("block." + controllerDefinition.location.getNamespace() + "." + controllerDefinition.location.getPath(), -1)
                         .setType(TextTexture.TextType.ROLL)
                         .setWidth(162)
                         .setDropShadow(true))

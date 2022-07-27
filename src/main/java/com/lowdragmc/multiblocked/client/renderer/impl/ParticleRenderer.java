@@ -60,16 +60,18 @@ public class ParticleRenderer implements IMultiblockedRenderer {
     @Override
     @OnlyIn(Dist.CLIENT)
     public final void onPreAccess(IComponent component) {
-        BlockPos pos = component.self().getBlockPos();
-        LParticle particle = createParticle(component, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-        component.setRendererObject(particle);
-        if (particle != null) {
-            particle.setOnUpdate(p -> {
-                if (component.self().isRemoved() || component.self().getLevel().getBlockEntity(component.self().getBlockPos()) != component) p.remove();
-            });
-            particle.setImmortal();
-            particle.setCull(shouldCull);
-            particle.addParticle();
+        synchronized (INSTANCE) {
+            BlockPos pos = component.self().getBlockPos();
+            LParticle particle = createParticle(component, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+            component.setRendererObject(particle);
+            if (particle != null) {
+                particle.setOnUpdate(p -> {
+                    if (component.self().isRemoved() || component.self().getLevel().getBlockEntity(component.self().getBlockPos()) != component) p.remove();
+                });
+                particle.setImmortal();
+                particle.setCull(shouldCull);
+                particle.addParticle();
+            }
         }
     }
 

@@ -2,7 +2,6 @@
   "canShared": true,
   "location": "multiblocked:entity",
   "traits": {
-    "background": "multiblocked:textures/gui/item_bus_gui.png",
     "entity": {}
   },
   "allowRotate": true,

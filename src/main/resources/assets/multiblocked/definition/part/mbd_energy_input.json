@@ -20,9 +20,9 @@
       "width": 120,
       "height": 9,
       "texture": "multiblocked:textures/gui/energy_bar.png",
-      "capacity": 10000,
-      "maxReceive": 500,
-      "maxExtract": 500
+      "capacity": 100000,
+      "maxReceive": 5000,
+      "maxExtract": 5000
     }
   },
   "allowRotate": true,

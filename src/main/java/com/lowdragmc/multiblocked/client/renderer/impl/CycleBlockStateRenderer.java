@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
@@ -96,6 +97,7 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     @OnlyIn(Dist.CLIENT)
     public void render(TileEntity te, float partialTicks, MatrixStack stack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
         BlockState state = getState(te.getBlockState());
+        FluidState fluidState = state.getFluidState();
         TileEntity tileEntity = getBlockInfo().getTileEntity();
         Minecraft mc = Minecraft.getInstance();
 
@@ -120,7 +122,11 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
         mc.getTextureManager().bind(AtlasTexture.LOCATION_BLOCKS);
 
         for (RenderType layer : RenderType.chunkBufferLayers()) {
-            ForgeHooksClient.setRenderLayer(layer);
+            if (!fluidState.isEmpty() && RenderTypeLookup.canRenderInLayer(fluidState, layer)) {
+                ForgeHooksClient.setRenderLayer(layer);
+                IVertexBuilder bufferBuilder = buffer.getBuffer(layer);
+                brd.renderLiquid(te.getBlockPos(), dummyWorld, bufferBuilder, fluidState);
+            }
             if (RenderTypeLookup.canRenderInLayer(state, layer)) {
                 ForgeHooksClient.setRenderLayer(layer);
                 IVertexBuilder bufferBuilder = buffer.getBuffer(layer);

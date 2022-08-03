@@ -165,8 +165,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void update(){
         timer++;
-        if (Multiblocked.isKubeJSLoaded()) {
-            new UpdateTickEvent(this).post(ScriptType.SERVER, UpdateTickEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new UpdateTickEvent(this).post(ScriptType.of(level), UpdateTickEvent.ID, getSubID());
         }
         if (!traits.isEmpty()) {
             for (CapabilityTrait trait : traits.values()) {
@@ -181,9 +181,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void setStatus(String status) {
         if (!isRemote()) {
-            if (Multiblocked.isKubeJSLoaded()) {
+            if (Multiblocked.isKubeJSLoaded() && level != null) {
                 StatusChangedEvent event = new StatusChangedEvent(this, status);
-                if (event.post(ScriptType.SERVER, StatusChangedEvent.ID, getSubID())) {
+                if (event.post(ScriptType.of(level), StatusChangedEvent.ID, getSubID())) {
                     return;
                 }
                 status = event.getStatus();
@@ -211,9 +211,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         } else {
             renderer = definition.baseRenderer;
         }
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
             UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
-            event.post(ScriptType.CLIENT, UpdateRendererEvent.ID, getSubID());
+            event.post(ScriptType.of(level), UpdateRendererEvent.ID, getSubID());
             renderer = event.getRenderer();
         }
         return renderer;
@@ -238,9 +238,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 //    }
 
     public int getOutputRedstoneSignal(Direction facing) {
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
             OutputRedstoneEvent event = new OutputRedstoneEvent(this, facing);
-            event.post(ScriptType.SERVER, OutputRedstoneEvent.ID, getSubID());
+            event.post(ScriptType.of(level), OutputRedstoneEvent.ID, getSubID());
             return event.redstone;
         }
         return 0;
@@ -266,8 +266,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     //************* events *************//
 
     public void onDrops(NonNullList<ItemStack> drops, PlayerEntity player) {
-        if (Multiblocked.isKubeJSLoaded()) {
-            if (new DropEvent(this, drops, player).post(ScriptType.SERVER, DropEvent.ID, getSubID())) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            if (new DropEvent(this, drops, player).post(ScriptType.of(level), DropEvent.ID, getSubID())) {
                 return;
             }
         }
@@ -278,9 +278,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
             RightClickEvent event = new RightClickEvent(this, player, hand, hit);
-            if (event.post(ScriptType.SERVER, RightClickEvent.ID, getSubID())) {
+            if (event.post(ScriptType.of(level), RightClickEvent.ID, getSubID())) {
                 return ActionResultType.SUCCESS;
             }
         }
@@ -295,8 +295,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
     
     public void onNeighborChange() {
-        if (Multiblocked.isKubeJSLoaded()) {
-            new NeighborChangedEvent(this).post(ScriptType.SERVER, NeighborChangedEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new NeighborChangedEvent(this).post(ScriptType.of(level), NeighborChangedEvent.ID, getSubID());
         }
     }
     //************* capability *************//
@@ -335,9 +335,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     @Override
     public ModularUI createUI(PlayerEntity entityPlayer) {
         ModularUI modularUI = createComponentUI(entityPlayer);
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
             CreateUIEvent event = new CreateUIEvent(this, modularUI);
-            if (event.post(ScriptType.of(getLevel()), CreateUIEvent.ID, getSubID())) {
+            if (event.post(ScriptType.of(level), CreateUIEvent.ID, getSubID())) {
                 return null;
             }
             modularUI = event.getModularUI();
@@ -376,8 +376,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         for (CapabilityTrait trait : traits.values()) {
             trait.createUI(this, group, PlayerEntity);
         }
-        if (Multiblocked.isKubeJSLoaded()) {
-            new InitTraitUIEvent(this, group).post(ScriptType.of(getLevel()), InitTraitUIEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new InitTraitUIEvent(this, group).post(ScriptType.of(level), InitTraitUIEvent.ID, getSubID());
         }
     }
 
@@ -405,15 +405,15 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void writeInitialSyncData(PacketBuffer buf) {
         buf.writeUtf(status);
-        if (Multiblocked.isKubeJSLoaded()) {
-            new WriteInitialDataEvent(this, buf).post(ScriptType.SERVER, WriteInitialDataEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new WriteInitialDataEvent(this, buf).post(ScriptType.of(level), WriteInitialDataEvent.ID, getSubID());
         }
     }
 
     public void receiveInitialSyncData(PacketBuffer buf) {
         status = buf.readUtf();
-        if (Multiblocked.isKubeJSLoaded()) {
-            new ReadInitialDataEvent(this, buf).post(ScriptType.CLIENT, ReadInitialDataEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new ReadInitialDataEvent(this, buf).post(ScriptType.of(level), ReadInitialDataEvent.ID, getSubID());
         }
     }
 
@@ -426,8 +426,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
             if (traits.containsKey(capability)) {
                 traits.get(capability).receiveCustomData(buf.readVarInt(), buf);
             }
-        } else if (Multiblocked.isKubeJSLoaded()) {
-            new ReceiveCustomDataEvent(this, dataId, buf).post(ScriptType.CLIENT, ReceiveCustomDataEvent.ID, getSubID());
+        } else if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new ReceiveCustomDataEvent(this, dataId, buf).post(ScriptType.of(level), ReceiveCustomDataEvent.ID, getSubID());
         }
     }
 
@@ -557,9 +557,9 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     @Override
     public VoxelShape getShape() {
         VoxelShape shape = IComponent.super.getShape();
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
             CustomShapeEvent event= new CustomShapeEvent(this, shape);
-            event.post(ScriptType.SERVER, CustomShapeEvent.ID, getSubID());
+            event.post(ScriptType.of(level), CustomShapeEvent.ID, getSubID());
             shape = event.getShape();
         }
         return shape;

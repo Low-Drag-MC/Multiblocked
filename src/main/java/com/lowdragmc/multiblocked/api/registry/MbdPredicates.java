@@ -3,12 +3,7 @@ package com.lowdragmc.multiblocked.api.registry;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateAnyCapability;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateBlocks;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateCustomAny;
-import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateStates;
-import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
+import com.lowdragmc.multiblocked.api.pattern.predicates.*;
 
 import java.util.Map;
 
@@ -53,6 +48,7 @@ public class MbdPredicates {
         registerPredicate(PredicateBlocks.class);
         registerPredicate(PredicateAnyCapability.class);
         registerPredicate(PredicateCustomAny.class);
+        registerPredicate(PredicateFluids.class);
     }
 
 }

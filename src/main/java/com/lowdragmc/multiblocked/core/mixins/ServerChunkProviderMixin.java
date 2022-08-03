@@ -14,9 +14,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 @Mixin(ServerChunkProvider.class)
 public abstract class ServerChunkProviderMixin {
@@ -25,15 +27,31 @@ public abstract class ServerChunkProviderMixin {
 
     @Shadow @Final public ServerWorld level;
 
-    @Shadow @Final private long[] lastChunkPos;
-
-    @Shadow @Final private ChunkStatus[] lastChunkStatus;
-
-    @Shadow @Final private IChunk[] lastChunk;
-
     @Shadow @Nullable protected abstract ChunkHolder getVisibleChunkIfPresent(long p_217213_1_);
 
-    @Shadow protected abstract void storeInCache(long p_225315_1_, IChunk p_225315_3_, ChunkStatus p_225315_4_);
+    private final long[] mbdLastChunkPos = new long[4];
+
+    private final Chunk[] mbdLastChunk = new Chunk[4];
+
+    @Inject(method = "clearCache", at = @At(value = "TAIL"))
+    private void injectClearCache(CallbackInfo ci) {
+        synchronized (this.mbdLastChunkPos) {
+            Arrays.fill(this.mbdLastChunkPos, ChunkPos.INVALID_CHUNK_POS);
+            Arrays.fill(this.mbdLastChunk, null);
+        }
+    }
+
+    private void storeInCache(long pos, Chunk chunkAccess) {
+        synchronized (this.mbdLastChunkPos) {
+            for(int i = 3; i > 0; --i) {
+                this.mbdLastChunkPos[i] = this.mbdLastChunkPos[i - 1];
+                this.mbdLastChunk[i] = this.mbdLastChunk[i - 1];
+            }
+
+            this.mbdLastChunkPos[0] = pos;
+            this.mbdLastChunk[0] = chunkAccess;
+        }
+    }
 
     @Inject(method = "getChunkNow", at = @At(value = "HEAD"), cancellable = true)
     private void getTileEntity(int pChunkX, int pChunkZ, CallbackInfoReturnable<Chunk> cir) {
@@ -41,32 +59,27 @@ public abstract class ServerChunkProviderMixin {
             long i = ChunkPos.asLong(pChunkX, pChunkZ);
 
             for(int j = 0; j < 4; ++j) {
-                if (i == this.lastChunkPos[j] && this.lastChunkStatus[j] == ChunkStatus.FULL) {
-                    IChunk ichunk = this.lastChunk[j];
-                    cir.setReturnValue(ichunk instanceof Chunk ? (Chunk)ichunk : null);
+                if (i == this.mbdLastChunkPos[j]) {
+                    cir.setReturnValue(this.mbdLastChunk[j]);
                     return;
                 }
             }
 
             ChunkHolder chunkholder = this.getVisibleChunkIfPresent(i);
-            if (chunkholder == null) {
-                cir.setReturnValue(null);
-            } else {
+            if (chunkholder != null) {
                 Either<IChunk, ChunkHolder.IChunkLoadingError> either = chunkholder.getFutureIfPresent(ChunkStatus.FULL).getNow(null);
-                if (either == null) {
-                    cir.setReturnValue(null);
-                } else {
+                if (either != null) {
                     IChunk ichunk1 = either.left().orElse(null);
                     if (ichunk1 != null) {
-                        this.storeInCache(i, ichunk1, ChunkStatus.FULL);
                         if (ichunk1 instanceof Chunk) {
+                            storeInCache(i, (Chunk) ichunk1);
                             cir.setReturnValue((Chunk)ichunk1);
                             return;
                         }
                     }
-                    cir.setReturnValue(null);
                 }
             }
+            cir.setReturnValue(null);
         }
     }
 

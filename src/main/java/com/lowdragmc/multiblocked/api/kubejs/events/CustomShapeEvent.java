@@ -26,8 +26,4 @@ public class CustomShapeEvent extends EventJS {
         this.shape = shape;
     }
 
-    @Override
-    public boolean canCancel() {
-        return true;
-    }
 }

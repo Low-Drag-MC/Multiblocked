@@ -10,6 +10,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.trait.ProgressCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.FEMultiblockCapability;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.JSONUtils;
 import net.minecraftforge.common.capabilities.Capability;
@@ -106,6 +107,38 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     @Nonnull
     public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
         return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, capabilityIO, true)));
+    }
+
+    @Override
+    public boolean hasUpdate() {
+        return capabilityIO == IO.OUT;
+    }
+
+    @Override
+    public void update() {
+        int left = Math.min(maxExtract, handler.getEnergyStored());
+        if (left > 0) {
+            for (Direction facing : getIOFacing()) {
+                TileEntity te = component.getLevel().getBlockEntity(component.getBlockPos().relative(facing));
+                if (te != null) {
+                    IEnergyStorage handler = te.getCapability(CapabilityEnergy.ENERGY, facing.getOpposite()).orElse(null);
+                    if (handler != null) {
+                        int accepted = handler.receiveEnergy(left, false);
+                        left -= this.handler.extractEnergy(accepted, false);
+                        if (left <= 0) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public Direction[] getIOFacing() {
+        if (component.getDefinition().allowRotate) {
+            return new Direction[]{component.getFrontFacing()};
+        }
+        return Direction.values();
     }
 
     private class ProxyEnergyStorage implements IEnergyStorage {

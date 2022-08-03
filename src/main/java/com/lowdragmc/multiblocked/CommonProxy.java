@@ -115,6 +115,7 @@ public class CommonProxy {
         MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_item_output"), PartDefinition.class, null);
         MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_fluid_input"), PartDefinition.class, null);
         MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_fluid_output"), PartDefinition.class, null);
+        MbdComponents.registerComponentFromResource(Multiblocked.GSON, new ResourceLocation(Multiblocked.MODID, "part/mbd_entity"), PartDefinition.class, null);
         // register JsonFiles
         MbdComponents.registerComponentFromFile(
                 Multiblocked.GSON,

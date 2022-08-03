@@ -9,6 +9,7 @@ import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
+import com.lowdragmc.multiblocked.common.capability.EntityMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
 import mekanism.api.chemical.gas.GasStack;
@@ -23,12 +24,17 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Tuple;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
@@ -87,6 +93,25 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
                     .map(Content::getContent)
                     .map(ItemsIngredient.class::cast)
                     .flatMap(r -> Arrays.stream(r.getIngredient().getItems()))
+                    .collect(Collectors.toList()));
+        }
+
+        if (recipe.inputs.containsKey(EntityMultiblockCapability.CAP)) {
+            ingredients.setInputIngredients(recipe.inputs.get(EntityMultiblockCapability.CAP).stream()
+                    .map(Content::getContent)
+                    .map(EntityType.class::cast)
+                    .map(ForgeSpawnEggItem::fromEntityType)
+                    .filter(Objects::nonNull)
+                    .map(Ingredient::of)
+                    .collect(Collectors.toList()));
+        }
+        if (recipe.outputs.containsKey(EntityMultiblockCapability.CAP)) {
+            ingredients.setOutputs(VanillaTypes.ITEM, recipe.outputs.get(EntityMultiblockCapability.CAP).stream()
+                    .map(Content::getContent)
+                    .map(EntityType.class::cast)
+                    .map(ForgeSpawnEggItem::fromEntityType)
+                    .filter(Objects::nonNull)
+                    .map(ItemStack::new)
                     .collect(Collectors.toList()));
         }
 

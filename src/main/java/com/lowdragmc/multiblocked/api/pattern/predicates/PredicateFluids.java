@@ -39,7 +39,7 @@ public class PredicateFluids extends SimplePredicate {
     public SimplePredicate buildPredicate() {
         fluids = Arrays.stream(fluids).filter(Objects::nonNull).toArray(Fluid[]::new);
         if (fluids.length == 0) fluids = new Fluid[]{Fluids.WATER};
-        predicate = state -> ArrayUtils.contains(fluids, state.getBlockState().getBlock());
+        predicate = state -> ArrayUtils.contains(fluids, state.getBlockState().getFluidState().getType());
         candidates = () -> Arrays.stream(fluids).map(fluid -> BlockInfo.fromBlockState(fluid.defaultFluidState().createLegacyBlock())).toArray(BlockInfo[]::new);
         return this;
     }

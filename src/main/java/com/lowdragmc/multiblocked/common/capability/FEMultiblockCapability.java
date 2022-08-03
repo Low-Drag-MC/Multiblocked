@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;

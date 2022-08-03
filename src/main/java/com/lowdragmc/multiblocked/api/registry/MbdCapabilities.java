@@ -26,6 +26,7 @@ public class MbdCapabilities {
         registerCapability(FEMultiblockCapability.CAP);
         registerCapability(ItemMultiblockCapability.CAP);
         registerCapability(FluidMultiblockCapability.CAP);
+        registerCapability(EntityMultiblockCapability.CAP);
         if (Multiblocked.isMekLoaded()) {
             registerCapability(ChemicalMekanismCapability.CAP_GAS);
             registerCapability(ChemicalMekanismCapability.CAP_SLURRY);

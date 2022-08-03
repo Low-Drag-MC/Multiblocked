@@ -2,14 +2,19 @@ package com.lowdragmc.multiblocked.api.recipe.serde.content;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import net.minecraft.network.FriendlyByteBuf;
 
 public interface IContentSerializer<T> {
 
-    void toNetwork(FriendlyByteBuf buf, T content);
+    default void toNetwork(FriendlyByteBuf buf, T content) {
+        buf.writeUtf(Multiblocked.GSON.toJson(toJson(content)));
+    }
 
-    T fromNetwork(FriendlyByteBuf buf);
+    default T fromNetwork(FriendlyByteBuf buf) {
+        return fromJson(Multiblocked.GSON.fromJson(buf.readUtf(), JsonElement.class));
+    }
 
     T fromJson(JsonElement json);
 

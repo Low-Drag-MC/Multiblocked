@@ -59,6 +59,7 @@
   "multiblocked.renderer.gregtech": "GregTech模型",
   "multiblocked.gui.tips.settings": "设置",
   "multiblocked.gui.tips.block_register": "方块名字",
+  "multiblocked.gui.tips.fluid_register": "流体名字",
   "multiblocked.gui.tips.block_meta": "BlockState Meta数据",
   "multiblocked.gui.tips.open_folder": "打开文件夹",
   "multiblocked.gui.tips.building_scene": "构建场景中！",
@@ -218,11 +219,14 @@
   "multiblocked.gui.label.dir": "方向:",
   "multiblocked.gui.label.symbol": "符号特征:",
   "multiblocked.gui.label.block_settings": "方块设置",
+  "multiblocked.gui.label.fluid_settings": "流体设置",
   "multiblocked.gui.label.component_registry_name": "方块注册名:",
   "multiblocked.gui.label.metaTileEntity_registry_name": "MetaTileEntity注册名:",
   "multiblocked.gui.label.type": "类型:",
   "multiblocked.gui.label.save_pattern": "保存结构模板",
   "multiblocked.gui.label.save_recipe_map": "保存Recipe Map",
   "multiblocked.gui.label.pattern_settings": "保存结构模板设置",
-  "multiblocked.jei.multiblock_info": "多方块结构"
+  "multiblocked.jei.multiblock_info": "多方块结构",
+  "multiblocked.gui.predicate.fluids.add": "添加一个新的流体",
+  "multiblocked.gui.label.entity_type": "实体类型"
 }

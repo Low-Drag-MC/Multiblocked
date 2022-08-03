@@ -13,6 +13,7 @@ import mekanism.api.chemical.slurry.SlurryStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.state.BlockState;
@@ -160,6 +161,14 @@ public class RecipeBuilder {
 
     public RecipeBuilder outputFluids(FluidStack... outputs) {
         return output(FluidMultiblockCapability.CAP, outputs);
+    }
+
+    public RecipeBuilder inputEntities(EntityType<?>... inputs) {
+        return input(EntityMultiblockCapability.CAP, inputs);
+    }
+
+    public RecipeBuilder outputEntities(EntityType<?>... outputs) {
+        return output(EntityMultiblockCapability.CAP, outputs);
     }
 
     public RecipeBuilder inputHeat(double heat) {

@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -91,6 +92,7 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     @OnlyIn(Dist.CLIENT)
     public void render(BlockEntity te, float partialTicks, PoseStack stack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         BlockState state = getState(te.getBlockState());
+        FluidState fluidState = state.getFluidState();
         BlockEntity tileEntity = getBlockInfo().getBlockEntity(te.getBlockPos());
         Minecraft mc = Minecraft.getInstance();
 
@@ -109,6 +111,11 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
         RenderSystem.enableTexture();
 
         for (RenderType layer : RenderType.chunkBufferLayers()) {
+            if (!fluidState.isEmpty() && ItemBlockRenderTypes.canRenderInLayer(fluidState, layer)) {
+                ForgeHooksClient.setRenderType(layer);
+                VertexConsumer bufferBuilder = buffer.getBuffer(layer);
+                brd.renderLiquid(te.getBlockPos(), dummyWorld, bufferBuilder, state, fluidState);
+            }
             if (ItemBlockRenderTypes.canRenderInLayer(state, layer)) {
                 ForgeHooksClient.setRenderType(layer);
                 VertexConsumer bufferBuilder = buffer.getBuffer(layer);

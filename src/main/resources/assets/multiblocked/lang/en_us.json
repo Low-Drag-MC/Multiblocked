@@ -2,6 +2,8 @@
   "multiblocked.multiblock.formed": "Multiblock Formed!",
   "multiblocked.capability.forge_energy": "Forge Energy",
   "block.multiblocked.forge_energy.any": "Any Forge Energy Containers",
+  "multiblocked.capability.entity": "Entity",
+  "block.multiblocked.entity.any": "Any Entity Containers",
   "multiblocked.capability.fluid": "Fluid",
   "block.multiblocked.fluid.any": "Any Fluid Tanks",
   "multiblocked.capability.mek_gas": "Mekanism Gas",
@@ -73,6 +75,7 @@
   "multiblocked.renderer.gregtech": "GregTech Model",
   "multiblocked.gui.tips.settings": "Settings",
   "multiblocked.gui.tips.block_register": "Block Name",
+  "multiblocked.gui.tips.fluid_register": "Fluid Name",
   "multiblocked.gui.tips.block_meta": "BlockState Metadata",
   "multiblocked.gui.tips.open_folder": "Open Folder",
   "multiblocked.gui.tips.building_scene": "Building Scene!",
@@ -198,6 +201,7 @@
   "multiblocked.gui.trait.item.add": "Add a New Item Matcher",
   "multiblocked.gui.predicate.capability": "Capability",
   "multiblocked.gui.predicate.blocks.add": "Add a New Block",
+  "multiblocked.gui.predicate.fluids.add": "Add a New Fluid",
   "multiblocked.gui.predicate.states.add": "Add a New BlockState",
   "multiblocked.gui.predicate.preview": "Preview",
   "multiblocked.gui.predicate.jei": "JEI",
@@ -238,6 +242,7 @@
   "multiblocked.gui.label.dir": "Dir:",
   "multiblocked.gui.label.symbol": "Symbol Character:",
   "multiblocked.gui.label.block_settings": "Block Settings",
+  "multiblocked.gui.label.fluid_settings": "Fluid Settings",
   "multiblocked.gui.label.component_registry_name": "Component registry name:",
   "multiblocked.gui.label.metaTileEntity_registry_name": "MetaTileEntity registry name:",
   "multiblocked.gui.label.type": "Type:",
@@ -264,5 +269,7 @@
   "multiblocked.recipe.condition.dimension.tooltip": "Dimension: %s",
   "multiblocked.recipe.condition.biome": "Biome",
   "multiblocked.recipe.condition.pos_y": "Position Y",
-  "multiblocked.recipe.condition.pos_y.tooltip": "%d <= Y <= %d"
+  "multiblocked.recipe.condition.pos_y.tooltip": "%d <= Y <= %d",
+  "multiblocked.gui.label.entity_type": "Entity Type"
+
 }

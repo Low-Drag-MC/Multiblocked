@@ -135,7 +135,7 @@ public class Recipe {
                         while (iterator.hasNext()) {
                             String key = iterator.next();
                             if (proxy.slots.contains(key)) {
-                                List<?> left = proxy.searchingRecipe(io, this, contentSlot.get(key));
+                                List<?> left = proxy.searchingRecipe(io, this, contentSlot.get(key).stream().map(capability::copyContent).toList());
                                 if (left == null) iterator.remove();
                             }
                         }
@@ -210,7 +210,7 @@ public class Recipe {
                         while (iterator.hasNext()) {
                             String key = iterator.next();
                             if (proxy.slots.contains(key)) {
-                                List<?> left = proxy.handleRecipe(io, this, contentSlot.get(key));
+                                List<?> left = proxy.handleRecipe(io, this, contentSlot.get(key).stream().map(capability::copyContent).toList());
                                 if (left == null) iterator.remove();
                             }
                         }

@@ -148,9 +148,9 @@ public class RecipeLogic {
     }
 
     public void setupRecipe(Recipe recipe) {
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && controller != null && controller.getLevel() != null) {
             SetupRecipeEvent event = new SetupRecipeEvent(this, recipe);
-            if (event.post(ScriptType.SERVER, SetupRecipeEvent.ID, controller.getSubID())) {
+            if (event.post(ScriptType.of(controller.getLevel()), SetupRecipeEvent.ID, controller.getSubID())) {
                 return;
             }
             recipe = event.getRecipe();
@@ -190,9 +190,9 @@ public class RecipeLogic {
 
     public void onRecipeFinish() {
         Recipe recipe = lastRecipe;
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && controller != null && controller.getLevel() != null) {
             RecipeFinishEvent event = new RecipeFinishEvent(this);
-            if (event.post(ScriptType.SERVER, RecipeFinishEvent.ID, controller.getSubID())) {
+            if (event.post(ScriptType.of(controller.getLevel()), RecipeFinishEvent.ID, controller.getSubID())) {
                 return;
             }
             recipe = event.getRecipe();

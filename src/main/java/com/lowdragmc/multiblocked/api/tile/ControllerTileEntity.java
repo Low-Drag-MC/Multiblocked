@@ -82,9 +82,9 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Nullable
     public BlockPattern getPattern() {
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
             DynamicPatternEvent event = new DynamicPatternEvent(this, definition.basePattern);
-            if (event.post(ScriptType.SERVER, DynamicPatternEvent.ID, getSubID())) {
+            if (event.post(ScriptType.of(level), DynamicPatternEvent.ID, getSubID())) {
                 return null;
             }
             return event.pattern;
@@ -126,8 +126,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (recipeLogic != null) {
             recipeLogic.update();
         }
-        if (Multiblocked.isKubeJSLoaded()) {
-            new UpdateFormedEvent(this).post(ScriptType.SERVER, UpdateFormedEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new UpdateFormedEvent(this).post(ScriptType.of(level), UpdateFormedEvent.ID, getSubID());
         }
     }
 
@@ -136,9 +136,9 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         IMultiblockedRenderer renderer;
         if (definition.workingRenderer != null && isFormed() && (status.equals("working") || status.equals("suspend"))) {
             renderer = definition.workingRenderer;
-            if (Multiblocked.isKubeJSLoaded()) {
+            if (Multiblocked.isKubeJSLoaded() && level != null) {
                 UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
-                event.post(ScriptType.SERVER, UpdateRendererEvent.ID, getSubID());
+                event.post(ScriptType.of(level), UpdateRendererEvent.ID, getSubID());
                 renderer = event.getRenderer();
             }
         } else {
@@ -221,8 +221,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
 
         writeCustomData(-1, this::writeState);
-        if (Multiblocked.isKubeJSLoaded()) {
-            new StructureFormedEvent(this).post(ScriptType.SERVER, StructureFormedEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new StructureFormedEvent(this).post(ScriptType.of(level), StructureFormedEvent.ID, getSubID());
         }
     }
 
@@ -245,8 +245,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         capabilities = null;
 
         writeCustomData(-1, this::writeState);
-        if (Multiblocked.isKubeJSLoaded()) {
-            new StructureInvalidEvent(this).post(ScriptType.SERVER, StructureInvalidEvent.ID, getSubID());
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
+            new StructureInvalidEvent(this).post(ScriptType.of(level), StructureInvalidEvent.ID, getSubID());
         }
     }
 
@@ -386,9 +386,9 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Override
     public InteractionResult use(Player player, InteractionHand hand, BlockHitResult hit) {
-        if (Multiblocked.isKubeJSLoaded()) {
+        if (Multiblocked.isKubeJSLoaded() && level != null) {
             RightClickEvent event = new RightClickEvent(this, player, hand, hit);
-            if (event.post(ScriptType.SERVER, RightClickEvent.ID, getSubID())) {
+            if (event.post(ScriptType.of(level), RightClickEvent.ID, getSubID())) {
                 return InteractionResult.SUCCESS;
             }
         }

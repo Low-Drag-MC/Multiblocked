@@ -34,6 +34,7 @@
   "block.multiblocked.item_output": "Item Output Bus",
   "block.multiblocked.create_input": "Create Stress Input Box",
   "block.multiblocked.create_output": "Create Stress Output Box",
+  "block.multiblocked.entity": "Entity Hatch",
 
   "multiblocked.content.miss": "IO: %s Capability: %s miss widget",
   "multiblocked.pattern.error": "Expected components (%s) at (%s)",

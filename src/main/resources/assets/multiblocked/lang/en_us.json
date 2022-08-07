@@ -22,6 +22,9 @@
   "block.multiblocked.bot_mana.any": "Any Botania Mana Containers",
   "multiblocked.capability.create_stress": "Create Stress",
   "block.multiblocked.create_stress.any": "Any Create Kinetic Part",
+  "multiblocked.capability.pneumatic_pressure": "Pneumatic Pressure",
+  "block.multiblocked.pneumatic_pressure.any": "Any Pneumatic Pressure Containers",
+
   "itemGroup.multiblocked.all": "MBD",
   "item.multiblocked.multiblock_builder": "Multiblock Builder",
   "multiblocked.renderer.tparticle": "particle textures",

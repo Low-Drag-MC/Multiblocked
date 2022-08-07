@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.common.capability;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
@@ -10,6 +11,7 @@ import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.IContentSerializer;
+import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.common.capability.trait.EntityCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.EntityContentWidget;
@@ -18,7 +20,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 
@@ -95,8 +96,7 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityType<
     @Override
     public BlockInfo[] getCandidates() {
         return new BlockInfo[]{
-                BlockInfo.fromBlockState(Blocks.BEACON.defaultBlockState()),
-                BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState()),
+                BlockInfo.fromBlock(MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "entity"))),
         };
     }
 

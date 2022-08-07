@@ -15,6 +15,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class CustomProperties {
     public boolean isOpaque;
+    public boolean hasDynamicShape;
     public float destroyTime;
     public float explosionResistance;
     public int lightEmissive;
@@ -24,7 +25,7 @@ public class CustomProperties {
     public boolean hasCollision;
     public String tabGroup;
     public int stackSize;
-    public transient VoxelShape shape;
+    public VoxelShape shape;
 
     public CustomProperties() {
         this.isOpaque = true;
@@ -38,6 +39,7 @@ public class CustomProperties {
         this.tabGroup = "multiblocked.all";
         this.stackSize = 64;
         this.shape = Shapes.block();
+        this.hasDynamicShape = false;
     }
 
     public BlockBehaviour.Properties createBlock() {
@@ -48,6 +50,9 @@ public class CustomProperties {
         }
         if (!hasCollision) {
             properties.noCollission();
+        }
+        if (hasDynamicShape) {
+            properties.dynamicShape();
         }
         properties.strength(destroyTime, explosionResistance)
                 .sound(SoundType.STONE)

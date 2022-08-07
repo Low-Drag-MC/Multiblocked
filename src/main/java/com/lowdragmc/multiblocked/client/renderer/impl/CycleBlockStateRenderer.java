@@ -91,6 +91,7 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(BlockEntity te, float partialTicks, PoseStack stack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+        if (te.getLevel() == null) return;
         BlockState state = getState(te.getBlockState());
         FluidState fluidState = state.getFluidState();
         BlockEntity tileEntity = getBlockInfo().getBlockEntity(te.getBlockPos());

@@ -572,8 +572,8 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     @Override
-    public VoxelShape getShape() {
-        VoxelShape shape = IComponent.super.getShape();
+    public VoxelShape getDynamicShape() {
+        VoxelShape shape = IComponent.super.getDynamicShape();
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             var event= new CustomShapeEvent(this, shape);
             event.post(ScriptType.of(level), CustomShapeEvent.ID, getSubID());

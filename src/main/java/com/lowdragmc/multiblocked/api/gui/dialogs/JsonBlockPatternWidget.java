@@ -492,6 +492,9 @@ public class JsonBlockPatternWidget extends DialogWidget {
                         assert tileEntity != null;
                         tileEntity.init(c, JsonBlockPatternWidget.this, i, j, k);
                         tileEntity.setDefinition((PartDefinition) symbolBlock.definition);
+                        if (!tileEntity.hasLevel()) {
+                            tileEntity.setLevel(world);
+                        }
                         posSet.add(pos);
                         tiles.put(pos, tileEntity);
                         tileEntity.updateRenderer();

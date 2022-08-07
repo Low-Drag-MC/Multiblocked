@@ -33,6 +33,11 @@ public class PedestalTileEntity extends PartTileEntity.PartSimpleTileEntity {
             markAsDirty();
             writeCustomData(-2, buf -> buf.writeNbt(handler.serializeNBT()));
         }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return 1;
+        }
     };
 
     public PedestalTileEntity(PartDefinition definition, BlockPos pos, BlockState state) {

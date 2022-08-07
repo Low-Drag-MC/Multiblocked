@@ -6,6 +6,9 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public interface ICapabilityProxyHolder {
 
@@ -22,6 +25,15 @@ public interface ICapabilityProxyHolder {
     }
 
     Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> getCapabilitiesProxy();
+
+    default Map<BlockPos, CapabilityProxy<?>> getProxies(IO io, MultiblockCapability<?> capability){
+        Long2ObjectOpenHashMap<CapabilityProxy<?>> map = getCapabilitiesProxy().get(io, capability);
+        Map<BlockPos, CapabilityProxy<?>> result = new HashMap<>();
+        if (map != null) {
+            map.forEach((p, p2) -> result.put(BlockPos.of(p), p2));
+        }
+        return result;
+    }
 
     static ICapabilityProxyHolder fromWorldPos(Level world, BlockPos pos, MultiblockCapability<?>... capabilities) {
         return new CommonCapabilityProxyHolder(world, pos, capabilities);

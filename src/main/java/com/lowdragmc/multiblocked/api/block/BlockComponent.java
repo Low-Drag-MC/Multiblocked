@@ -172,10 +172,12 @@ public class BlockComponent extends Block implements IBlockRendererProvider, Ent
 
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-        BlockEntity tileEntity = pLevel.getBlockEntity(pPos);
-        if (tileEntity instanceof IComponent) {
-            return ((IComponent) tileEntity).getShape();
+        if (hasDynamicShape()) {
+            BlockEntity tileEntity = pLevel.getBlockEntity(pPos);
+            if (tileEntity instanceof IComponent) {
+                return ((IComponent) tileEntity).getDynamicShape();
+            }
         }
-        return super.getShape(pState, pLevel, pPos, pContext);
+        return definition.properties.shape;
     }
 }

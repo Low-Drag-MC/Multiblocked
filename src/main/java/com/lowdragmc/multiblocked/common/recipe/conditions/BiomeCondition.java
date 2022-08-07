@@ -53,7 +53,7 @@ public class BiomeCondition extends RecipeCondition {
         World level = recipeLogic.controller.getLevel();
         if (level == null) return false;
         Biome biome = level.getBiome(recipeLogic.controller.getBlockPos());
-        return this.biome.equals(biome.delegate.name());
+        return this.biome.equals(biome.getRegistryName());
     }
 
     @Override

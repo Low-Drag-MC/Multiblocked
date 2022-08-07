@@ -8,10 +8,7 @@ import com.lowdragmc.lowdraglib.json.BlockTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.json.BlockStateTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.ItemStackTypeAdapter;
-import com.lowdragmc.multiblocked.api.json.IMultiblockedRendererTypeAdapterFactory;
-import com.lowdragmc.multiblocked.api.json.RecipeMapTypeAdapter;
-import com.lowdragmc.multiblocked.api.json.RecipeTypeAdapter;
-import com.lowdragmc.multiblocked.api.json.SimplePredicateFactory;
+import com.lowdragmc.multiblocked.api.json.*;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
@@ -54,6 +51,7 @@ public class Multiblocked {
             .registerTypeAdapterFactory(BlockStateTypeAdapterFactory.INSTANCE)
             .registerTypeAdapterFactory(IMultiblockedRendererTypeAdapterFactory.INSTANCE)
             .registerTypeAdapterFactory(BlockTypeAdapterFactory.INSTANCE)
+            .registerTypeAdapterFactory(VoxelShapAdapterFactory.INSTANCE)
             .registerTypeAdapterFactory(SimplePredicateFactory.INSTANCE)
             .registerTypeAdapter(ItemStack.class, ItemStackTypeAdapter.INSTANCE)
             .registerTypeAdapter(FluidStack.class, FluidStackTypeAdapter.INSTANCE)

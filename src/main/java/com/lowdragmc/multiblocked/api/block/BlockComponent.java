@@ -29,7 +29,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
@@ -181,10 +180,12 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
 
     @Override
     public VoxelShape getShape(BlockState pState, IBlockReader pLevel, BlockPos pPos, ISelectionContext pContext) {
-        TileEntity tileEntity = pLevel.getBlockEntity(pPos);
-        if (tileEntity instanceof IComponent) {
-            return ((IComponent) tileEntity).getShape();
+        if (hasDynamicShape()) {
+            TileEntity tileEntity = pLevel.getBlockEntity(pPos);
+            if (tileEntity instanceof IComponent) {
+                return ((IComponent) tileEntity).getDynamicShape();
+            }
         }
-        return super.getShape(pState, pLevel, pPos, pContext);
+        return definition.properties.shape;
     }
 }

@@ -78,7 +78,7 @@ public interface IComponent {
 
     void setStatus(String status);
 
-    default VoxelShape getShape() {
+    default VoxelShape getDynamicShape() {
         return getDefinition().properties.shape;
     }
 }

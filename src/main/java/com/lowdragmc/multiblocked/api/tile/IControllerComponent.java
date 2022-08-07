@@ -6,4 +6,6 @@ package com.lowdragmc.multiblocked.api.tile;
  * @implNote IControllerComponent
  */
 public interface IControllerComponent extends IComponent{
+    boolean isWorking();
+
 }

@@ -478,4 +478,10 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             Multiblocked.LOGGER.error("something run while checking proxy changes");
         }
     }
+
+    @Override
+    public boolean isWorking() {
+        return getRecipeLogic() != null && getRecipeLogic().isWorking();
+    }
+
 }

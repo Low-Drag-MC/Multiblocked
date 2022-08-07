@@ -53,7 +53,7 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public IMultiblockedRenderer updateCurrentRenderer() {
         if (definition.workingRenderer != null) {
             for (IControllerComponent controller : getControllers()) {
-                if (controller.isFormed() && controller.getStatus().equals("working")) {
+                if (controller.isFormed() && controller.isWorking()) {
                     IMultiblockedRenderer renderer = definition.workingRenderer;
                     if (Multiblocked.isKubeJSLoaded() && level != null) {
                         UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);

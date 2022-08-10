@@ -481,7 +481,11 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Override
     public boolean isWorking() {
-        return getRecipeLogic() != null && getRecipeLogic().isWorking();
+        if (level != null && level.isClientSide) {
+            return status.equals("working");
+        } else {
+            return getRecipeLogic() != null && getRecipeLogic().isWorking();
+        }
     }
 
 }

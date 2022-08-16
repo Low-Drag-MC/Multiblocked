@@ -102,7 +102,11 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
                     return;
                 }
             }
-            component.setFrontFacing(placer.getDirection().getOpposite());
+            if (definition.properties.rotationState == CustomProperties.RotationState.Y_AXIS) {
+                component.setFrontFacing(Direction.UP);
+            } else {
+                component.setFrontFacing(placer.getDirection().getOpposite());
+            }
         }
     }
 
@@ -186,6 +190,17 @@ public class BlockComponent extends Block implements IBlockRendererProvider {
                 return ((IComponent) tileEntity).getDynamicShape();
             }
         }
-        return definition.properties.shape;
+        return definition.getBaseStatus().getShape(pState.getValue(BlockStateProperties.FACING));
+    }
+
+    @Override
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+        TileEntity tileEntity = world.getBlockEntity(pos);
+        if (tileEntity instanceof IComponent) {
+            IComponent component = (IComponent) tileEntity;
+            return component.getDefinition().getStatus(component.getStatus()).getLightEmissive();
+        } else {
+            return super.getLightValue(state, world, pos);
+        }
     }
 }

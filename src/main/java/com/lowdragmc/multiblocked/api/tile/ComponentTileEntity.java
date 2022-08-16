@@ -132,9 +132,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         return I18n.get(getUnlocalizedName());
     }
 
-    public String getSubID() {
-        return definition.getID();
-    }
 
     public abstract boolean isFormed();
 
@@ -189,34 +186,19 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
                 status = event.getStatus();
             }
             if (!this.status.equals(status)) {
+                boolean shouldUpdateLight = getDefinition().getStatus(status).getLightEmissive() != getDefinition().getStatus(this.status).getLightEmissive();
                 this.status = status;
                 writeCustomData(1, buffer->buffer.writeUtf(this.status));
+                if (shouldUpdateLight && level != null) {
+                    level.getChunkSource().getLightEngine().checkBlock(getBlockPos());
+                }
             }
         }
     }
 
-//    public List<AxisAlignedBB> getCollisionBoundingBox() {
-//        return definition.getAABB(isFormed(), frontFacing);
-//    }
-
     @Override
     public void mirror(@Nonnull Mirror mirrorIn) {
         rotateTo(mirrorIn.getRotation(getFrontFacing()));
-    }
-
-    public IMultiblockedRenderer updateCurrentRenderer() {
-        IMultiblockedRenderer renderer;
-        if (isFormed()) {
-            renderer = definition.formedRenderer == null ? definition.baseRenderer : definition.formedRenderer;
-        } else {
-            renderer = definition.baseRenderer;
-        }
-        if (Multiblocked.isKubeJSLoaded() && level != null) {
-            UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
-            event.post(ScriptType.of(level), UpdateRendererEvent.ID, getSubID());
-            renderer = event.getRenderer();
-        }
-        return renderer;
     }
 
     public IMultiblockedRenderer getRenderer() {
@@ -232,10 +214,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         }
         return currentRenderer;
     }
-
-//    public boolean canConnectRedstone(Direction facing) {
-//        return definition.getOutputRedstoneSignal != null;
-//    }
 
     public int getOutputRedstoneSignal(Direction facing) {
         if (Multiblocked.isKubeJSLoaded() && level != null) {
@@ -411,7 +389,13 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     public void receiveInitialSyncData(PacketBuffer buf) {
-        status = buf.readUtf();
+        String status = buf.readUtf();
+        if (!this.status.equals(status)) {
+            this.status = status;
+            if (getDefinition().getStatus(status).getSound().loop) {
+                getDefinition().getStatus(status).getSound().playSound(this);
+            }
+        }
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             new ReadInitialDataEvent(this, buf).post(ScriptType.of(level), ReadInitialDataEvent.ID, getSubID());
         }
@@ -419,7 +403,15 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void receiveCustomData(int dataId, PacketBuffer buf) {
         if (dataId == 1) {
-            status = buf.readUtf();
+            String status = buf.readUtf();
+            if (!this.status.equals(status)) {
+                boolean shouldUpdateLight = getDefinition().getStatus(status).getLightEmissive() != getDefinition().getStatus(this.status).getLightEmissive();
+                this.status = status;
+                getDefinition().getStatus(status).getSound().playSound(this);
+                if (shouldUpdateLight && level != null) {
+                    level.getChunkSource().getLightEngine().checkBlock(getBlockPos());
+                }
+            }
             scheduleChunkForRenderUpdate();
         } else if (dataId == 3) {
             MultiblockCapability<?> capability = MbdCapabilities.get(buf.readUtf());

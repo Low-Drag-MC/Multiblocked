@@ -45,7 +45,7 @@ public class JEIPlugin implements IModPlugin {
         JEIPlugin.jeiRuntime = jeiRuntime;
         List<ItemStack> removed = new ArrayList<>();
         for (ComponentDefinition definition : MbdComponents.DEFINITION_REGISTRY.values()) {
-            if (!definition.showInJei) {
+            if (!definition.properties.showInJei) {
                 removed.add(definition.getStackForm());
             }
         }

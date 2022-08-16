@@ -44,7 +44,7 @@ public class MbdComponents {
         ComponentDefinition definition = new ComponentDefinition(new ResourceLocation(Multiblocked.MODID, "dummy_component"), DummyComponentTileEntity::new);
         definition.properties.isOpaque = false;
         definition.properties.tabGroup = null;
-        definition.showInJei = false;
+        definition.properties.showInJei = false;
         registerComponent(definition);
         DummyComponentBlock = (BlockComponent) COMPONENT_BLOCKS_REGISTRY.get(definition.location);
         DummyComponentItem = (ItemComponent) COMPONENT_ITEMS_REGISTRY.get(definition.location);
@@ -75,15 +75,16 @@ public class MbdComponents {
 
     public static List<Runnable> handlers = new ArrayList<>();
 
-    public static <T extends ComponentDefinition> void registerComponentFromFile(Gson gson, File location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
-        registerComponentFromFile(gson, location, clazz, null, null, postHandler);
+    public static <T extends ComponentDefinition> void registerComponentFromFile(File location, Function<ResourceLocation, T> constructor, BiConsumer<T, JsonObject> postHandler) {
+        registerComponentFromFile(location, constructor, null, null, postHandler);
     }
 
-    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromFile(Gson gson, File location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
+    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromFile(File location, Function<ResourceLocation, T> constructor, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
         for (File file : Optional.ofNullable(location.listFiles((f, n) -> n.endsWith(".json"))).orElse(new File[0])) {
             try {
                 JsonObject config = (JsonObject) FileUtility.loadJson(file);
-                T definition = gson.fromJson(config, clazz);
+                T definition = constructor.apply(new ResourceLocation(config.get("location").getAsString()));
+                definition.fromJson(config);
                 if (definition != null) {
                     if (block == null || item == null) {
                         registerComponent(definition);
@@ -100,15 +101,16 @@ public class MbdComponents {
         }
     }
 
-    public static <T extends ComponentDefinition> void registerComponentFromResource(Gson gson, ResourceLocation location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
-        registerComponentFromResource(gson, location, clazz, null, null, postHandler);
+    public static <T extends ComponentDefinition> void registerComponentFromResource(Gson gson, ResourceLocation location, Function<ResourceLocation, T> constructor, BiConsumer<T, JsonObject> postHandler) {
+        registerComponentFromResource(gson, location, constructor, null, null, postHandler);
     }
 
-    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromResource(Gson gson, ResourceLocation location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
+    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromResource(Gson gson, ResourceLocation location, Function<ResourceLocation, T> constructor, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
         try {
             InputStream inputstream = ResourceLocation.class.getResourceAsStream(String.format("/assets/%s/definition/%s.json", location.getNamespace(), location.getPath()));
             JsonObject config = FileUtility.jsonParser.parse(new InputStreamReader(inputstream)).getAsJsonObject();
-            T definition = gson.fromJson(config, clazz);
+            T definition = constructor.apply(new ResourceLocation(config.get("location").getAsString()));
+            definition.fromJson(config);
             if (definition != null) {
                 if (block == null || item == null) {
                     registerComponent(definition);

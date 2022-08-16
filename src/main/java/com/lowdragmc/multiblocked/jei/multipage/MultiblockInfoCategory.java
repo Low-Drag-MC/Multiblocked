@@ -42,9 +42,9 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     public static void registerRecipes(IRecipeRegistration registry) {
         registry.addRecipes(REGISTER.stream().map(MultiblockInfoWrapper::new).collect(Collectors.toList()), UID);
         for (ControllerDefinition definition : REGISTER) {
-            if (definition.recipeMap != null) {
-                if (definition.recipeMap.categoryTexture == null) {
-                    definition.recipeMap.categoryTexture = new ItemStackTexture(definition.getStackForm());
+            if (definition.getRecipeMap() != null) {
+                if (definition.getRecipeMap().categoryTexture == null) {
+                    definition.getRecipeMap().categoryTexture = new ItemStackTexture(definition.getStackForm());
                 }
             }
         }
@@ -52,8 +52,8 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
 
     public static void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for (ControllerDefinition definition : REGISTER) {
-            if (definition.recipeMap != null && definition.recipeMap != RecipeMap.EMPTY) {
-                registration.addRecipeCatalyst(definition.getStackForm(), new ResourceLocation(Multiblocked.MODID + ":" + definition.recipeMap.name));
+            if (definition.getRecipeMap() != null && definition.getRecipeMap() != RecipeMap.EMPTY) {
+                registration.addRecipeCatalyst(definition.getStackForm(), new ResourceLocation(Multiblocked.MODID + ":" + definition.getRecipeMap().name));
             }
         }
     }

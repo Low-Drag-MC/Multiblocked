@@ -47,18 +47,6 @@ public class MultiblockShapeInfo {
             return where(symbol, BlockInfo.fromBlockState(blockState));
         }
 
-        //TODO
-//        public Builder where(char symbol, MetaTileEntity tileEntity, EnumFacing frontSide) {
-//            MetaTileEntityHolder holder = new MetaTileEntityHolder();
-//            holder.setMetaTileEntity(tileEntity);
-//            holder.getMetaTileEntity().setFrontFacing(frontSide);
-//            return where(symbol, new BlockInfo(MetaBlocks.MACHINE.getDefaultState(), holder));
-//        }
-
-        //TODO
-        /**
-         * @param partSupplier Should supply either a MetaTileEntity or an IBlockState.
-         */
         public Builder where(char symbol, Supplier<?> partSupplier, Direction frontSideIfTE) {
             Object part = partSupplier.get();
             if (part instanceof BlockState) {
@@ -77,15 +65,7 @@ public class MultiblockShapeInfo {
                     for (int x = 0; x < columnEntry.length(); x++) {
                         BlockInfo info = symbolMap.getOrDefault(columnEntry.charAt(x), BlockInfo.EMPTY);
                         TileEntity tileEntity = info.getTileEntity();
-                        //TODO
-//                        if (tileEntity != null) {
-//                            MetaTileEntityHolder holder = (MetaTileEntityHolder) tileEntity;
-//                            final MetaTileEntity mte = holder.getMetaTileEntity();
-//                            holder = new MetaTileEntityHolder();
-//                            holder.setMetaTileEntity(mte);
-//                            holder.getMetaTileEntity().setFrontFacing(mte.getFrontFacing());
-//                            info = new BlockInfo(info.getBlockState(), holder);
-//                        }
+
                         blockInfos[x][y][z] = info;
                     }
                 }

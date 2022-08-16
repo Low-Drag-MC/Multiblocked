@@ -1,7 +1,11 @@
 package com.lowdragmc.multiblocked.api.tile;
 
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.kubejs.events.UpdateRendererEvent;
+import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import dev.latvian.kubejs.script.ScriptType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -38,7 +42,7 @@ public interface IComponent {
     default void setOwner(UUID uuid) {}
 
     default boolean isValidFrontFacing(Direction up) {
-        return getDefinition().allowRotate;
+        return getDefinition().properties.rotationState.test(up);
     }
 
     default void setFrontFacing(Direction facing) {
@@ -48,6 +52,20 @@ public interface IComponent {
             if (self().getBlockState().getValue(BlockStateProperties.FACING) == facing) return;
             level.setBlock(self().getBlockPos(), self().getBlockState().setValue(BlockStateProperties.FACING, facing), 3);
         }
+    }
+
+    default String getSubID() {
+        return getDefinition().getID();
+    }
+
+    default IMultiblockedRenderer updateCurrentRenderer() {
+        IMultiblockedRenderer renderer = getDefinition().getStatus(getStatus()).getRenderer();
+        if (Multiblocked.isKubeJSLoaded() && self().getLevel() != null) {
+            UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
+            event.post(ScriptType.of(self().getLevel()), UpdateRendererEvent.ID, getSubID());
+            renderer = event.getRenderer();
+        }
+        return renderer;
     }
 
     default Direction getFrontFacing() {
@@ -79,6 +97,6 @@ public interface IComponent {
     void setStatus(String status);
 
     default VoxelShape getDynamicShape() {
-        return getDefinition().properties.shape;
+        return getDefinition().getStatus(getStatus()).getShape(getFrontFacing());
     }
 }

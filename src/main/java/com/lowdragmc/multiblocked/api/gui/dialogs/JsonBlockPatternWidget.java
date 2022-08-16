@@ -379,7 +379,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
         PartDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "symbol"), SymbolTileEntity::new);
         definition.properties.isOpaque = false;
         definition.properties.tabGroup = null;
-        definition.showInJei = false;
+        definition.properties.showInJei = false;
         MbdComponents.registerComponent(definition);
         symbolBlock = (BlockComponent) MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(definition.location);
     }
@@ -756,7 +756,7 @@ public class JsonBlockPatternWidget extends DialogWidget {
                 for (String s : widget.pattern.symbolMap.get(symbol)) {
                     SimplePredicate predicate = widget.pattern.predicates.get(s);
                     if (predicate instanceof PredicateComponent && ((PredicateComponent) predicate).definition != null) {
-                        renderer = ((PredicateComponent) predicate).definition.baseRenderer;
+                        renderer = ((PredicateComponent) predicate).definition.getBaseRenderer();
                         candidates = null;
                         break;
                     } else if (predicate != null && predicate.candidates != null) {

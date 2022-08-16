@@ -115,23 +115,6 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
         return this.controllerPos.contains(controllerPos);
     }
 
-    private IMultiblockedRenderer updateCurrentRenderer() {
-        if (definition.workingRenderer != null) {
-            for (ControllerTileEntity controller : getControllers()) {
-                if (controller.isFormed() && controller.getStatus().equals("working")) {
-                    return definition.workingRenderer;
-                }
-            }
-        }
-        IMultiblockedRenderer renderer;
-        if (isFormed()) {
-            renderer = definition.formedRenderer == null ? definition.baseRenderer : definition.formedRenderer;
-        } else {
-            renderer = definition.baseRenderer;
-        }
-        return renderer;
-    }
-
     @Override
     public ActionResultType use(PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
         return IPartComponent.super.use(player, hand, hit);
@@ -140,11 +123,6 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     @Override
     public void setRendererObject(Object o) {
         rendererObject = o;
-    }
-
-    @Override
-    public String getStatus() {
-        return status;
     }
 
     @Override

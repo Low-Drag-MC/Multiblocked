@@ -19,6 +19,7 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.blueprint_table.components.PartWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -97,7 +98,7 @@ public class PartBuilderWidget extends WidgetGroup {
 
     private void setNewRenderer(IMultiblockedRenderer newRenderer, String type) {
         PartDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "i_renderer"));
-        definition.baseRenderer = newRenderer;
+        definition.getBaseStatus().setRenderer(newRenderer);
         tileEntity.setDefinition(definition);
         textTexture.updateText(type);
     }
@@ -108,7 +109,8 @@ public class PartBuilderWidget extends WidgetGroup {
         files.clear();
         File path = new File(Multiblocked.location, "definition/part");
         walkFile("Common", new ItemStackTexture(BlueprintTableTileEntity.partDefinition.getStackForm()), path, (jsonElement, file)->{
-            PartDefinition definition = Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class);
+            PartDefinition definition = new PartDefinition(new ResourceLocation(jsonElement.getAsJsonObject().get("location").getAsString()));
+            definition.fromJson(jsonElement.getAsJsonObject());
             new PartWidget(this, definition, jsonObject -> {
                 if (jsonObject != null) {
                     FileUtility.saveJson(file, jsonObject);
@@ -118,7 +120,8 @@ public class PartBuilderWidget extends WidgetGroup {
         if (Multiblocked.isCreateLoaded()) {
             path = new File(path, "create");
             walkFile("Create", new ItemStackTexture(AllBlocks.FLYWHEEL.asStack()), path, ((jsonElement, file) -> {
-                CreatePartDefinition definition = Multiblocked.GSON.fromJson(jsonElement, CreatePartDefinition.class);
+                CreatePartDefinition definition = new CreatePartDefinition(new ResourceLocation(jsonElement.getAsJsonObject().get("location").getAsString()));
+                definition.fromJson(jsonElement.getAsJsonObject());
                 new CreatePartWidget(this, definition, jsonObject -> {
                     if (jsonObject != null) {
                         FileUtility.saveJson(file, jsonObject);
@@ -140,7 +143,7 @@ public class PartBuilderWidget extends WidgetGroup {
                         JsonElement jsonElement = FileUtility.loadJson(file);
                         if (jsonElement != null && jsonElement.isJsonObject()) {
                             try {
-                                setNewRenderer(Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class).baseRenderer, type);
+                                setNewRenderer(Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class).getBaseRenderer(), type);
                             } catch (Exception ignored) {}
                         }
                     })

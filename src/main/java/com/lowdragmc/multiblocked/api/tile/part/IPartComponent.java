@@ -1,11 +1,8 @@
 package com.lowdragmc.multiblocked.api.tile.part;
 
-import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.kubejs.events.PartAddedEvent;
-import com.lowdragmc.multiblocked.api.kubejs.events.PartRemovedEvent;
+import com.lowdragmc.multiblocked.api.definition.StatusProperties;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
-import dev.latvian.kubejs.script.ScriptType;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
@@ -29,6 +26,19 @@ public interface IPartComponent extends IComponent {
         return false;
     }
 
+    @Override
+    default String getStatus() {
+        boolean isIdle = false;
+        for (IControllerComponent controller : getControllers()) {
+            if (controller.getStatus().equals(StatusProperties.IDLE)) {
+                isIdle = true;
+                if (controller.getStatus().equals(StatusProperties.WORKING)) {
+                    return StatusProperties.WORKING;
+                }
+            }
+        }
+        return isIdle ? StatusProperties.IDLE : StatusProperties.UNFORMED;
+    }
 
     void addedToController(@Nonnull IControllerComponent controller);
 

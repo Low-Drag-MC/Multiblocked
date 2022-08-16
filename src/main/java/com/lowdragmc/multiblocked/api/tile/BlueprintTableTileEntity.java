@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.api.tile;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.blueprint_table.BlueprintTableWidget;
@@ -46,23 +47,23 @@ public class BlueprintTableTileEntity extends ControllerTileEntity{
     public final static PartDefinition partDefinition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "blueprint_table_part"));
 
     public static void registerBlueprintTable() {
-        tableDefinition.recipeMap.inputCapabilities.add(ItemMultiblockCapability.CAP);
-        tableDefinition.baseRenderer = new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/blueprint_table_controller"));
-        tableDefinition.formedRenderer = new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/blueprint_table_formed"));
+        tableDefinition.getRecipeMap().inputCapabilities.add(ItemMultiblockCapability.CAP);
+        tableDefinition.getBaseStatus().setRenderer(new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/blueprint_table_controller")));
+        tableDefinition.getIdleStatus().setRenderer(new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/blueprint_table_formed")));
         tableDefinition.properties.isOpaque = false;
 
-        partDefinition.baseRenderer = new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/blueprint_table"));
-        partDefinition.allowRotate = false;
+        partDefinition.getBaseStatus().setRenderer(new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/blueprint_table")));
+        partDefinition.properties.rotationState = CustomProperties.RotationState.NONE;
         partDefinition.properties.isOpaque = false;
 
-        tableDefinition.basePattern = FactoryBlockPattern.start()
+        tableDefinition.setBasePattern(FactoryBlockPattern.start()
                 .aisle("PPP", "C  ")
                 .aisle("PTP", "   ")
                 .where(' ', Predicates.any())
                 .where('T', Predicates.component(tableDefinition))
                 .where('P', Predicates.component(partDefinition).disableRenderFormed())
                 .where('C', Predicates.anyCapability(ItemMultiblockCapability.CAP).disableRenderFormed())
-                .build();
+                .build());
         MbdComponents.registerComponent(tableDefinition);
         MbdComponents.registerComponent(partDefinition);
     }

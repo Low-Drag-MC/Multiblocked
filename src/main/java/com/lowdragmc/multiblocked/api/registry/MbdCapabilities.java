@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.api.registry;
 
 import com.google.common.collect.Maps;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
@@ -47,8 +48,8 @@ public class MbdCapabilities {
             ComponentDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, capability.name + ".any"));
             definition.properties.isOpaque = false;
             definition.properties.tabGroup = null;
-            definition.allowRotate = false;
-            definition.showInJei = false;
+            definition.properties.rotationState = CustomProperties.RotationState.NONE;
+            definition.properties.showInJei = false;
             MbdComponents.registerComponent(definition);
         }
     }

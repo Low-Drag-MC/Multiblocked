@@ -97,7 +97,7 @@ public class IRendererWidget extends DialogWidget {
 
     private void setNewRenderer(IMultiblockedRenderer newRenderer) {
         PartDefinition definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "i_renderer"));
-        definition.baseRenderer = newRenderer;
+        definition.getBaseStatus().setRenderer(newRenderer);
         tileEntity.setDefinition(definition);
     }
 

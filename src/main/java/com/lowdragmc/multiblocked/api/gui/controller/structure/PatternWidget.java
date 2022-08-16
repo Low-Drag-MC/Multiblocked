@@ -222,8 +222,8 @@ public class PatternWidget extends WidgetGroup {
         if (itemStack.getItem() instanceof BlockItem) {
             Block block = ((BlockItem) itemStack.getItem()).getBlock();
             if (block instanceof BlockComponent) {
-                if (((BlockComponent) block).definition.baseRenderer instanceof CycleBlockStateRenderer) {
-                    CycleBlockStateRenderer renderer = ((CycleBlockStateRenderer) ((BlockComponent) block).definition.baseRenderer);
+                if (((BlockComponent) block).definition.getBaseRenderer() instanceof CycleBlockStateRenderer) {
+                    CycleBlockStateRenderer renderer = ((CycleBlockStateRenderer) ((BlockComponent) block).definition.getBaseRenderer());
                     itemStack = renderer.getBlockInfo().getItemStackForm();
                 }
             }

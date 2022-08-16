@@ -116,7 +116,7 @@ public class RecipeLogic {
             lastRecipe = null;
             setupRecipe(recipe);
         } else {
-            List<Recipe> matches = controller.getDefinition().recipeMap.searchRecipe(this.controller);
+            List<Recipe> matches = controller.getDefinition().getRecipeMap().searchRecipe(this.controller);
             lastRecipe = null;
             for (Recipe match : matches) {
                 if (match.checkConditions(this)) {
@@ -209,7 +209,7 @@ public class RecipeLogic {
     }
 
     public void readFromNBT(CompoundNBT compound) {
-        lastRecipe = compound.contains("recipe") ? controller.getDefinition().recipeMap.recipes.get(compound.getString("recipe")) : null;
+        lastRecipe = compound.contains("recipe") ? controller.getDefinition().getRecipeMap().recipes.get(compound.getString("recipe")) : null;
         if (lastRecipe != null) {
             status = compound.contains("status") ? Status.values()[compound.getInt("status")] : Status.WORKING;
             duration = lastRecipe.duration;

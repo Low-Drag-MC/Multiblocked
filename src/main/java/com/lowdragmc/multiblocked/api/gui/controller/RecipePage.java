@@ -177,13 +177,13 @@ public class RecipePage extends PageWidget{
 
     private void readRecipe(FriendlyByteBuf buffer) {
         if (buffer.readBoolean()) {
-            recipe = controller.getDefinition().recipeMap.recipes.get(buffer.readUtf());
+            recipe = controller.getDefinition().getRecipeMap().recipes.get(buffer.readUtf());
             if (recipeWidget != null) {
                 removeWidget(recipeWidget);
             }
-            recipeWidget = new RecipeWidget(recipe, controller.getDefinition().recipeMap.progressTexture, null);
+            recipeWidget = new RecipeWidget(recipe, controller.getDefinition().getRecipeMap().progressTexture, null);
             if (Multiblocked.isKubeJSLoaded()) {
-                new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, controller.getDefinition().recipeMap.name);
+                new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, controller.getDefinition().getRecipeMap().name);
             }
             this.addWidget(recipeWidget);
             recipeWidget.inputs.addSelfPosition(5, 0);

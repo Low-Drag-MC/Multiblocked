@@ -21,7 +21,6 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
-import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.MultiblockPreviewRenderer;
 import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
@@ -83,13 +82,13 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     @Nullable
     public BlockPattern getPattern() {
         if (Multiblocked.isKubeJSLoaded() && level != null) {
-            DynamicPatternEvent event = new DynamicPatternEvent(this, definition.basePattern);
+            DynamicPatternEvent event = new DynamicPatternEvent(this, definition.getBasePattern());
             if (event.post(ScriptType.of(level), DynamicPatternEvent.ID, getSubID())) {
                 return null;
             }
             return event.pattern;
         }
-        return definition.basePattern;
+        return definition.getBasePattern();
     }
     public RecipeLogic getRecipeLogic() {
         return recipeLogic;
@@ -103,11 +102,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (state == null) return false;
         BlockPattern pattern = getPattern();
         return pattern != null && pattern.checkPatternAt(state, false);
-    }
-
-    @Override
-    public boolean isValidFrontFacing(Direction facing) {
-        return definition.allowRotate && facing.getAxis() != Direction.Axis.Y;
     }
 
     public boolean isFormed() {
@@ -129,22 +123,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             new UpdateFormedEvent(this).post(ScriptType.of(level), UpdateFormedEvent.ID, getSubID());
         }
-    }
-
-    @Override
-    public IMultiblockedRenderer updateCurrentRenderer() {
-        IMultiblockedRenderer renderer;
-        if (definition.workingRenderer != null && isFormed() && (status.equals("working") || status.equals("suspend"))) {
-            renderer = definition.workingRenderer;
-            if (Multiblocked.isKubeJSLoaded() && level != null) {
-                UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
-                event.post(ScriptType.of(level), UpdateRendererEvent.ID, getSubID());
-                renderer = event.getRenderer();
-            }
-        } else {
-            renderer = super.updateCurrentRenderer();
-        }
-        return renderer;
     }
 
     public Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> getCapabilitiesProxy() {
@@ -399,15 +377,15 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
 
         if (!isRemote()) {
-            if (!isFormed() && definition.catalyst != null) {
+            if (!isFormed() && definition.getCatalyst() != null) {
                 if (state == null) state = new MultiblockState(level, getBlockPos());
                 ItemStack held = player.getItemInHand(hand);
-                if (definition.catalyst.isEmpty() || ItemStack.isSame(held, definition.catalyst)) {
+                if (definition.getCatalyst().isEmpty() || ItemStack.isSame(held, definition.getCatalyst())) {
                     if (checkPattern()) { // formed
                         player.swing(hand);
                         Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));
                         player.sendMessage(formedMsg, NIL_UUID);
-                        if (!player.isCreative() && !definition.catalyst.isEmpty()) {
+                        if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
                             held.shrink(1);
                         }
                         MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
@@ -449,7 +427,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Override
     public void asyncThreadLogic(long periodID) {
-        if (!isFormed() && getDefinition().catalyst == null && (getOffset() + periodID) % 4 == 0) {
+        if (!isFormed() && getDefinition().getCatalyst() == null && (getOffset() + periodID) % 4 == 0) {
             BlockPattern pattern = getPattern();
             if (pattern != null && pattern.checkPatternAt(new MultiblockState(level, worldPosition), false)) {
                 ServerLifecycleHooks.getCurrentServer().execute(() -> {
@@ -481,11 +459,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Override
     public boolean isWorking() {
-        if (level != null && level.isClientSide) {
-            return status.equals("working");
-        } else {
-            return getRecipeLogic() != null && getRecipeLogic().isWorking();
-        }
+        return getRecipeLogic() != null && getRecipeLogic().isWorking();
     }
 
 }

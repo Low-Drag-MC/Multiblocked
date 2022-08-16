@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.common.tile;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.utils.FluidUtils;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
@@ -110,13 +111,13 @@ public class JarTileEntity extends PartTileEntity.PartSimpleTileEntity {
     public final static PartDefinition jarlDefinition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "jar"), JarTileEntity.class);
 
     public static void registerJar() {
-        jarlDefinition.baseRenderer = new JarRenderer();
-        jarlDefinition.allowRotate = false;
+        jarlDefinition.getBaseStatus().setRenderer(new JarRenderer());
+        jarlDefinition.properties.rotationState = CustomProperties.RotationState.NONE;
         jarlDefinition.properties.isOpaque = false;
-        jarlDefinition.properties.shape = Shapes.or(
+        jarlDefinition.getBaseStatus().setShape(Shapes.or(
                 Shapes.box(3 / 16f, 0 / 16f, 3 / 16f, 13 / 16f, 12 / 16f, 13 / 16f),
                 Shapes.box(5 / 16f, 12 / 16f, 5 / 16f, 11 / 16f, 14 / 16f, 11 / 16f)
-        );
+        ));
 
         MbdComponents.registerComponent(jarlDefinition);
     }

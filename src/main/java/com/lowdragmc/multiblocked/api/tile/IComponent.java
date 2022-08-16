@@ -1,7 +1,9 @@
 package com.lowdragmc.multiblocked.api.tile;
 
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
@@ -14,6 +16,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.lowdragmc.multiblocked.api.kubejs.events.UpdateRendererEvent;
+import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+
 
 import java.util.UUID;
 
@@ -38,7 +43,7 @@ public interface IComponent {
     default void setOwner(UUID uuid) {}
 
     default boolean isValidFrontFacing(Direction up) {
-        return getDefinition().allowRotate;
+        return getDefinition().properties.rotationState.test(up);
     }
 
     default void setFrontFacing(Direction facing) {
@@ -48,6 +53,20 @@ public interface IComponent {
             if (self().getBlockState().getValue(BlockStateProperties.FACING) == facing) return;
             level.setBlock(self().getBlockPos(), self().getBlockState().setValue(BlockStateProperties.FACING, facing), 3);
         }
+    }
+
+    default String getSubID() {
+        return getDefinition().getID();
+    }
+
+    default IMultiblockedRenderer updateCurrentRenderer() {
+        IMultiblockedRenderer renderer = getDefinition().getStatus(getStatus()).getRenderer();
+        if (Multiblocked.isKubeJSLoaded() && self().getLevel() != null) {
+            UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
+            event.post(ScriptType.of(self().getLevel()), UpdateRendererEvent.ID, getSubID());
+            renderer = event.getRenderer();
+        }
+        return renderer;
     }
 
     default Direction getFrontFacing() {
@@ -79,6 +98,6 @@ public interface IComponent {
     void setStatus(String status);
 
     default VoxelShape getDynamicShape() {
-        return getDefinition().properties.shape;
+        return getDefinition().getStatus(getStatus()).getShape(getFrontFacing());
     }
 }

@@ -317,10 +317,10 @@ public class TemplateBuilderWidget extends WidgetGroup {
     public static ComponentDefinition getComponentDefinition(ComponentDefinition definition, Set<BlockInfo> candidates) {
         if (candidates.size() == 1) {
             definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "i_renderer"));
-            definition.baseRenderer = new MBDBlockStateRenderer(candidates.toArray(new BlockInfo[0])[0]);
+            definition.getBaseStatus().setRenderer(new MBDBlockStateRenderer(candidates.toArray(new BlockInfo[0])[0]));
         } else if (!candidates.isEmpty()) {
             definition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "i_renderer"));
-            definition.baseRenderer = new CycleBlockStateRenderer(candidates.toArray(new BlockInfo[0]));
+            definition.getBaseStatus().setRenderer(new CycleBlockStateRenderer(candidates.toArray(new BlockInfo[0])));
         }
         return definition;
     }

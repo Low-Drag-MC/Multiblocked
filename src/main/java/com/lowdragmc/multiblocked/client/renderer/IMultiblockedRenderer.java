@@ -47,6 +47,13 @@ public interface IMultiblockedRenderer extends IRenderer {
     JsonObject toJson(Gson gson, JsonObject jsonObject);
 
     /**
+     * should initialize renderer while it used. e.g. some renderer need to be loaded after blocks registered, like blockrenderer.
+     */
+    default boolean isPostRenderer() {
+        return false;
+    }
+
+    /**
      * configurator.
      * @param group group widget.
      * @param current current renderer.

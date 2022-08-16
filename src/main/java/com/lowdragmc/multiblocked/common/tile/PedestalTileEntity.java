@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.common.tile;
 
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
@@ -129,14 +130,13 @@ public class PedestalTileEntity extends PartTileEntity.PartSimpleTileEntity {
     public final static PartDefinition pedestalDefinition = new PartDefinition(new ResourceLocation(Multiblocked.MODID, "pedestal"), PedestalTileEntity.class);
 
     public static void registerPedestal() {
-        pedestalDefinition.baseRenderer = new PedestalRenderer();
-        pedestalDefinition.allowRotate = false;
-        pedestalDefinition.properties.isOpaque = false;
-        pedestalDefinition.properties.shape = Shapes.or(
+        pedestalDefinition.getBaseStatus().setRenderer(new PedestalRenderer());
+        pedestalDefinition.properties.rotationState = CustomProperties.RotationState.NONE;
+        pedestalDefinition.getBaseStatus().setShape(Shapes.or(
                 Shapes.box(2 / 16f, 0 / 16f, 2 / 16f, 14 / 16f, 3 / 16f, 14 / 16f),
                 Shapes.box(4 / 16f, 3 / 16f, 4 / 16f, 12 / 16f, 12 / 16f, 12 / 16f),
                 Shapes.box(2 / 16f, 12 / 16f, 2 / 16f, 14 / 16f, 16 / 16f, 14 / 16f)
-        );
+        ));
 
         MbdComponents.registerComponent(pedestalDefinition);
     }

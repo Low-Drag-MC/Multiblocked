@@ -93,12 +93,12 @@ public class ControllerTileTesterEntity extends ControllerTileEntity {
     }
 
     public static void registerTestController() {
-        DEFAULT_DEFINITION.baseRenderer = new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/controller_tester"));
+        DEFAULT_DEFINITION.getBaseStatus().setRenderer(new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/controller_tester")));
         DEFAULT_DEFINITION.properties.isOpaque = false;
-        DEFAULT_DEFINITION.basePattern = FactoryBlockPattern.start()
+        DEFAULT_DEFINITION.setBasePattern(FactoryBlockPattern.start()
                 .aisle("@")
                 .where('@', Predicates.component(DEFAULT_DEFINITION))
-                .build();
+                .build());
         MbdComponents.registerComponent(DEFAULT_DEFINITION);
     }
 }

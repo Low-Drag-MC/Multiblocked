@@ -2,7 +2,6 @@ package com.lowdragmc.multiblocked.api.registry;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.lowdragmc.lowdraglib.client.renderer.IBlockRendererProvider;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
@@ -17,7 +16,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -25,11 +23,8 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.lang.reflect.Constructor;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -45,7 +40,7 @@ public class MbdComponents {
         ComponentDefinition definition = new ComponentDefinition(new ResourceLocation(Multiblocked.MODID, "dummy_component"), DummyComponentTileEntity.class);
         definition.properties.isOpaque = false;
         definition.properties.tabGroup = null;
-        definition.showInJei = false;
+        definition.properties.showInJei = false;
         registerComponent(definition);
         DummyComponentBlock = (BlockComponent) COMPONENT_BLOCKS_REGISTRY.get(definition.location);
         DummyComponentItem = (ItemComponent) COMPONENT_ITEMS_REGISTRY.get(definition.location);
@@ -56,6 +51,7 @@ public class MbdComponents {
         registerComponent(definition, BlockComponent::new, ItemComponent::new);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends ComponentDefinition, B extends Block> void registerComponent(T definition, Function<T, B> block, Function<B, BlockItem> item) {
         if (DEFINITION_REGISTRY.containsKey(definition.location)) return;
         DEFINITION_REGISTRY.put(definition.location, definition);
@@ -76,41 +72,22 @@ public class MbdComponents {
 
     public static List<Runnable> handlers = new ArrayList<>();
 
-    public static <T extends ComponentDefinition> void registerComponentFromFile(Gson gson, File location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
-        registerComponentFromFile(gson, location, clazz, null, null, postHandler);
+    public static <T extends ComponentDefinition> void registerComponentFromFile(File location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
+        registerComponentFromFile(location, clazz, null, null, postHandler);
     }
 
-    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromFile(Gson gson, File location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
+    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromFile(File location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
         for (File file : Optional.ofNullable(location.listFiles((f, n) -> n.endsWith(".json"))).orElse(new File[0])) {
             try {
                 JsonObject config = (JsonObject) FileUtility.loadJson(file);
-                T definition = gson.fromJson(config, clazz);
-                if (definition != null) {
-                    if (block == null || item == null) {
-                        registerComponent(definition);
-                    } else {
-                        registerComponent(definition, block, item);
-                    }
-                    if (postHandler != null) {
-                        handlers.add(()->postHandler.accept(definition, config));
-                    }
-                }
-            } catch (Exception e) {
-                Multiblocked.LOGGER.error("error while loading the definition file {}", file.toString());
-            }
-        }
-    }
-
-    public static <T extends ComponentDefinition> void registerComponentFromResource(Class<?> source, Gson gson, ResourceLocation location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
-        registerComponentFromResource(source, gson, location, clazz, null, null, postHandler);
-    }
-
-    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromResource(Class<?> source, Gson gson, ResourceLocation location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
-        try {
-            InputStream inputstream = source.getResourceAsStream(String.format("/assets/%s/definition/%s.json", location.getNamespace(), location.getPath()));
-            JsonObject config = FileUtility.jsonParser.parse(new InputStreamReader(inputstream)).getAsJsonObject();
-            T definition = gson.fromJson(config, clazz);
-            if (definition != null) {
+                Constructor<?> constructor = Arrays.stream(clazz.getDeclaredConstructors())
+                        .filter(c -> {
+                            if (c.getParameterCount() != 1) return false;
+                            Class<?>[] classes = c.getParameterTypes();
+                            return ResourceLocation.class.isAssignableFrom(classes[0]);
+                        }).findFirst().orElseThrow(() -> new IllegalArgumentException("cant find the constructor with the parameters(resourcelocation)"));
+                T definition = (T) constructor.newInstance(new ResourceLocation(config.get("location").getAsString()));
+                definition.fromJson(config);
                 if (block == null || item == null) {
                     registerComponent(definition);
                 } else {
@@ -119,6 +96,36 @@ public class MbdComponents {
                 if (postHandler != null) {
                     handlers.add(()->postHandler.accept(definition, config));
                 }
+            } catch (Exception e) {
+                Multiblocked.LOGGER.error("error while loading the definition file {}", file.toString());
+            }
+        }
+    }
+
+    public static <T extends ComponentDefinition> void registerComponentFromResource(Class<?> source, ResourceLocation location, Class<T> clazz, BiConsumer<T, JsonObject> postHandler) {
+        registerComponentFromResource(source, location, clazz, null, null, postHandler);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends ComponentDefinition, B extends Block> void registerComponentFromResource(Class<?> source, ResourceLocation location, Class<T> clazz, @Nullable Function<T, B> block, @Nullable Function<B, BlockItem> item, BiConsumer<T, JsonObject> postHandler) {
+        try {
+            InputStream inputstream = source.getResourceAsStream(String.format("/assets/%s/definition/%s.json", location.getNamespace(), location.getPath()));
+            JsonObject config = FileUtility.jsonParser.parse(new InputStreamReader(inputstream)).getAsJsonObject();
+            Constructor<?> constructor = Arrays.stream(clazz.getDeclaredConstructors())
+                    .filter(c -> {
+                        if (c.getParameterCount() != 1) return false;
+                        Class<?>[] classes = c.getParameterTypes();
+                        return ResourceLocation.class.isAssignableFrom(classes[0]);
+                    }).findFirst().orElseThrow(() -> new IllegalArgumentException("cant find the constructor with the parameters(resourcelocation)"));
+            T definition = (T) constructor.newInstance(new ResourceLocation(config.get("location").getAsString()));
+            definition.fromJson(config);
+            if (block == null || item == null) {
+                registerComponent(definition);
+            } else {
+                registerComponent(definition, block, item);
+            }
+            if (postHandler != null) {
+                handlers.add(()->postHandler.accept(definition, config));
             }
         } catch (Exception e) {
             Multiblocked.LOGGER.error("error while loading the definition resource {}", location.toString());

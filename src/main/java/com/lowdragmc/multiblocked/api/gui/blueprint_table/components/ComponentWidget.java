@@ -15,6 +15,7 @@ import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.definition.StatusProperties;
 import com.lowdragmc.multiblocked.api.gui.GuiUtils;
@@ -48,6 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget {
     protected final T definition;
@@ -80,6 +82,13 @@ public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget
         int x = 47;
         S1.addWidget(new LabelWidget(x, 57, "multiblocked.gui.label.registry_name"));
         S1.addWidget(new TextFieldWidget(x + 80, 54, 150, 15,  null, this::updateRegistryName).setResourceLocationOnly().setCurrentString(this.location.toString()));
+        if (definition instanceof ControllerDefinition) {
+            S1.addWidget(GuiUtils.createSelector(x, 75, "rotateState", "multiblocked.gui.widget.component.rotate_state", definition.properties.rotationState == CustomProperties.RotationState.NONE ? "NONE" : CustomProperties.RotationState.NON_Y_AXIS.name(),
+                    Stream.of(CustomProperties.RotationState.NONE, CustomProperties.RotationState.NON_Y_AXIS).map(Enum::name)
+                            .collect(Collectors.toList()), r -> definition.properties.rotationState = CustomProperties.RotationState.valueOf(r)));
+        } else {
+            S1.addWidget(GuiUtils.createSelector(x, 75, "rotateState", "multiblocked.gui.widget.component.rotate_state", definition.properties.rotationState.name(), Arrays.stream(CustomProperties.RotationState.values()).map(Enum::name).collect(Collectors.toList()), r -> definition.properties.rotationState = CustomProperties.RotationState.valueOf(r)));
+        }
         S1.addWidget(GuiUtils.createBoolSwitch(x, 90, "showInJei", "multiblocked.gui.widget.component.jei", definition.properties.showInJei, r -> definition.properties.showInJei = r));
         S1.addWidget(GuiUtils.createBoolSwitch(x, 105, "isOpaqueCube", "multiblocked.gui.widget.component.opaque", definition.properties.isOpaque, r -> definition.properties.isOpaque = r));
         S1.addWidget(GuiUtils.createBoolSwitch(x, 120, "hasDynamicShape", "multiblocked.gui.widget.component.dynamic_shape", definition.properties.hasDynamicShape, r -> definition.properties.hasDynamicShape = r));

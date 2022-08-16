@@ -16,9 +16,9 @@ public class CreatePartWidget extends ComponentWidget<CreatePartDefinition> {
     public CreatePartWidget(WidgetGroup group, CreatePartDefinition definition, Consumer<JsonObject> onSave) {
         super(group, definition, onSave);
         int x = 47;
-        S1.addWidget(GuiUtils.createBoolSwitch(x + 100, 75, "isOutput", "multiblocked.gui.widget.part.create.output", definition.isOutput, r -> definition.isOutput = r));
-        S1.addWidget(new TextFieldWidget(x + 100, 92, 60, 11,  null, stress -> definition.stress = MathHelper.clamp(Float.parseFloat(stress), 1, 256)).setNumbersOnly(1, 256).setCurrentString(definition.stress + ""));
-        S1.addWidget(new LabelWidget(x + 165, 94, "basic Stress").setDrop(true));
+        S1.addWidget(GuiUtils.createBoolSwitch(x + 140, 165, "isOutput", "multiblocked.gui.widget.part.create.output", definition.isOutput, r -> definition.isOutput = r));
+        S1.addWidget(new TextFieldWidget(x + 100, 182, 60, 11,  null, stress -> definition.stress = Mth.clamp(Float.parseFloat(stress), 1, 256)).setNumbersOnly(1, 256).setCurrentString(definition.stress + ""));
+        S1.addWidget(new LabelWidget(x + 165, 184, "basic Stress").setDrop(true));
         S3.clearAllWidgets();
     }
 

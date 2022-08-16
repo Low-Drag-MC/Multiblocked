@@ -22,7 +22,6 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.gui.GuiUtils;
@@ -73,9 +72,6 @@ public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
             ((PredicateComponent) predicate).definition = definition;
         }
         S1.addWidget(GuiUtils.createBoolSwitch(x + 140, 165, "consumeCatalyst", "multiblocked.gui.widget.controller.consume", definition.consumeCatalyst, r -> definition.consumeCatalyst = r));
-        S1.addWidget(GuiUtils.createSelector(x, 75, "rotateState", "multiblocked.gui.widget.component.rotate_state", definition.properties.rotationState == CustomProperties.RotationState.NONE ? "NONE" : CustomProperties.RotationState.NON_Y_AXIS.name(),
-                Stream.of(CustomProperties.RotationState.NONE, CustomProperties.RotationState.NON_Y_AXIS).map(Enum::name)
-                        .collect(Collectors.toList()), r -> definition.properties.rotationState = CustomProperties.RotationState.valueOf(r)));
 
         IItemHandlerModifiable handler;
         PhantomSlotWidget phantomSlotWidget = new PhantomSlotWidget(handler = new ItemStackHandler(1), 0, x + 250, 154);

@@ -85,15 +85,13 @@ public class MbdComponents {
                 JsonObject config = (JsonObject) FileUtility.loadJson(file);
                 T definition = constructor.apply(new ResourceLocation(config.get("location").getAsString()));
                 definition.fromJson(config);
-                if (definition != null) {
-                    if (block == null || item == null) {
-                        registerComponent(definition);
-                    } else {
-                        registerComponent(definition, block, item);
-                    }
-                    if (postHandler != null) {
-                        handlers.add(()->postHandler.accept(definition, config));
-                    }
+                if (block == null || item == null) {
+                    registerComponent(definition);
+                } else {
+                    registerComponent(definition, block, item);
+                }
+                if (postHandler != null) {
+                    handlers.add(()->postHandler.accept(definition, config));
                 }
             } catch (Exception e) {
                 Multiblocked.LOGGER.error("error while loading the definition file {}", file.toString());

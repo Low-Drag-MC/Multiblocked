@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.gui.dialogs;
 
 import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
+import com.lowdragmc.lowdraglib.client.utils.RenderBufferUtils;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.*;
@@ -14,9 +15,13 @@ import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -57,24 +62,33 @@ public class IShapeWidget extends DialogWidget {
                 RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
                 PoseStack.pushPose();
-
                 Tesselator tessellator = Tesselator.getInstance();
-                RenderSystem.disableTexture();
+                RenderSystem.disableCull();
                 BufferBuilder buffer = tessellator.getBuilder();
-                RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
-                RenderSystem.lineWidth(3);
+                RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+                buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+                RenderSystem.lineWidth(10);
                 Matrix4f matrix4f = PoseStack.last().pose();
 
                 IShapeWidget.this.shape.forAllEdges((x0, y0, z0, x1, y1, z1) -> {
-                    buffer.vertex(matrix4f, (float)(x0), (float)(y0), (float)(z0)).color(255, 0, 0, 255).endVertex();
-                    buffer.vertex(matrix4f, (float)(x1), (float)(y1), (float)(z1)).color(255, 0, 0, 255).endVertex();
+                    float f = (float)(x1 - x0);
+                    float f1 = (float)(y1 - y0);
+                    float f2 = (float)(z1 - z0);
+                    float f3 = Mth.sqrt(f * f + f1 * f1 + f2 * f2);
+                    f /= f3;
+                    f1 /= f3;
+                    f2 /= f3;
+                    buffer.vertex(matrix4f, (float)(x0), (float)(y0), (float)(z0)).color(-1).normal(PoseStack.last().normal(), f, f1, f2).endVertex();
+                    buffer.vertex(matrix4f, (float)(x1), (float)(y1), (float)(z1)).color(-1).normal(PoseStack.last().normal(), f, f1, f2).endVertex();
                 });
+
 
                 tessellator.end();
 
                 PoseStack.popPose();
                 RenderSystem.enableDepthTest();
+                RenderSystem.enableCull();
+
             }
         }
                 .setRenderedCore(Collections.singleton(BlockPos.ZERO), null)

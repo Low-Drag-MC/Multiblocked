@@ -36,6 +36,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
@@ -288,7 +289,7 @@ public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget
                                 status.lightEmissive = null;
                             } else {
                                 status.setLightEmissive(status.lightEmissive == null ? 0 : status.getLightEmissive());
-                                widgetGroup.addWidget(GuiUtils.createIntField(30, 0, "", "", status.getLightEmissive(), 0, 15, status::setLightEmissive));
+                                widgetGroup.addWidget(GuiUtils.createIntField(30, 0, "", "light level", status.getLightEmissive(), 0, 15, status::setLightEmissive));
                             }
                         }));
                         panel.addWidget(createStatusBoolSwitch(4, 80, "shape", "multiblocked.gui.widget.component.status.shape", status.shape != null, widgetGroup -> {
@@ -400,22 +401,31 @@ public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget
 
                 PoseStack.pushPose();
 
+                PoseStack.pushPose();
                 Tesselator tessellator = Tesselator.getInstance();
-                RenderSystem.disableTexture();
+                RenderSystem.disableCull();
                 BufferBuilder buffer = tessellator.getBuilder();
-                RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
-                RenderSystem.lineWidth(2);
+                RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+                buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+                RenderSystem.lineWidth(6);
                 Matrix4f matrix4f = PoseStack.last().pose();
 
                 shape.get().forAllEdges((x0, y0, z0, x1, y1, z1) -> {
-                    buffer.vertex(matrix4f, (float)(x0), (float)(y0), (float)(z0)).color(50, 50, 50, 255).endVertex();
-                    buffer.vertex(matrix4f, (float)(x1), (float)(y1), (float)(z1)).color(50, 50, 50, 255).endVertex();
+                    float f = (float)(x1 - x0);
+                    float f1 = (float)(y1 - y0);
+                    float f2 = (float)(z1 - z0);
+                    float f3 = Mth.sqrt(f * f + f1 * f1 + f2 * f2);
+                    f /= f3;
+                    f1 /= f3;
+                    f2 /= f3;
+                    buffer.vertex(matrix4f, (float)(x0), (float)(y0), (float)(z0)).color(50, 50, 50, 255).normal(PoseStack.last().normal(), f, f1, f2).endVertex();
+                    buffer.vertex(matrix4f, (float)(x1), (float)(y1), (float)(z1)).color(50, 50, 50, 255).normal(PoseStack.last().normal(), f, f1, f2).endVertex();
                 });
 
                 tessellator.end();
 
                 PoseStack.popPose();
+                RenderSystem.enableCull();
             }
         }
                 .setRenderedCore(Collections.singleton(BlockPos.ZERO), null)

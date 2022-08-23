@@ -5,6 +5,10 @@ import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -66,5 +70,81 @@ public class GuiUtils {
                 .setHoverTooltips(tips));
         widgetGroup.addWidget(new LabelWidget(65, 3, text));
         return widgetGroup;
+    }
+
+    public static WidgetGroup createItemStackSelector(int x, int y, String text, List<ItemStack> init, Consumer<List<ItemStack>> onUpdated) {
+        WidgetGroup group = new WidgetGroup(x, y, 162, 100);
+        List<ItemStack> itemList = new ArrayList<>(init);
+        DraggableScrollableWidgetGroup container = new DraggableScrollableWidgetGroup(0, 25, 162, 80).setBackground(new ColorRectTexture(0xffaaaaaa));
+        group.addWidget(container);
+        for (ItemStack itemStack : itemList) {
+            addItemStackSelectorWidget(itemList, container, itemStack, onUpdated);
+        }
+        group.addWidget(new LabelWidget(0, 6, text));
+        group.addWidget(new ButtonWidget(142, 0, 20, 20, cd -> {
+            itemList.add(null);
+            addItemStackSelectorWidget(itemList, container, null, onUpdated);
+        }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/add.png")).setHoverBorderTexture(1, -1));
+        return group;
+    }
+
+    private static void addItemStackSelectorWidget(List<ItemStack> itemList, DraggableScrollableWidgetGroup container, ItemStack itemStack, Consumer<List<ItemStack>> onUpdated) {
+        ItemStackSelectorWidget bsw = new ItemStackSelectorWidget(0, container.widgets.size() * 21 + 1, 140);
+        container.addWidget(bsw);
+        bsw.addWidget(new ButtonWidget(143, 1, 18, 18, cd -> {
+            int index = (bsw.getSelfPosition().y - 1) / 21;
+            itemList.remove(index);
+            onUpdated.accept(itemList);
+            for (int i = index + 1; i < container.widgets.size(); i++) {
+                container.widgets.get(i).addSelfPosition(0, -21);
+            }
+            container.waitToRemoved(bsw);
+        }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/remove.png")).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.remove"));
+        if (itemStack != null) {
+            bsw.setItemStack(itemStack);
+        }
+        bsw.setOnItemStackUpdate(stack->{
+            int index = (bsw.getSelfPosition().y - 1) / 21;
+            itemList.set(index, stack);
+            onUpdated.accept(itemList);
+        });
+    }
+
+    public static WidgetGroup createFluidStackSelector(int x, int y, String text, List<FluidStack> init, Consumer<List<FluidStack>> onUpdated) {
+        WidgetGroup group = new WidgetGroup(x, y, 162, 100);
+        List<FluidStack> fluidList = new ArrayList<>(init);
+        DraggableScrollableWidgetGroup container = new DraggableScrollableWidgetGroup(0, 25, 162, 80).setBackground(new ColorRectTexture(0xffaaaaaa));
+        group.addWidget(container);
+        for (FluidStack fluidStack : fluidList) {
+            addFluidStackSelectorWidget(fluidList, container, fluidStack, onUpdated);
+        }
+        group.addWidget(new LabelWidget(0, 6, text));
+        group.addWidget(new ButtonWidget(142, 0, 20, 20, cd -> {
+            fluidList.add(null);
+            addFluidStackSelectorWidget(fluidList, container, null, onUpdated);
+        }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/add.png")).setHoverBorderTexture(1, -1));
+        return group;
+    }
+
+    private static void addFluidStackSelectorWidget(List<FluidStack> fluidList, DraggableScrollableWidgetGroup container, FluidStack fluidStack, Consumer<List<FluidStack>> onUpdated) {
+        FluidStackSelectorWidget bsw = new FluidStackSelectorWidget(0, container.widgets.size() * 21 + 1, 140);
+        container.addWidget(bsw);
+        bsw.addWidget(new ButtonWidget(143, 1, 18, 18, cd -> {
+            int index = (bsw.getSelfPosition().y - 1) / 21;
+            fluidList.remove(index);
+            onUpdated.accept(fluidList);
+            for (int i = index + 1; i < container.widgets.size(); i++) {
+                container.widgets.get(i).addSelfPosition(0, -21);
+            }
+            container.waitToRemoved(bsw);
+        }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/remove.png")).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.remove"));
+        if (fluidStack != null) {
+            bsw.setFluidStack(fluidStack);
+        }
+        bsw.setOnFluidStackUpdate(stack->{
+            int index = (bsw.getSelfPosition().y - 1) / 21;
+            fluidList.set(index, stack);
+            onUpdated.accept(fluidList);
+        });
     }
 }

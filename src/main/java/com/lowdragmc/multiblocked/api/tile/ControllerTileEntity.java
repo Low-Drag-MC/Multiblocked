@@ -33,6 +33,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -74,6 +75,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     protected LongOpenHashSet parts;
     protected RecipeLogic recipeLogic;
     protected AABB renderBox;
+    protected BlockState oldState;
+    protected CompoundTag oldNbt;
 
     public ControllerTileEntity(ControllerDefinition definition, BlockPos pos, BlockState state) {
         super(definition, pos, state);
@@ -226,6 +229,17 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             new StructureInvalidEvent(this).post(ScriptType.of(level), StructureInvalidEvent.ID, getSubID());
         }
+
+        if (getDefinition().noNeedController && oldState != null && this.level != null) {
+            BlockPos pos = getBlockPos();
+            this.level.setBlockAndUpdate(pos, oldState);
+            if (oldNbt != null) {
+                BlockEntity blockEntity = BlockEntity.loadStatic(pos, oldState, oldNbt);
+                if (blockEntity != null) {
+                    this.level.setBlockEntity(blockEntity);
+                }
+            }
+        }
     }
 
     @Override
@@ -332,6 +346,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                         .put(MbdCapabilities.get(tag.getString("cap")), new Tuple<>(IO.VALUES[tag.getInt("io")], Direction.values()[tag.getInt("facing")]));
             }
         }
+        if (getDefinition().noNeedController && compound.contains("oldState")) {
+            this.oldState = NbtUtils.readBlockState(compound.getCompound("oldState"));
+            if (compound.contains("oldNbt")) {
+                this.oldNbt = compound.getCompound("oldNbt");
+            }
+        }
     }
 
     @Override
@@ -360,6 +380,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
             compound.put("capabilities", tagList);
         }
+        if (getDefinition().noNeedController && oldState != null) {
+            compound.put("oldState", NbtUtils.writeBlockState(oldState));
+            if (oldNbt != null) {
+                compound.put("oldNbt", oldNbt);
+            }
+        }
     }
 
     @Override
@@ -380,19 +406,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             if (!isFormed() && definition.getCatalyst() != null) {
                 if (state == null) state = new MultiblockState(level, getBlockPos());
                 ItemStack held = player.getItemInHand(hand);
-                if (definition.getCatalyst().isEmpty() || ItemStack.isSame(held, definition.getCatalyst())) {
-                    if (checkPattern()) { // formed
-                        player.swing(hand);
-                        Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));
-                        player.sendMessage(formedMsg, NIL_UUID);
-                        if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
-                            held.shrink(1);
-                        }
-                        MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
-                        if (!needAlwaysUpdate()) {
-                            MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
-                        }
-                        onStructureFormed();
+                if (definition.getCatalyst().isEmpty() || ItemStack.isSameItemSameTags(held, definition.getCatalyst())) {
+                    if (checkCatalystPattern(player, hand, held)) {
                         return InteractionResult.SUCCESS;
                     }
                 }
@@ -404,6 +419,24 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    public boolean checkCatalystPattern(Player player, InteractionHand hand, ItemStack held) {
+        if (checkPattern()) { // formed
+            player.swing(hand);
+            Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));
+            player.sendMessage(formedMsg, NIL_UUID);
+            if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
+                held.shrink(1);
+            }
+            MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
+            if (!needAlwaysUpdate()) {
+                MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
+            }
+            onStructureFormed();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -462,4 +495,11 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return getRecipeLogic() != null && getRecipeLogic().isWorking();
     }
 
+    public void saveOldBlock(BlockState oldState, CompoundTag oldNbt) {
+        this.oldState = oldState;
+        if (oldNbt != null) {
+            this.oldNbt = oldNbt;
+        }
+        markAsDirty();
+    }
 }

@@ -1,6 +1,5 @@
 package com.lowdragmc.multiblocked.api.registry;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
@@ -12,12 +11,15 @@ import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.ComponentTESR;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.IForgeRegistry;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -33,6 +35,8 @@ public class MbdComponents {
     public static final Map<ResourceLocation, ComponentDefinition> TEST_DEFINITION_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, Block> COMPONENT_BLOCKS_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, BlockItem> COMPONENT_ITEMS_REGISTRY = new HashMap<>();
+    public static final Map<ItemStack, ControllerDefinition[]> NO_NEED_CONTROLLER_MB = new HashMap<>();
+    public static final Set<Item> CATALYST_SET = new HashSet<>();
     public static final BlockComponent DummyComponentBlock;
     public static final ItemComponent DummyComponentItem;
 
@@ -149,5 +153,29 @@ public class MbdComponents {
         for (ComponentDefinition definition : DEFINITION_REGISTRY.values()) {
             event.registerBlockEntityRenderer(definition.getTileType(), ComponentTESR::new);
         }
+    }
+
+    public static void registerNoNeedController(ItemStack catalyst, ControllerDefinition definition) {
+        CATALYST_SET.add(catalyst.getItem());
+        ItemStack key = catalyst;
+        for (ItemStack itemStack : NO_NEED_CONTROLLER_MB.keySet()) {
+            if (ItemStack.isSameItemSameTags(itemStack, catalyst)) {
+                key = itemStack;
+                break;
+            }
+        }
+        NO_NEED_CONTROLLER_MB.put(key, ArrayUtils.add(NO_NEED_CONTROLLER_MB.get(catalyst), definition));
+    }
+
+    public static ControllerDefinition[] checkNoNeedController(ItemStack catalyst) {
+        if (catalyst == null) return new ControllerDefinition[0];
+        if (CATALYST_SET.contains(catalyst.getItem())) {
+            for (ItemStack itemStack : NO_NEED_CONTROLLER_MB.keySet()) {
+                if (ItemStack.isSameItemSameTags(itemStack, catalyst)) {
+                    return NO_NEED_CONTROLLER_MB.get(itemStack);
+                }
+            }
+        }
+        return new ControllerDefinition[0];
     }
 }

@@ -2,19 +2,21 @@ package com.lowdragmc.multiblocked.common.capability.trait;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.widget.*;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.trait.MultiCapabilityTrait;
+import com.lowdragmc.multiblocked.api.gui.GuiUtils;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -26,9 +28,11 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 public class ItemCapabilityTrait extends MultiCapabilityTrait {
     private ItemStackHandler handler;
+    private ItemStack[][] validItems;
 
     public ItemCapabilityTrait() {
         super(ItemMultiblockCapability.CAP);
@@ -42,7 +46,46 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
         }
         JsonArray jsonArray = jsonElement.getAsJsonArray();
         int size = jsonArray.size();
-        handler = new ItemStackHandler(size);
+        validItems = new ItemStack[size][];
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
+            if (jsonObject.has("valid")) {
+                validItems[i] = new ItemStack[0];
+                for (JsonElement item : jsonObject.get("valid").getAsJsonArray()) {
+                    validItems[i] = ArrayUtils.add(validItems[i], Multiblocked.GSON.fromJson(item.getAsString(), ItemStack.class));
+                }
+            }
+        }
+        handler = new ItemStackHandler(size) {
+            @Override
+            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+                if (validItems[slot] != null) {
+                    for (ItemStack itemStack : validItems[slot]) {
+                        if (ItemStack.isSameItemSameTags(stack, itemStack)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                return super.isItemValid(slot, stack);
+            }
+        };
+    }
+
+    @Override
+    public JsonElement deserialize() {
+        JsonArray jsonArray = super.deserialize().getAsJsonArray();
+        for (int i = 0; i < capabilityIO.length; i++) {
+            JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
+            if (validItems[i] != null) {
+                JsonArray items = new JsonArray();
+                for (ItemStack itemStack : validItems[i]) {
+                    items.add(Multiblocked.GSON.toJson(itemStack));
+                }
+                jsonObject.add("valid", items);
+            }
+        }
+        return jsonArray;
     }
 
     @Override
@@ -136,6 +179,37 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
             }
         }
         super.update();
+    }
+
+    @Override
+    protected void addSlot() {
+        super.addSlot();
+        validItems = ArrayUtils.add(validItems, null);
+    }
+
+    @Override
+    protected void removeSlot(int index) {
+        super.removeSlot(index);
+        validItems = ArrayUtils.remove(validItems, index);
+    }
+
+    @Override
+    protected void initSettingDialog(DialogWidget dialog, DraggableWidgetGroup slot, final int index) {
+        super.initSettingDialog(dialog, slot, index);
+        WidgetGroup widget = new WidgetGroup(5, 73, 200, 200);
+        dialog.addWidget(widget);
+        dialog.addWidget(GuiUtils.createBoolSwitch(5, 60, "Item Filter", "", validItems[index] != null, result->{
+            if (result) {
+                validItems[index] = new ItemStack[0];
+                widget.addWidget(GuiUtils.createItemStackSelector(0,0, "Valid Items", Arrays.stream(validItems[index]).toList(), list -> validItems[index] = list.toArray(ItemStack[]::new)));
+            } else {
+                widget.clearAllWidgets();
+                validItems[index] = null;
+            }
+        }));
+        if (validItems[index] != null) {
+            widget.addWidget(GuiUtils.createItemStackSelector(0,0, "Valid Items", Arrays.stream(validItems[index]).toList(), list -> validItems[index] = list.toArray(ItemStack[]::new)));
+        }
     }
 
     @Nonnull

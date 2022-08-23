@@ -1,7 +1,6 @@
 package com.lowdragmc.multiblocked.common.capability;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -10,16 +9,16 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.IContentSerializer;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.common.capability.trait.EntityCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.EntityContentWidget;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 
@@ -28,39 +27,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class EntityMultiblockCapability extends MultiblockCapability<EntityType<?>> {
+public class EntityMultiblockCapability extends MultiblockCapability<EntityIngredient> {
     public static final EntityMultiblockCapability CAP = new EntityMultiblockCapability();
 
     private EntityMultiblockCapability() {
         super("entity", 0xFF65CB9D, new IContentSerializer<>() {
 
             @Override
-            public EntityType<?> fromJson(JsonElement json) {
-                return EntityType.byString(json.getAsString()).orElse(EntityType.PIG);
+            public EntityIngredient fromJson(JsonElement json) {
+                return EntityIngredient.fromJson(json);
             }
 
             @Override
-            public JsonElement toJson(EntityType<?> content) {
-                return new JsonPrimitive(content.getRegistryName().toString());
+            public JsonElement toJson(EntityIngredient content) {
+                return content.toJson();
             }
 
             @Override
-            public EntityType<?> of(Object o) {
-                if (o instanceof EntityType<?>) {
-                    return (EntityType<?>) o;
-                } else if (o instanceof CharSequence charSequence) {
-                    return EntityType.byString(charSequence.toString()).orElse(EntityType.PIG);
-                } else if (o instanceof ResourceLocation resourceLocation) {
-                    return EntityType.byString(resourceLocation.toString()).orElse(EntityType.PIG);
-                }
-                return EntityType.PIG;
+            public EntityIngredient of(Object o) {
+                return EntityIngredient.of(o);
             }
         });
     }
 
     @Override
-    public EntityType<?> defaultContent() {
-        return EntityType.PIG;
+    public EntityIngredient defaultContent() {
+        return new EntityIngredient();
     }
 
     @Override
@@ -69,8 +61,8 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityType<
     }
 
     @Override
-    public EntityType<?> copyInner(EntityType<?> content) {
-        return content;
+    public EntityIngredient copyInner(EntityIngredient content) {
+        return content.copy();
     }
 
     @Override
@@ -79,7 +71,7 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityType<
     }
 
     @Override
-    public ContentWidget<? super EntityType<?>> createContentWidget() {
+    public ContentWidget<? super EntityIngredient> createContentWidget() {
         return new EntityContentWidget();
     }
 
@@ -100,56 +92,63 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityType<
         };
     }
 
-    public static class EntityCapabilityProxy extends CapabilityProxy<EntityType<?>> {
+    public static class EntityCapabilityProxy extends CapabilityProxy<EntityIngredient> {
 
         public EntityCapabilityProxy(BlockEntity tileEntity) {
             super(EntityMultiblockCapability.CAP, tileEntity);
         }
 
         @Override
-        protected List<EntityType<?>> handleRecipeInner(IO io, Recipe recipe, List<EntityType<?>> left, boolean simulate) {
-            if (io == IO.IN) {
-                List<Entity> entities = getTileEntity().getLevel().getEntities(null, new AABB(
-                        getTileEntity().getBlockPos().above(),
-                        getTileEntity().getBlockPos().above().offset(1, 1, 1)));
-                for (Entity entity : entities) {
-                    if (entity.isAlive()) {
-                        if (left.remove(entity.getType())) {
-                            if (!simulate) {
-                                entity.remove(Entity.RemovalReason.DISCARDED);
+        protected List<EntityIngredient> handleRecipeInner(IO io, Recipe recipe, List<EntityIngredient> left, boolean simulate) {
+            if (getTileEntity() instanceof ComponentTileEntity<?> component) {
+                BlockPos pos = component.getBlockPos().relative(component.getFrontFacing());
+                if (io == IO.IN) {
+                    List<Entity> entities = component.getLevel().getEntities(null, new AABB(
+                            pos,
+                            pos.offset(1, 1, 1)));
+                    for (Entity entity : entities) {
+                        if (entity.isAlive()) {
+                            if (left.removeIf(ingredient -> ingredient.match(entity))) {
+                                if (!simulate) {
+                                    entity.remove(Entity.RemovalReason.DISCARDED);
+                                }
                             }
                         }
                     }
-                }
-            } else if (io == IO.OUT){
-                if (!simulate && getTileEntity().getLevel() instanceof ServerLevel serverLevel) {
-                    for (EntityType<?> type : left) {
-                        type.spawn(serverLevel, null, null, null, getTileEntity().getBlockPos().above(), MobSpawnType.NATURAL, false, false);
+                } else if (io == IO.OUT){
+                    if (!simulate && component.getLevel() instanceof ServerLevel serverLevel) {
+                        for (EntityIngredient ingredient : left) {
+                            ingredient.spawn(serverLevel, ingredient.tag, pos);
+                        }
                     }
+                    return null;
                 }
-                return null;
             }
             return left.isEmpty() ? null : left;
         }
 
-        Set<EntityType<?>> entities = new HashSet<>();
+        Set<Entity> entities = new HashSet<>();
 
         @Override
         protected boolean hasInnerChanged() {
-            List<Entity> entities = getTileEntity().getLevel().getEntities(null, new AABB(
-                    getTileEntity().getBlockPos().above(),
-                    getTileEntity().getBlockPos().above().offset(1, 1, 1)));
-            Set<EntityType<?>> temp = new HashSet<>();
-            for (Entity entity : entities) {
-                if (entity.isAlive()) {
-                    temp.add(entity.getType());
+            if (getTileEntity() instanceof ComponentTileEntity<?> component) {
+                BlockPos pos = component.getBlockPos().relative(component.getFrontFacing());
+                List<Entity> entities = component.getLevel().getEntities(null, new AABB(
+                       pos,
+                       pos.offset(1, 1, 1)));
+                Set<Entity> temp = new HashSet<>();
+                for (Entity entity : entities) {
+                    if (entity.isAlive()) {
+                        temp.add(entity);
+                    }
                 }
+                if (this.entities.size() == temp.size() && this.entities.containsAll(temp)) {
+                    return false;
+                }
+                this.entities = temp;
+                return true;
             }
-            if (this.entities.size() == temp.size() && this.entities.containsAll(temp)) {
-                return false;
-            }
-            this.entities = temp;
-            return true;
+            return false;
         }
     }
 

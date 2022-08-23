@@ -7,6 +7,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
 import com.lowdragmc.multiblocked.common.capability.EntityMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
@@ -26,8 +27,8 @@ import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.crafting.NBTIngredient;
@@ -35,7 +36,6 @@ import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,19 +100,32 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
         if (recipe.inputs.containsKey(EntityMultiblockCapability.CAP)) {
             ingredients.setInputIngredients(recipe.inputs.get(EntityMultiblockCapability.CAP).stream()
                     .map(Content::getContent)
-                    .map(EntityType.class::cast)
-                    .map(ForgeSpawnEggItem::fromEntityType)
-                    .filter(Objects::nonNull)
+                    .map(EntityIngredient.class::cast)
+                    .map(content -> {
+                        if (content.isEntityItem()) {
+                            return content.getEntityItem();
+                        } else {
+                            SpawnEggItem item = ForgeSpawnEggItem.fromEntityType(content.type);
+                            return item == null ? ItemStack.EMPTY : item.getDefaultInstance();
+                        }
+                    })
+                    .filter(itemStack -> !itemStack.isEmpty())
                     .map(Ingredient::of)
                     .collect(Collectors.toList()));
         }
         if (recipe.outputs.containsKey(EntityMultiblockCapability.CAP)) {
             ingredients.setOutputs(VanillaTypes.ITEM, recipe.outputs.get(EntityMultiblockCapability.CAP).stream()
                     .map(Content::getContent)
-                    .map(EntityType.class::cast)
-                    .map(ForgeSpawnEggItem::fromEntityType)
-                    .filter(Objects::nonNull)
-                    .map(ItemStack::new)
+                    .map(EntityIngredient.class::cast)
+                    .map(content -> {
+                        if (content.isEntityItem()) {
+                            return content.getEntityItem();
+                        } else {
+                            SpawnEggItem item = ForgeSpawnEggItem.fromEntityType(content.type);
+                            return item == null ? ItemStack.EMPTY : item.getDefaultInstance();
+                        }
+                    })
+                    .filter(itemStack -> !itemStack.isEmpty())
                     .collect(Collectors.toList()));
         }
 

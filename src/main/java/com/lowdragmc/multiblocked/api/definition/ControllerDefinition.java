@@ -27,6 +27,7 @@ public class ControllerDefinition extends ComponentDefinition {
     protected Supplier<RecipeMap> recipeMap;
     protected Supplier<ItemStack> catalyst; // if null, checking pattern per second
     public boolean consumeCatalyst;
+    public boolean noNeedController;
     public List<MultiblockShapeInfo> designs; // TODO
 
     public ControllerDefinition(ResourceLocation location) {
@@ -126,8 +127,9 @@ public class ControllerDefinition extends ComponentDefinition {
             setRecipeMap(RecipeMap.EMPTY);
         }
         if (json.has("catalyst")) {
-            catalyst = Suppliers.memoize(()-> Multiblocked.GSON.fromJson("catalyst", ItemStack.class));
+            catalyst = Suppliers.memoize(()-> Multiblocked.GSON.fromJson(json.get("catalyst"), ItemStack.class));
             consumeCatalyst = JsonUtils.getBooleanOr("consumeCatalyst", json, consumeCatalyst);
+            noNeedController = JsonUtils.getBooleanOr("noNeedController", json, noNeedController);
         }
     }
 
@@ -140,6 +142,7 @@ public class ControllerDefinition extends ComponentDefinition {
         if (getCatalyst() != null) {
             json.add("catalyst", Multiblocked.GSON.toJsonTree(getCatalyst()));
             json.addProperty("consumeCatalyst", consumeCatalyst);
+            json.addProperty("noNeedController", noNeedController);
         }
         return json;
     }

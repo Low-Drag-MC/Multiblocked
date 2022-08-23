@@ -107,7 +107,7 @@ public class SizedIngredient extends Ingredient {
             if (json.has("tag")) {
                 return new SizedIngredient(json.get("tag").getAsString(), amount);
             } else {
-                Ingredient inner = Ingredient.fromJson(json.get("ingredient").getAsJsonObject());
+                Ingredient inner = Ingredient.fromJson(json.get("ingredient"));
                 return new SizedIngredient(inner, amount);
             }
         }

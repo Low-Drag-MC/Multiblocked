@@ -7,6 +7,7 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
 import com.lowdragmc.multiblocked.common.capability.*;
@@ -201,20 +202,20 @@ public class MultiblockRecipeJS extends RecipeJS {
         return this;
     }
 
-    public MultiblockRecipeJS inputEntity(String id) {
-        return inputEntity(id, null);
+    public MultiblockRecipeJS inputEntity(EntityIngredient entityIngredient) {
+        return inputEntity(entityIngredient, null);
     }
 
-    public MultiblockRecipeJS inputEntity(String id, String slotName) {
-        return input(EntityMultiblockCapability.CAP, EntityType.byString(id).orElse(EntityType.PIG), slotName);
+    public MultiblockRecipeJS inputEntity(EntityIngredient entityIngredient, String slotName) {
+        return input(EntityMultiblockCapability.CAP, entityIngredient, slotName);
     }
 
-    public MultiblockRecipeJS outputEntity(String id) {
-        return outputEntity(id, null);
+    public MultiblockRecipeJS outputEntity(EntityIngredient entityIngredient) {
+        return outputEntity(entityIngredient, null);
     }
 
-    public MultiblockRecipeJS outputEntity(String id, String slotName) {
-        return output(EntityMultiblockCapability.CAP, EntityType.byString(id).orElse(EntityType.PIG), slotName);
+    public MultiblockRecipeJS outputEntity(EntityIngredient entityIngredient, String slotName) {
+        return output(EntityMultiblockCapability.CAP, entityIngredient, slotName);
     }
 
     //Numbers

@@ -1,6 +1,8 @@
 package com.lowdragmc.multiblocked;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.api.block.ItemComponent;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
@@ -24,7 +26,9 @@ import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.simibubi.create.foundation.block.BlockStressValues;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -78,6 +82,21 @@ public class CommonProxy {
         });
 
         CraftingHelper.register(new ResourceLocation("multiblocked:sized"), SizedIngredient.SERIALIZER);
+    }
+
+    @SubscribeEvent
+    public void registerSounds(RegistryEvent.Register<SoundEvent> event) {
+        File file = new File(Multiblocked.location, "assets/multiblocked/sounds.json");
+        if (file.exists() && file.isFile()) {
+            JsonElement sounds = FileUtility.loadJson(file);
+            if (sounds instanceof JsonObject jsonObject) {
+                IForgeRegistry<SoundEvent> registry = event.getRegistry();
+                for (String sound : jsonObject.keySet()) {
+                    SoundEvent soundEvent = new SoundEvent(new ResourceLocation(Multiblocked.MODID, sound));
+                    registry.register(soundEvent.setRegistryName(new ResourceLocation(Multiblocked.MODID, sound)));
+                }
+            }
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -160,6 +179,11 @@ public class CommonProxy {
     }
 
     public static void controllerPost(ControllerDefinition definition, JsonObject config) {
-
+        if (definition.noNeedController) {
+            ItemStack catalyst = definition.getCatalyst();
+            if (catalyst != null && !catalyst.isEmpty()) {
+                MbdComponents.registerNoNeedController(catalyst, definition);
+            }
+        }
     }
 }

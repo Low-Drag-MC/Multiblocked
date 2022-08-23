@@ -143,7 +143,9 @@ public class PartBuilderWidget extends WidgetGroup {
                         JsonElement jsonElement = FileUtility.loadJson(file);
                         if (jsonElement != null && jsonElement.isJsonObject()) {
                             try {
-                                setNewRenderer(Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class).getBaseRenderer(), type);
+                                PartDefinition definition = new PartDefinition(new ResourceLocation(jsonElement.getAsJsonObject().get("location").getAsString()));
+                                definition.fromJson(jsonElement.getAsJsonObject());
+                                setNewRenderer(definition.getBaseRenderer(), type);
                             } catch (Exception ignored) {}
                         }
                     })

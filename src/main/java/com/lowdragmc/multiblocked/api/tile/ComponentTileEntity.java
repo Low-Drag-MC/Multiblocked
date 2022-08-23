@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TabButton;
 import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.utils.DummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -177,7 +178,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
     }
 
     public void setStatus(String status) {
-        if (!isRemote()) {
+        if (!isRemote() || level instanceof DummyWorld) {
             if (Multiblocked.isKubeJSLoaded() && level != null) {
                 StatusChangedEvent event = new StatusChangedEvent(this, status);
                 if (event.post(ScriptType.of(level), StatusChangedEvent.ID, getSubID())) {

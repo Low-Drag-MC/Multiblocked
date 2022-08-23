@@ -61,8 +61,8 @@ public class PartScriptWidget extends PageWidget {
             JsonElement jsonElement = FileUtility.loadJson(selected);
             if (jsonElement != null) {
                 try {
-                    PartDefinition definition = Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class);
-                    part.setDefinition(definition);
+                    PartDefinition definition = new PartDefinition(new ResourceLocation(jsonElement.getAsJsonObject().get("location").getAsString()));
+                    definition.fromJson(jsonElement.getAsJsonObject());
                     MbdComponents.TEST_DEFINITION_REGISTRY.put(definition.location, definition);
                     writeClientAction(-1, buffer -> buffer.writeUtf(definition.location.toString()));
                 } catch (Exception e) {

@@ -3,6 +3,8 @@ package com.lowdragmc.multiblocked.api.tile.part;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import net.minecraft.core.BlockPos;
+import com.lowdragmc.multiblocked.api.definition.StatusProperties;
+
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -25,6 +27,19 @@ public interface IPartComponent extends IComponent {
         return false;
     }
 
+    @Override
+    default String getStatus() {
+        boolean isIdle = false;
+        for (IControllerComponent controller : getControllers()) {
+            if (controller.getStatus().equals(StatusProperties.IDLE)) {
+                isIdle = true;
+                if (controller.getStatus().equals(StatusProperties.WORKING)) {
+                    return StatusProperties.WORKING;
+                }
+            }
+        }
+        return isIdle ? StatusProperties.IDLE : StatusProperties.UNFORMED;
+    }
 
     void addedToController(@Nonnull IControllerComponent controller);
 

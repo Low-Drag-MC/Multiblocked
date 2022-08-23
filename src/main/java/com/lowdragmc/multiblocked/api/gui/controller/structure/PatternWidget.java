@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
@@ -222,8 +223,8 @@ public class PatternWidget extends WidgetGroup {
         if (itemStack.getItem() instanceof BlockItem) {
             Block block = ((BlockItem) itemStack.getItem()).getBlock();
             if (block instanceof BlockComponent) {
-                if (((BlockComponent) block).definition.baseRenderer instanceof CycleBlockStateRenderer) {
-                    CycleBlockStateRenderer renderer = ((CycleBlockStateRenderer) ((BlockComponent) block).definition.baseRenderer);
+                if (((BlockComponent) block).definition.getBaseRenderer() instanceof CycleBlockStateRenderer) {
+                    CycleBlockStateRenderer renderer = ((CycleBlockStateRenderer) ((BlockComponent) block).definition.getBaseRenderer());
                     itemStack = renderer.getBlockInfo().getItemStackForm();
                 }
             }
@@ -335,6 +336,11 @@ public class PatternWidget extends WidgetGroup {
                     new Vec3(0.5, 1, 0.5).add(pos.getX(), pos.getY(), pos.getZ()),
                     Direction.UP,
                     pos), PatternWidget.world, pos, Minecraft.getInstance().player);
+
+            if (itemStack.isEmpty() && !blockState.getFluidState().isEmpty()) {
+                Fluid fluid = blockState.getFluidState().getType();
+                itemStack = fluid.getBucket().getDefaultInstance();
+            }
 
             ItemStackKey itemStackKey = new ItemStackKey(itemStack);
             PartInfo partInfo = partsMap.get(itemStackKey);

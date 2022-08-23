@@ -72,7 +72,8 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
                     Level world = table.getLevel();
                     ResourceLocation location = new ResourceLocation("mod_id:component_id");
                     ControllerDefinition controllerDefinition = new ControllerDefinition(location);
-                    controllerDefinition.baseRenderer = new MBDBlockStateRenderer(world.getBlockState(pos));
+                    assert world != null;
+                    controllerDefinition.getBaseStatus().setRenderer(new MBDBlockStateRenderer(world.getBlockState(pos)));
                     new ControllerWidget(this, controllerDefinition, new JsonBlockPattern(world, location, pos, facing,
                             poses[0].getX(), poses[0].getY(), poses[0].getZ(),
                             poses[1].getX(), poses[1].getY(), poses[1].getZ()),
@@ -136,7 +137,8 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
                             try {
                                 String recipeMap = jsonElement.getAsJsonObject().get("recipeMap").getAsString();
                                 JsonBlockPattern pattern = Multiblocked.GSON.fromJson(jsonElement.getAsJsonObject().get("basePattern"), JsonBlockPattern.class);
-                                ControllerDefinition definition = Multiblocked.GSON.fromJson(jsonElement, ControllerDefinition.class);
+                                ControllerDefinition definition = new ControllerDefinition(new ResourceLocation(jsonElement.getAsJsonObject().get("location").getAsString()));
+                                definition.fromJson(jsonElement.getAsJsonObject());
                                 new ControllerWidget(this, definition, pattern, recipeMap, jsonObject -> {
                                     if (jsonObject != null) {
                                         FileUtility.saveJson(file, jsonObject);

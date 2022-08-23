@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.common.capability.*;
 import com.lowdragmc.multiblocked.common.recipe.conditions.*;
 import mekanism.api.chemical.gas.GasStack;
@@ -163,11 +164,11 @@ public class RecipeBuilder {
         return output(FluidMultiblockCapability.CAP, outputs);
     }
 
-    public RecipeBuilder inputEntities(EntityType<?>... inputs) {
+    public RecipeBuilder inputEntities(EntityIngredient... inputs) {
         return input(EntityMultiblockCapability.CAP, inputs);
     }
 
-    public RecipeBuilder outputEntities(EntityType<?>... outputs) {
+    public RecipeBuilder outputEntities(EntityIngredient... outputs) {
         return output(EntityMultiblockCapability.CAP, outputs);
     }
 

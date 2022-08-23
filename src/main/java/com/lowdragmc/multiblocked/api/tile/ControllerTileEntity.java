@@ -21,7 +21,6 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
-import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.MultiblockPreviewRenderer;
 import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
@@ -34,6 +33,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -75,6 +75,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     protected LongOpenHashSet parts;
     protected RecipeLogic recipeLogic;
     protected AABB renderBox;
+    protected BlockState oldState;
+    protected CompoundTag oldNbt;
 
     public ControllerTileEntity(ControllerDefinition definition, BlockPos pos, BlockState state) {
         super(definition, pos, state);
@@ -83,13 +85,13 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     @Nullable
     public BlockPattern getPattern() {
         if (Multiblocked.isKubeJSLoaded() && level != null) {
-            DynamicPatternEvent event = new DynamicPatternEvent(this, definition.basePattern);
+            DynamicPatternEvent event = new DynamicPatternEvent(this, definition.getBasePattern());
             if (event.post(ScriptType.of(level), DynamicPatternEvent.ID, getSubID())) {
                 return null;
             }
             return event.pattern;
         }
-        return definition.basePattern;
+        return definition.getBasePattern();
     }
     public RecipeLogic getRecipeLogic() {
         return recipeLogic;
@@ -103,11 +105,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (state == null) return false;
         BlockPattern pattern = getPattern();
         return pattern != null && pattern.checkPatternAt(state, false);
-    }
-
-    @Override
-    public boolean isValidFrontFacing(Direction facing) {
-        return definition.allowRotate && facing.getAxis() != Direction.Axis.Y;
     }
 
     public boolean isFormed() {
@@ -129,22 +126,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             new UpdateFormedEvent(this).post(ScriptType.of(level), UpdateFormedEvent.ID, getSubID());
         }
-    }
-
-    @Override
-    public IMultiblockedRenderer updateCurrentRenderer() {
-        IMultiblockedRenderer renderer;
-        if (definition.workingRenderer != null && isFormed() && (status.equals("working") || status.equals("suspend"))) {
-            renderer = definition.workingRenderer;
-            if (Multiblocked.isKubeJSLoaded() && level != null) {
-                UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
-                event.post(ScriptType.of(level), UpdateRendererEvent.ID, getSubID());
-                renderer = event.getRenderer();
-            }
-        } else {
-            renderer = super.updateCurrentRenderer();
-        }
-        return renderer;
     }
 
     public Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> getCapabilitiesProxy() {
@@ -247,6 +228,20 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         writeCustomData(-1, this::writeState);
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             new StructureInvalidEvent(this).post(ScriptType.of(level), StructureInvalidEvent.ID, getSubID());
+        }
+    }
+
+    public boolean hasOldBlock() {
+        return getDefinition().noNeedController && oldState != null && this.level != null;
+    }
+
+    public void resetOldBlock(Level level, BlockPos pos) {
+        level.setBlockAndUpdate(pos, oldState);
+        if (oldNbt != null) {
+            BlockEntity blockEntity = BlockEntity.loadStatic(pos, oldState, oldNbt);
+            if (blockEntity != null) {
+                this.level.setBlockEntity(blockEntity);
+            }
         }
     }
 
@@ -354,6 +349,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                         .put(MbdCapabilities.get(tag.getString("cap")), new Tuple<>(IO.VALUES[tag.getInt("io")], Direction.values()[tag.getInt("facing")]));
             }
         }
+        if (getDefinition().noNeedController && compound.contains("oldState")) {
+            this.oldState = NbtUtils.readBlockState(compound.getCompound("oldState"));
+            if (compound.contains("oldNbt")) {
+                this.oldNbt = compound.getCompound("oldNbt");
+            }
+        }
     }
 
     @Override
@@ -382,6 +383,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
             compound.put("capabilities", tagList);
         }
+        if (getDefinition().noNeedController && oldState != null) {
+            compound.put("oldState", NbtUtils.writeBlockState(oldState));
+            if (oldNbt != null) {
+                compound.put("oldNbt", oldNbt);
+            }
+        }
     }
 
     @Override
@@ -399,22 +406,11 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
 
         if (!isRemote()) {
-            if (!isFormed() && definition.catalyst != null) {
+            if (!isFormed() && definition.getCatalyst() != null) {
                 if (state == null) state = new MultiblockState(level, getBlockPos());
                 ItemStack held = player.getItemInHand(hand);
-                if (definition.catalyst.isEmpty() || ItemStack.isSame(held, definition.catalyst)) {
-                    if (checkPattern()) { // formed
-                        player.swing(hand);
-                        Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));
-                        player.sendMessage(formedMsg, NIL_UUID);
-                        if (!player.isCreative() && !definition.catalyst.isEmpty()) {
-                            held.shrink(1);
-                        }
-                        MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
-                        if (!needAlwaysUpdate()) {
-                            MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
-                        }
-                        onStructureFormed();
+                if (definition.getCatalyst().isEmpty() || ItemStack.isSameItemSameTags(held, definition.getCatalyst())) {
+                    if (checkCatalystPattern(player, hand, held)) {
                         return InteractionResult.SUCCESS;
                     }
                 }
@@ -426,6 +422,24 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    public boolean checkCatalystPattern(Player player, InteractionHand hand, ItemStack held) {
+        if (checkPattern()) { // formed
+            player.swing(hand);
+            Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));
+            player.sendMessage(formedMsg, NIL_UUID);
+            if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
+                held.shrink(1);
+            }
+            MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
+            if (!needAlwaysUpdate()) {
+                MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
+            }
+            onStructureFormed();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -449,7 +463,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Override
     public void asyncThreadLogic(long periodID) {
-        if (!isFormed() && getDefinition().catalyst == null && (getOffset() + periodID) % 4 == 0) {
+        if (!isFormed() && getDefinition().getCatalyst() == null && (getOffset() + periodID) % 4 == 0) {
             BlockPattern pattern = getPattern();
             if (pattern != null && pattern.checkPatternAt(new MultiblockState(level, worldPosition), false)) {
                 ServerLifecycleHooks.getCurrentServer().execute(() -> {
@@ -481,11 +495,14 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     @Override
     public boolean isWorking() {
-        if (level != null && level.isClientSide) {
-            return status.equals("working");
-        } else {
-            return getRecipeLogic() != null && getRecipeLogic().isWorking();
-        }
+        return getRecipeLogic() != null && getRecipeLogic().isWorking();
     }
 
+    public void saveOldBlock(BlockState oldState, CompoundTag oldNbt) {
+        this.oldState = oldState;
+        if (oldNbt != null) {
+            this.oldNbt = oldNbt;
+        }
+        markAsDirty();
+    }
 }

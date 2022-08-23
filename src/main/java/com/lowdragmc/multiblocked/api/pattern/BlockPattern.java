@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.api.pattern;
 
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
@@ -87,9 +88,9 @@ public class BlockPattern {
         }
         BlockPos centerPos = controller.getBlockPos();
         Direction frontFacing = controller.getFrontFacing();
-        Set<MultiblockCapability<?>> inputCapabilities = controller.getDefinition().recipeMap.inputCapabilities;
-        Set<MultiblockCapability<?>> outputCapabilities = controller.getDefinition().recipeMap.outputCapabilities;
-        Direction[] facings = controller.getDefinition().allowRotate ? new Direction[]{frontFacing} : new Direction[]{Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST};
+        Set<MultiblockCapability<?>> inputCapabilities = controller.getDefinition().getRecipeMap().inputCapabilities;
+        Set<MultiblockCapability<?>> outputCapabilities = controller.getDefinition().getRecipeMap().outputCapabilities;
+        Direction[] facings = controller.getDefinition().properties.rotationState != CustomProperties.RotationState.NONE ? new Direction[]{frontFacing} : new Direction[]{Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST};
         for (Direction facing : facings) {
             if (checkPatternAt(worldState, centerPos, facing, savePredicate, inputCapabilities, outputCapabilities)) {
                 return true;
@@ -98,7 +99,7 @@ public class BlockPattern {
         return false;
     }
 
-    private boolean checkPatternAt(MultiblockState worldState, BlockPos centerPos, Direction facing, boolean savePredicate, Set<MultiblockCapability<?>> inputCapabilities, Set<MultiblockCapability<?>> outputCapabilities) {
+    public boolean checkPatternAt(MultiblockState worldState, BlockPos centerPos, Direction facing, boolean savePredicate, Set<MultiblockCapability<?>> inputCapabilities, Set<MultiblockCapability<?>> outputCapabilities) {
         boolean findFirstAisle = false;
         int minZ = -centerOffset[4];
         worldState.clean();
@@ -269,8 +270,8 @@ public class BlockPattern {
                                     if (info.getBlockState().getBlock() != Blocks.AIR) {
                                         BlockState blockState = info.getBlockState();
                                         if (blockState.getBlock() instanceof BlockComponent && ((BlockComponent) blockState.getBlock()).definition != null) {
-                                            if (((BlockComponent) blockState.getBlock()).definition.baseRenderer instanceof CycleBlockStateRenderer) {
-                                                CycleBlockStateRenderer renderer = (CycleBlockStateRenderer) ((BlockComponent) blockState.getBlock()).definition.baseRenderer;
+                                            if (((BlockComponent) blockState.getBlock()).definition.getBaseRenderer() instanceof CycleBlockStateRenderer) {
+                                                CycleBlockStateRenderer renderer = (CycleBlockStateRenderer) ((BlockComponent) blockState.getBlock()).definition.getBaseRenderer();
                                                 for (BlockInfo blockInfo : renderer.blockInfos) {
                                                     candidates.add(blockInfo.getItemStackForm());
                                                 }

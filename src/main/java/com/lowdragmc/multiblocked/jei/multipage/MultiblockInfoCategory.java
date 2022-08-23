@@ -56,9 +56,9 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     public static void registerRecipes(IRecipeRegistration registry) {
         registry.addRecipes(RECIPE_TYPE, REGISTER.stream().map(MultiblockInfoWrapper::new).collect(Collectors.toList()));
         for (ControllerDefinition definition : REGISTER) {
-            if (definition.recipeMap != null) {
-                if (definition.recipeMap.categoryTexture == null) {
-                    definition.recipeMap.categoryTexture = new ItemStackTexture(definition.getStackForm());
+            if (definition.getRecipeMap() != null) {
+                if (definition.getRecipeMap().categoryTexture == null) {
+                    definition.getRecipeMap().categoryTexture = new ItemStackTexture(definition.getStackForm());
                 }
             }
         }

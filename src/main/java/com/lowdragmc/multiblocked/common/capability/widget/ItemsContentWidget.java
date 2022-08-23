@@ -37,7 +37,7 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
             itemHandler = new CycleItemStackHandler(stacks);
             addWidget(new SlotWidget(itemHandler, 0, 1, 1, false, false).setDrawOverlay(false).setOnAddedTooltips((s, l) -> {
                 if (chance < 1) {
-                    l.add(chance == 0 ? new TranslatableComponent("multiblocked.gui.content.chance_0") : new TranslatableComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
+                    l.add(chance == 0 ? new TranslatableComponent("multiblocked.gui.content.chance_0") : new TranslatableComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100) + "%"));
                 }
                 if (perTick) {
                     l.add(new TranslatableComponent("multiblocked.gui.content.per_tick"));

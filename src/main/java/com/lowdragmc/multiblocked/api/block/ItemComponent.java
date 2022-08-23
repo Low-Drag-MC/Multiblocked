@@ -45,7 +45,7 @@ public class ItemComponent extends BlockItem implements IItemRendererProvider {
     @Nonnull
     @Override
     public IRenderer getRenderer(ItemStack stack) {
-        IRenderer renderer = getDefinition().baseRenderer;
+        IRenderer renderer = getDefinition().getBaseRenderer();
         return renderer == null ? IRenderer.EMPTY : renderer;
     }
 }

@@ -64,7 +64,7 @@ public class PartTileTesterEntity extends PartTileEntity<PartDefinition> {
 
 
     public static void registerTestPart() {
-        DEFAULT_DEFINITION.baseRenderer = new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/part_tester"));
+        DEFAULT_DEFINITION.getBaseStatus().setRenderer(new MBDIModelRenderer(new ResourceLocation(Multiblocked.MODID,"block/part_tester")));
         DEFAULT_DEFINITION.properties.isOpaque = false;
         MbdComponents.registerComponent(DEFAULT_DEFINITION);
     }

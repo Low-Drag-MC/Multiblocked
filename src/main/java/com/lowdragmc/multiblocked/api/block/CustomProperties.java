@@ -1,12 +1,13 @@
 package com.lowdragmc.multiblocked.api.block;
 
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.function.Predicate;
 
 /**
  * Author: KilaBash
@@ -14,32 +15,34 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Description:
  */
 public class CustomProperties {
+    public RotationState rotationState;
+    public boolean showInJei;
     public boolean isOpaque;
     public boolean hasDynamicShape;
+
+    public boolean hasCollision;
     public float destroyTime;
     public float explosionResistance;
-    public int lightEmissive;
     public float speedFactor;
     public float jumpFactor;
     public float friction;
-    public boolean hasCollision;
-    public String tabGroup;
+    public int harvestLevel;
     public int stackSize;
-    public VoxelShape shape;
+    public String tabGroup;
 
     public CustomProperties() {
         this.isOpaque = true;
         this.destroyTime = 1.5f;
         this.explosionResistance = 6f;
-        this.lightEmissive = 0;
         this.speedFactor = 1f;
         this.jumpFactor = 1f;
         this.friction = 0.6f;
         this.hasCollision = true;
         this.tabGroup = "multiblocked.all";
         this.stackSize = 64;
-        this.shape = Shapes.block();
         this.hasDynamicShape = false;
+        this.rotationState = RotationState.ALL;
+        this.showInJei = true;
     }
 
     public BlockBehaviour.Properties createBlock() {
@@ -59,8 +62,7 @@ public class CustomProperties {
                 .explosionResistance(6.0f)
                 .speedFactor(speedFactor)
                 .jumpFactor(jumpFactor)
-                .friction(friction)
-                .lightLevel(s->lightEmissive);
+                .friction(friction);
         return properties;
     }
 
@@ -75,5 +77,23 @@ public class CustomProperties {
             }
         }
         return properties;
+    }
+
+    public enum RotationState implements Predicate<Direction> {
+        ALL(dir -> true),
+        NONE(dir -> false),
+        Y_AXIS(dir -> dir.getAxis() == Direction.Axis.Y),
+        NON_Y_AXIS(dir -> dir.getAxis() != Direction.Axis.Y);
+
+        final Predicate<Direction> predicate;
+
+        RotationState(Predicate<Direction> predicate){
+            this.predicate = predicate;
+        }
+
+        @Override
+        public boolean test(Direction dir) {
+            return predicate.test(dir);
+        }
     }
 }

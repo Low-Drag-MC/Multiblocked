@@ -17,6 +17,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.JsonUtil;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import net.minecraft.core.Direction;
@@ -78,7 +79,7 @@ public abstract class MultiCapabilityTrait extends CapabilityTrait {
     }
 
     public Direction[] getIOFacing() {
-        if (component.getDefinition().allowRotate) {
+        if (component.getDefinition().properties.rotationState != CustomProperties.RotationState.NONE) {
             return new Direction[]{component.getFrontFacing()};
         }
         return Direction.values();

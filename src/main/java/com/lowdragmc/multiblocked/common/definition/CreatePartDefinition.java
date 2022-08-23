@@ -1,8 +1,11 @@
 package com.lowdragmc.multiblocked.common.definition;
 
+import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
 import net.minecraft.resources.ResourceLocation;
+import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.util.GsonHelper;
 
 /**
  * @author KilaBash
@@ -24,5 +27,20 @@ public class CreatePartDefinition extends PartDefinition {
         canShared = false;
         stress = 4;
         isOutput = false;
+    }
+
+    @Override
+    public void fromJson(JsonObject json) {
+        super.fromJson(json);
+        isOutput = JsonUtils.getBooleanOr("isOutput", json, isOutput);
+        stress = GsonHelper.getAsFloat(json, "stress", stress);
+    }
+
+    @Override
+    public JsonObject toJson(JsonObject json) {
+        json = super.toJson(json);
+        json.addProperty("isOutput", isOutput);
+        json.addProperty("stress", stress);
+        return json;
     }
 }

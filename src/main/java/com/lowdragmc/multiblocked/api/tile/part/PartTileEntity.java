@@ -4,12 +4,10 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.kubejs.events.PartAddedEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.PartRemovedEvent;
-import com.lowdragmc.multiblocked.api.kubejs.events.UpdateRendererEvent;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
-import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import net.minecraft.core.BlockPos;
@@ -47,24 +45,6 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
             }
         }
         return false;
-    }
-
-    @Override
-    public IMultiblockedRenderer updateCurrentRenderer() {
-        if (definition.workingRenderer != null) {
-            for (IControllerComponent controller : getControllers()) {
-                if (controller.isFormed() && controller.isWorking()) {
-                    IMultiblockedRenderer renderer = definition.workingRenderer;
-                    if (Multiblocked.isKubeJSLoaded() && level != null) {
-                        UpdateRendererEvent event = new UpdateRendererEvent(this, renderer);
-                        event.post(ScriptType.of(level), UpdateRendererEvent.ID, getSubID());
-                        renderer = event.getRenderer();
-                    }
-                    return renderer;
-                }
-            }
-        }
-        return super.updateCurrentRenderer();
     }
 
     public boolean canShared() {

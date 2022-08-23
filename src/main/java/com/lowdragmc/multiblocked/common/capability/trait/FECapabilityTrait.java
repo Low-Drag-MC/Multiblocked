@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.trait.ProgressCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.FEMultiblockCapability;
@@ -135,7 +136,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     }
 
     public Direction[] getIOFacing() {
-        if (component.getDefinition().allowRotate) {
+        if (component.getDefinition().properties.rotationState != CustomProperties.RotationState.NONE) {
             return new Direction[]{component.getFrontFacing()};
         }
         return Direction.values();

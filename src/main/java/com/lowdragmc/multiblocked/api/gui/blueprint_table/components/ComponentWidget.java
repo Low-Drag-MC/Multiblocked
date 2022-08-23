@@ -1,55 +1,66 @@
 package com.lowdragmc.multiblocked.api.gui.blueprint_table.components;
 
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
 import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TabButton;
-import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
-import com.lowdragmc.lowdraglib.gui.widget.TextBoxWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
+import com.lowdragmc.multiblocked.api.definition.StatusProperties;
+import com.lowdragmc.multiblocked.api.gui.GuiUtils;
 import com.lowdragmc.multiblocked.api.gui.dialogs.IRendererWidget;
+import com.lowdragmc.multiblocked.api.gui.dialogs.IShapeWidget;
+import com.lowdragmc.multiblocked.api.gui.dialogs.ISoundWidget;
 import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
+import com.lowdragmc.multiblocked.api.sound.SoundState;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.lwjgl.opengl.GL11;
 
-import java.util.Collections;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class ComponentWidget<T extends ComponentDefinition> extends
-        DialogWidget {
+public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget {
     protected final T definition;
     protected ResourceLocation location;
     protected final TabContainer tabContainer;
     protected final WidgetGroup S1;
     protected final WidgetGroup S2;
+    protected final WidgetGroup S3;
     protected final WidgetGroup JSON;
     private final DraggableScrollableWidgetGroup tfGroup;
+    private final DraggableScrollableWidgetGroup statusList;
+    private final WidgetGroup statusSettings;
     private final TextBoxWidget textBox;
     private final Consumer<JsonObject> onSave;
     private boolean isPretty;
@@ -70,18 +81,55 @@ public class ComponentWidget<T extends ComponentDefinition> extends
         int x = 47;
         S1.addWidget(new LabelWidget(x, 57, "multiblocked.gui.label.registry_name"));
         S1.addWidget(new TextFieldWidget(x + 80, 54, 150, 15,  null, this::updateRegistryName).setResourceLocationOnly().setCurrentString(this.location.toString()));
-        S1.addWidget(createBoolSwitch(x, 75, "allowRotate", "multiblocked.gui.widget.component.allowRotate", definition.allowRotate, r -> definition.allowRotate = r));
-        S1.addWidget(createBoolSwitch(x, 90, "showInJei", "multiblocked.gui.widget.component.jei", definition.showInJei, r -> definition.showInJei = r));
-        S1.addWidget(createBoolSwitch(x, 105, "isOpaqueCube", "multiblocked.gui.widget.component.opaque", definition.properties.isOpaque, r -> definition.properties.isOpaque = r));
-        S1.addWidget(createScene(x - 2, 125, "baseRenderer", "multiblocked.gui.widget.component.basic_renderer", definition.baseRenderer, r -> definition.baseRenderer = r));
-        S1.addWidget(createScene(x + 98, 125, "formedRenderer", "multiblocked.gui.widget.component.formed_renderer", definition.formedRenderer, r -> definition.formedRenderer = r));
-        S1.addWidget(createScene(x + 198, 125, "workingRenderer", "multiblocked.gui.widget.component.working_renderer", definition.workingRenderer, r -> definition.workingRenderer = r));
+        if (definition instanceof ControllerDefinition) {
+            S1.addWidget(GuiUtils.createSelector(x, 75, "rotateState", "multiblocked.gui.widget.component.rotate_state", definition.properties.rotationState == CustomProperties.RotationState.NONE ? "NONE" : CustomProperties.RotationState.NON_Y_AXIS.name(),
+                    Stream.of(CustomProperties.RotationState.NONE, CustomProperties.RotationState.NON_Y_AXIS).map(Enum::name)
+                            .collect(Collectors.toList()), r -> definition.properties.rotationState = CustomProperties.RotationState.valueOf(r)));
+        } else {
+            S1.addWidget(GuiUtils.createSelector(x, 75, "rotateState", "multiblocked.gui.widget.component.rotate_state", definition.properties.rotationState.name(), Arrays.stream(CustomProperties.RotationState.values()).map(Enum::name).collect(Collectors.toList()), r -> definition.properties.rotationState = CustomProperties.RotationState.valueOf(r)));
+        }
+        S1.addWidget(GuiUtils.createBoolSwitch(x, 90, "showInJei", "multiblocked.gui.widget.component.jei", definition.properties.showInJei, r -> definition.properties.showInJei = r));
+        S1.addWidget(GuiUtils.createBoolSwitch(x, 105, "isOpaqueCube", "multiblocked.gui.widget.component.opaque", definition.properties.isOpaque, r -> definition.properties.isOpaque = r));
+        S1.addWidget(GuiUtils.createBoolSwitch(x, 120, "hasDynamicShape", "multiblocked.gui.widget.component.dynamic_shape", definition.properties.hasDynamicShape, r -> definition.properties.hasDynamicShape = r));
+        S1.addWidget(GuiUtils.createBoolSwitch(x, 135, "hasCollision", "multiblocked.gui.widget.component.collision", definition.properties.hasCollision, r -> definition.properties.hasCollision = r));
+        S1.addWidget(GuiUtils.createFloatField(x, 150, "destroyTime", "multiblocked.gui.widget.component.destroy_time", definition.properties.destroyTime, 0, Float.MAX_VALUE, r -> definition.properties.destroyTime = r));
+        S1.addWidget(GuiUtils.createFloatField(x, 165, "explosionResistance", "multiblocked.gui.widget.component.explosion_resistance", definition.properties.explosionResistance, 0, Float.MAX_VALUE, r -> definition.properties.explosionResistance = r));
+        S1.addWidget(GuiUtils.createFloatField(x, 180, "speedFactor", "multiblocked.gui.widget.component.speed_factor", definition.properties.speedFactor, 0, Float.MAX_VALUE, r -> definition.properties.speedFactor = r));
+        S1.addWidget(GuiUtils.createFloatField(x, 195, "jumpFactor", "multiblocked.gui.widget.component.jump_factor", definition.properties.jumpFactor, 0, Float.MAX_VALUE, r -> definition.properties.jumpFactor = r));
+
+        S1.addWidget(GuiUtils.createFloatField(x + 140, 75, "friction", "multiblocked.gui.widget.component.friction", definition.properties.friction, 0, Float.MAX_VALUE, r -> definition.properties.friction = r));
+        S1.addWidget(GuiUtils.createIntField(x + 140, 90, "harvestLevel", "multiblocked.gui.widget.component.harvest", definition.properties.harvestLevel, 0, Integer.MAX_VALUE, r -> definition.properties.harvestLevel = r));
+        S1.addWidget(GuiUtils.createIntField(x + 140, 105, "stackSize", "multiblocked.gui.widget.component.stack_size", definition.properties.stackSize, 1, 64, r -> definition.properties.stackSize = r));
+        S1.addWidget(GuiUtils.createStringField(x + 140, 120, "tabGroup", "multiblocked.gui.widget.component.tab_group", definition.properties.tabGroup, r -> definition.properties.tabGroup = r));
+
 
         tabContainer.addTab((TabButton) new TabButton(65, 26, 20, 20)
                         .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/switch_common.png").getSubTexture(0, 0.5, 1, 0.5), new TextTexture("S2"))
                         .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/switch_common.png").getSubTexture(0, 0, 1, 0.5), new TextTexture("S2"))
-                        .setHoverTooltips("multiblocked.gui.widget.component.s2"),
+                        .setHoverTooltips("multiblocked.gui.widget.component.status"),
                 S2 = new WidgetGroup(0, 0, getSize().width, getSize().height));
+        WidgetGroup statuesGroup = new WidgetGroup(20, 50, 150, 170);
+        S2.addWidget(statuesGroup);
+        S2.addWidget(statusSettings = (WidgetGroup) new WidgetGroup(170, 50, 168, 170).setBackground(ResourceBorderTexture.BORDERED_BACKGROUND));
+        statuesGroup.addWidget(new ImageWidget(20, 0, 150 - 20, 70, ResourceBorderTexture.BORDERED_BACKGROUND_BLUE));
+        statuesGroup.addWidget(statusList = new DraggableScrollableWidgetGroup(20, 4, 150 - 20, 70 - 8));
+        statuesGroup.addWidget(new ButtonWidget(0, 3, 20, 20, new ResourceTexture("multiblocked:textures/gui/add.png"), cd->{
+            int i = 1;
+            while (definition.status.containsKey("new_status_" + i)) {
+                i++;
+            }
+            String name = "new_status_" + i;
+            definition.status.put(name, new StatusProperties(name));
+            updateStatusList();
+        }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.widget.component.status.create"));
+        updateStatusList();
+
+
+        tabContainer.addTab((TabButton) new TabButton(88, 26, 20, 20)
+                        .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/switch_common.png").getSubTexture(0, 0.5, 1, 0.5), new TextTexture("S3"))
+                        .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/switch_common.png").getSubTexture(0, 0, 1, 0.5), new TextTexture("S3"))
+                        .setHoverTooltips("multiblocked.gui.widget.component.s2"),
+                S3 = new WidgetGroup(0, 0, getSize().width, getSize().height));
         int y = 55;
         for (MultiblockCapability<?> capability : MbdCapabilities.CAPABILITY_REGISTRY.values()) {
             if (capability.hasTrait()) {
@@ -138,7 +186,7 @@ public class ComponentWidget<T extends ComponentDefinition> extends
                         .setPressed(definition.traits.has(capability.name))
                         .setHoverTooltips(capability.getUnlocalizedName()));
                 widgetGroup.addWidget(new LabelWidget(40, 3, capability.getUnlocalizedName()));
-                S2.addWidget(widgetGroup);
+                S3.addWidget(widgetGroup);
                 y += 15;
             }
         }
@@ -179,7 +227,7 @@ public class ComponentWidget<T extends ComponentDefinition> extends
     }
 
     protected JsonObject getJsonObj() {
-        JsonObject jsonObject = (JsonObject) Multiblocked.GSON.toJsonTree(definition);
+        JsonObject jsonObject = definition.toJson(new JsonObject());
         jsonObject.addProperty("location", location.toString());
         return jsonObject;
     }
@@ -193,42 +241,197 @@ public class ComponentWidget<T extends ComponentDefinition> extends
         tfGroup.computeMax();
     }
 
+    protected void updateStatusList() {
+        statusList.clearAllWidgets();
+        statusSettings.clearAllWidgets();
+        for (StatusProperties status : definition.status.values()) {
+            SelectableWidgetGroup group = new SelectableWidgetGroup(5, 1 + statusList.widgets.size() * 22, statusList.getSize().width - 10, 20);
+            group.setSelectedTexture(-2, 0xff00aa00)
+                    .setOnSelected(W -> {
+                        statusSettings.clearAllWidgets();
+                        DraggableWidgetGroup panel = new DraggableWidgetGroup(0, 0, statusSettings.getSize().width, statusSettings.getSize().height);
+                        WidgetGroup scene = createScene(() -> status.renderer != null,  status::getRenderer, status::getShape, status::setRenderer);
+                        statusSettings.addWidget(scene);
+                        statusSettings.addWidget(panel);
+                        panel.addWidget(new LabelWidget(4, 7, "multiblocked.gui.label.registry_name"));
+                        panel.addWidget(new LabelWidget(4, 24, "Parent:"));
+                        if (status.builtin) {
+                            panel.addWidget(new LabelWidget(80, 7, status.getName()));
+                            panel.addWidget(new LabelWidget(50, 24, status.getParent() == null ? "null" : status.getParent().getName()));
+                        } else {
+                            List<String> candidates = new ArrayList<>();
+                            candidates.add("null");
+                            candidates.addAll(definition.status.values().stream().filter(s->s!=status).map(StatusProperties::getName).collect(Collectors.toList()));
+                            panel.addWidget(new TextFieldWidget(80, 4, 80, 15,  null, s -> {
+                                String lastName = status.getName();
+                                status.setName(s);
+                                definition.status.remove(lastName);
+                                definition.status.put(s, status);
+                            })
+                                    .setCurrentString(status.getName())
+                                    .setHoverTooltips("multiblocked.gui.widget.component.status.name"));
+                            panel.addWidget(new SelectorWidget(50, 22, 110, 15, candidates, -1)
+                                    .setValue(status.getParent() == null ? "null" : status.getParent().getName())
+                                    .setOnChanged(newParent -> status.setParent(definition.status.getOrDefault(newParent, null)))
+                                    .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
+                                    .setBackground(new ColorRectTexture(0xffaaaaaa))
+                                    .setHoverTooltips("multiblocked.gui.widget.component.status.parent"));
+                        }
+                        panel.addWidget(createStatusBoolSwitch(4, 40, "renderer", "multiblocked.gui.widget.component.status.renderer", status.renderer != null, widgetGroup -> {
+                            if (widgetGroup == null) {
+                                status.renderer = null;
+                            } else {
+                                status.setRenderer(status.renderer == null ? null : status.getRenderer());
+                            }
+                        }));
+                        panel.addWidget(createStatusBoolSwitch(4, 60, "lightEmissive", "multiblocked.gui.widget.component.status.light_emissive", status.lightEmissive != null, widgetGroup -> {
+                            if (widgetGroup == null) {
+                                status.lightEmissive = null;
+                            } else {
+                                status.setLightEmissive(status.lightEmissive == null ? 0 : status.getLightEmissive());
+                                widgetGroup.addWidget(GuiUtils.createIntField(30, 0, "", "light level", status.getLightEmissive(), 0, 15, status::setLightEmissive));
+                            }
+                        }));
+                        panel.addWidget(createStatusBoolSwitch(4, 80, "shape", "multiblocked.gui.widget.component.status.shape", status.shape != null, widgetGroup -> {
+                            if (widgetGroup == null) {
+                                status.shape = null;
+                            } else {
+                                status.setShape(status.shape == null ? Shapes.block() : status.getShape());
+                                widgetGroup.addWidget(new ButtonWidget(20, 0, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"),(cd) -> {
+                                    scene.setVisible(false);
+                                    new IShapeWidget(this, status.getRenderer(), status.getShape(), s -> {
+                                        status.setShape(s);
+                                        scene.setVisible(true);
+                                    });
+                                }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.settings"));
+                            }
+                        }));
+                        panel.addWidget(createStatusBoolSwitch(4, 100, "sound", "multiblocked.gui.widget.component.status.sound", status.sound != null, widgetGroup -> {
+                            if (widgetGroup == null) {
+                                status.sound = null;
+                            } else {
+                                status.setSound(status.sound == null ? SoundState.EMPTY : status.getSound());
+                                widgetGroup.addWidget(new ButtonWidget(20, 0, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"),(cd) ->
+                                        new ISoundWidget(this, status.getSound(), status::setSound))
+                                        .setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.settings"));
+                            }
+                        }));
+                    })
+                    .addWidget(new ImageWidget(0, 0, 120, 20, new ColorRectTexture(0x4faaaaaa)))
+                    .addWidget(new ImageWidget(2, 0, statusList.getSize().width - 14, 20, new TextTexture(status.getName())
+                            .setSupplier(status::getName)
+                            .setWidth(statusList.getSize().width - 14).setType(TextTexture.TextType.ROLL)));
+            if (!status.builtin) {
+                group.addWidget(new ButtonWidget(104, 4, 12, 12, new ResourceTexture("multiblocked:textures/gui/remove.png"), cd -> {
+                    definition.status.remove(status.getName());
+                    updateStatusList();
+                }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.remove"));
+            }
+            statusList.addWidget(group);
+        }
+    }
+
     protected void updateRegistryName(String s) {
         location = (s != null && !s.isEmpty()) ? new ResourceLocation(s) : location;
     }
 
-    protected WidgetGroup createBoolSwitch(int x, int y, String text, String tips, boolean init, Consumer<Boolean> onPressed) {
+    protected WidgetGroup createStatusBoolSwitch(int x, int y, String text, String tips, boolean init, Consumer<WidgetGroup> onPressed) {
         WidgetGroup widgetGroup = new WidgetGroup(x, y, 100, 15);
-        widgetGroup.addWidget(new SwitchWidget(0, 0, 15, 15, (cd, r)->onPressed.accept(r))
+        AtomicReference<WidgetGroup> group = new AtomicReference<>();
+        widgetGroup.addWidget(new SwitchWidget(0, 0, 15, 15, (cd, r) -> {
+            if (r) {
+                group.set(new WidgetGroup(60, 0, 100, 100));
+                widgetGroup.addWidget(group.get());
+                onPressed.accept(group.get());
+            } else {
+                widgetGroup.removeWidget(group.get());
+                onPressed.accept(null);
+            }
+        })
                 .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
                 .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
                 .setHoverTexture(new ColorBorderTexture(1, 0xff545757))
                 .setPressed(init)
                 .setHoverTooltips(tips));
+        if (init) {
+            group.set(new WidgetGroup(60, 0, 100, 100));
+            widgetGroup.addWidget(group.get());
+            onPressed.accept(group.get());
+        }
         widgetGroup.addWidget(new LabelWidget(20, 3, text));
         return widgetGroup;
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected WidgetGroup createScene(int x, int y, String text, String tips, IMultiblockedRenderer init, Consumer<IMultiblockedRenderer> onUpdate) {
+    protected WidgetGroup createScene(Supplier<Boolean> custom, Supplier<IMultiblockedRenderer> init, Supplier<VoxelShape> shape, Consumer<IMultiblockedRenderer> onUpdate) {
+        final int width = 90, height = 90;
         TrackedDummyWorld world = new TrackedDummyWorld();
         world.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(MbdComponents.DummyComponentBlock.defaultBlockState()));
         DummyComponentTileEntity tileEntity = (DummyComponentTileEntity) world.getBlockEntity(BlockPos.ZERO);
         tileEntity.setDefinition(new PartDefinition(new ResourceLocation(Multiblocked.MODID, "component_widget")));
-        tileEntity.getDefinition().baseRenderer = init;
-        WidgetGroup widgetGroup = new WidgetGroup(x, y, 90, 90);
-        widgetGroup.addWidget(new LabelWidget(0, 0, text));
-        widgetGroup.addWidget(new ImageWidget(0, 12,  90, 80, new ColorBorderTexture(2, 0xff4A82F7)));
-        widgetGroup.addWidget(new SceneWidget(0, 12,  90, 80, world)
+        tileEntity.getDefinition().getBaseStatus().setRenderer(init.get());
+        Widget buttonWidget = new ButtonWidget(width - 17, 2, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"),(cd) ->
+                new IRendererWidget(this, tileEntity.getRenderer(), r -> {
+                    tileEntity.getDefinition().getBaseStatus().setRenderer(r);
+                    onUpdate.accept(r);
+                })).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.settings");
+        buttonWidget.setVisible(custom.get());
+        WidgetGroup widgetGroup = new WidgetGroup(-110, 75, width, height) {
+            @Override
+            public void updateScreen() {
+                super.updateScreen();
+                IMultiblockedRenderer currentRenderer = tileEntity.getRenderer();
+                IMultiblockedRenderer newRenderer = init.get();
+                if (currentRenderer != newRenderer) {
+                    tileEntity.getDefinition().getBaseStatus().setRenderer(newRenderer);
+                }
+                buttonWidget.setVisible(custom.get());
+            }
+        };
+        widgetGroup.addWidget(new ImageWidget(0, 0,  width, height, new ColorBorderTexture(2, 0xff4A82F7)));
+        widgetGroup.addWidget(new SceneWidget(0, 0,  width, height, world) {
+            @Override
+            @OnlyIn(Dist.CLIENT)
+            public void renderBlockOverLay(WorldSceneRenderer renderer) {
+                super.renderBlockOverLay(renderer);
+                PoseStack PoseStack = new PoseStack();
+
+                RenderSystem.enableBlend();
+                RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+                PoseStack.pushPose();
+
+                PoseStack.pushPose();
+                Tesselator tessellator = Tesselator.getInstance();
+                RenderSystem.disableCull();
+                BufferBuilder buffer = tessellator.getBuilder();
+                RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+                buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+                RenderSystem.lineWidth(6);
+                Matrix4f matrix4f = PoseStack.last().pose();
+
+                shape.get().forAllEdges((x0, y0, z0, x1, y1, z1) -> {
+                    float f = (float)(x1 - x0);
+                    float f1 = (float)(y1 - y0);
+                    float f2 = (float)(z1 - z0);
+                    float f3 = Mth.sqrt(f * f + f1 * f1 + f2 * f2);
+                    f /= f3;
+                    f1 /= f3;
+                    f2 /= f3;
+                    buffer.vertex(matrix4f, (float)(x0), (float)(y0), (float)(z0)).color(50, 50, 50, 255).normal(PoseStack.last().normal(), f, f1, f2).endVertex();
+                    buffer.vertex(matrix4f, (float)(x1), (float)(y1), (float)(z1)).color(50, 50, 50, 255).normal(PoseStack.last().normal(), f, f1, f2).endVertex();
+                });
+
+                tessellator.end();
+
+                PoseStack.popPose();
+                RenderSystem.enableCull();
+            }
+        }
                 .setRenderedCore(Collections.singleton(BlockPos.ZERO), null)
                 .setRenderSelect(false)
                 .setRenderFacing(false));
-        widgetGroup.addWidget(new ButtonWidget(90-15, 12, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"),(cd) ->
-                new IRendererWidget(this, tileEntity.getRenderer(), r -> {
-                    tileEntity.getDefinition().baseRenderer = r;
-                    onUpdate.accept(r);
-                })).setHoverBorderTexture(1, -1).setHoverTooltips(tips));
-
+        widgetGroup.addWidget(buttonWidget);
         return widgetGroup;
     }
 }

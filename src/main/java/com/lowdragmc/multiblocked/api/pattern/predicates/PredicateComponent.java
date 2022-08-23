@@ -94,7 +94,7 @@ public class PredicateComponent extends SimplePredicate {
     private List<String> getAvailableComponents() {
         Set<String> components = new HashSet<>();
         for (ComponentDefinition value : MbdComponents.DEFINITION_REGISTRY.values()) {
-            if (value.baseRenderer instanceof CycleBlockStateRenderer) continue;
+            if (value.getBaseRenderer() instanceof CycleBlockStateRenderer) continue;
             if (value instanceof ControllerDefinition) continue;
             components.add(value.location.toString());
         }

@@ -11,6 +11,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.lowdragmc.multiblocked.api.registry.MbdRenderers;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import net.minecraft.util.GsonHelper;
 
 public class IMultiblockedRendererTypeAdapterFactory implements TypeAdapterFactory {
     public static final IMultiblockedRendererTypeAdapterFactory INSTANCE = new IMultiblockedRendererTypeAdapterFactory();
@@ -37,6 +38,7 @@ public class IMultiblockedRendererTypeAdapterFactory implements TypeAdapterFacto
             if (value != null) {
                 JsonObject jsonObject = value.toJson(gson, new JsonObject());
                 jsonObject.addProperty("type", value.getType());
+                jsonObject.addProperty("postRenderer", value.isPostRenderer());
                 gson.toJson(jsonObject, out);
             } else {
                 gson.toJson(JsonNull.INSTANCE, out);
@@ -56,5 +58,21 @@ public class IMultiblockedRendererTypeAdapterFactory implements TypeAdapterFacto
             return null;
         }
 
+    }
+
+    /**
+     * check the renderer need to be loaded.
+     */
+    public boolean isPostRenderer(JsonElement jsonElement) {
+        if (jsonElement.isJsonObject()) {
+            if (jsonElement.getAsJsonObject().has("postRenderer")) {
+                return GsonHelper.getAsBoolean(jsonElement.getAsJsonObject(), "postRenderer", false);
+            }
+            final String type = GsonHelper.getAsString(jsonElement.getAsJsonObject(), "type", "");
+            if (type.equals("blockstate")) { // legacy
+                return true;
+            }
+        }
+        return false;
     }
 }

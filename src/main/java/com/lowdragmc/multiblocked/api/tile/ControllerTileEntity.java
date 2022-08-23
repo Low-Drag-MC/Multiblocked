@@ -229,15 +229,18 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             new StructureInvalidEvent(this).post(ScriptType.of(level), StructureInvalidEvent.ID, getSubID());
         }
+    }
 
-        if (getDefinition().noNeedController && oldState != null && this.level != null) {
-            BlockPos pos = getBlockPos();
-            this.level.setBlockAndUpdate(pos, oldState);
-            if (oldNbt != null) {
-                BlockEntity blockEntity = BlockEntity.loadStatic(pos, oldState, oldNbt);
-                if (blockEntity != null) {
-                    this.level.setBlockEntity(blockEntity);
-                }
+    public boolean hasOldBlock() {
+        return getDefinition().noNeedController && oldState != null && this.level != null;
+    }
+
+    public void resetOldBlock(Level level, BlockPos pos) {
+        level.setBlockAndUpdate(pos, oldState);
+        if (oldNbt != null) {
+            BlockEntity blockEntity = BlockEntity.loadStatic(pos, oldState, oldNbt);
+            if (blockEntity != null) {
+                this.level.setBlockEntity(blockEntity);
             }
         }
     }

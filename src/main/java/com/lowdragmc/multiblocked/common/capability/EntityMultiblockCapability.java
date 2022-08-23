@@ -8,17 +8,17 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.EntityIngredient;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.common.capability.trait.EntityCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.EntityContentWidget;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 
 
@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class EntityMultiblockCapability extends MultiblockCapability<EntityType<?>> {
+public class EntityMultiblockCapability extends MultiblockCapability<EntityIngredient> {
     public static final EntityMultiblockCapability CAP = new EntityMultiblockCapability();
 
     private EntityMultiblockCapability() {
@@ -36,8 +36,8 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityType<
     }
 
     @Override
-    public EntityType<?> defaultContent() {
-        return EntityType.PIG;
+    public EntityIngredient defaultContent() {
+        return new EntityIngredient();
     }
 
     @Override
@@ -49,17 +49,17 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityType<
     }
 
     @Override
-    public EntityType<?> copyInner(EntityType<?> content) {
-        return content;
+    public EntityIngredient copyInner(EntityIngredient content) {
+        return content.copy();
     }
 
     @Override
-    public CapabilityProxy<? extends EntityType<?>> createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
+    public CapabilityProxy<? extends EntityIngredient> createProxy(@Nonnull IO io, @Nonnull TileEntity tileEntity) {
         return new EntityCapabilityProxy(tileEntity);
     }
 
     @Override
-    public ContentWidget<? super EntityType<?>> createContentWidget() {
+    public ContentWidget<? super EntityIngredient> createContentWidget() {
         return new EntityContentWidget();
     }
 
@@ -81,77 +81,81 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityType<
     }
 
     @Override
-    public EntityType<?> of(Object o) {
-        if (o instanceof EntityType<?>) {
-            return (EntityType<?>) o;
-        } else if (o instanceof CharSequence || o instanceof ResourceLocation) {
-            return EntityType.byString(o.toString()).orElse(EntityType.PIG);
-        }
-        return EntityType.PIG;
+    public EntityIngredient of(Object o) {
+        return EntityIngredient.of(o);
     }
 
     @Override
-    public EntityType<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        return EntityType.byString(json.getAsString()).orElse(EntityType.PIG);
+    public EntityIngredient deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        return EntityIngredient.fromJson(json);
     }
 
     @Override
-    public JsonElement serialize(EntityType<?> src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src.getRegistryName().toString());
+    public JsonElement serialize(EntityIngredient src, Type typeOfSrc, JsonSerializationContext context) {
+        return src.toJson();
     }
 
-    public static class EntityCapabilityProxy extends CapabilityProxy<EntityType<?>> {
+    public static class EntityCapabilityProxy extends CapabilityProxy<EntityIngredient> {
 
         public EntityCapabilityProxy(TileEntity tileEntity) {
             super(EntityMultiblockCapability.CAP, tileEntity);
         }
 
         @Override
-        protected List<EntityType<?>> handleRecipeInner(IO io, Recipe recipe, List<EntityType<?>> left, boolean simulate) {
-            if (io == IO.IN) {
-                List<Entity> entities = getTileEntity().getLevel().getEntities(null, new AxisAlignedBB(
-                        getTileEntity().getBlockPos().above(),
-                        getTileEntity().getBlockPos().above().offset(1, 1, 1)));
-                for (Entity entity : entities) {
-                    if (entity.isAlive()) {
-                        if (left.remove(entity.getType())) {
-                            if (!simulate) {
-                                entity.remove(false);
+        protected List<EntityIngredient> handleRecipeInner(IO io, Recipe recipe, List<EntityIngredient> left, boolean simulate) {
+            TileEntity tileEntity =getTileEntity();
+            if (tileEntity instanceof ComponentTileEntity) {
+                ComponentTileEntity<?> component = (ComponentTileEntity<?>) tileEntity;
+                BlockPos pos = component.getBlockPos().relative(component.getFrontFacing());
+                if (io == IO.IN) {
+                    List<Entity> entities = component.getLevel().getEntities(null, new AxisAlignedBB(
+                            pos,
+                            pos.offset(1, 1, 1)));
+                    for (Entity entity : entities) {
+                        if (entity.isAlive()) {
+                            if (left.removeIf(ingredient -> ingredient.match(entity))) {
+                                if (!simulate) {
+                                    entity.remove(false);
+                                }
                             }
                         }
                     }
-                }
-            } else if (io == IO.OUT){
-                if (!simulate && getTileEntity().getLevel() instanceof ServerWorld) {
-                    for (EntityType<?> type : left) {
-                        type.spawn((ServerWorld) getTileEntity().getLevel(), null, null, null,
-                                getTileEntity().getBlockPos().above(), SpawnReason.NATURAL,
-                                false, false);
+                } else if (io == IO.OUT){
+                    if (!simulate && component.getLevel() instanceof ServerWorld) {
+                        ServerWorld serverLevel = (ServerWorld) component.getLevel();
+                        for (EntityIngredient ingredient : left) {
+                            ingredient.spawn(serverLevel, ingredient.tag, pos);
+                        }
                     }
+                    return null;
                 }
-                return null;
             }
+
             return left.isEmpty() ? null : left;
         }
-
-        Set<EntityType<?>> entities = new HashSet<>();
+        Set<Entity> entities = new HashSet<>();
 
         @Override
         protected boolean hasInnerChanged() {
-            List<Entity> entities = getTileEntity().getLevel().getEntities(null, new AxisAlignedBB(
-                    getTileEntity().getBlockPos().above(),
-                    getTileEntity().getBlockPos().above().offset(1, 1, 1)));
-            Set<EntityType<?>> temp = new HashSet<>();
-            for (Entity entity : entities) {
-                if (entity.isAlive()) {
-                    temp.add(entity.getType());
+            if (getTileEntity() instanceof ComponentTileEntity<?>) {
+                ComponentTileEntity<?> component = (ComponentTileEntity<?>) getTileEntity();
+                BlockPos pos = component.getBlockPos().relative(component.getFrontFacing());
+                List<Entity> entities = component.getLevel().getEntities(null, new AxisAlignedBB(
+                        pos,
+                        pos.offset(1, 1, 1)));
+                Set<Entity> temp = new HashSet<>();
+                for (Entity entity : entities) {
+                    if (entity.isAlive()) {
+                        temp.add(entity);
+                    }
                 }
+                if (this.entities.size() == temp.size() && this.entities.containsAll(temp)) {
+                    return false;
+                }
+                this.entities = temp;
+                return true;
             }
-            if (this.entities.size() == temp.size() && this.entities.containsAll(temp)) {
-                return false;
-            }
-            this.entities = temp;
-            return true;
+            return false;
         }
     }
 

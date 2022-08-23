@@ -15,20 +15,19 @@ import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -37,6 +36,8 @@ public class MbdComponents {
     public static final Map<ResourceLocation, ComponentDefinition> TEST_DEFINITION_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, Block> COMPONENT_BLOCKS_REGISTRY = new HashMap<>();
     public static final Map<ResourceLocation, BlockItem> COMPONENT_ITEMS_REGISTRY = new HashMap<>();
+    public static final Map<ItemStack, ControllerDefinition[]> NO_NEED_CONTROLLER_MB = new HashMap<>();
+    public static final Set<Item> CATALYST_SET = new HashSet<>();
     public static final BlockComponent DummyComponentBlock;
     public static final ItemComponent DummyComponentItem;
 
@@ -109,15 +110,13 @@ public class MbdComponents {
             JsonObject config = FileUtility.jsonParser.parse(new InputStreamReader(inputstream)).getAsJsonObject();
             T definition = constructor.apply(new ResourceLocation(config.get("location").getAsString()));
             definition.fromJson(config);
-            if (definition != null) {
-                if (block == null || item == null) {
-                    registerComponent(definition);
-                } else {
-                    registerComponent(definition, block, item);
-                }
-                if (postHandler != null) {
-                    handlers.add(()->postHandler.accept(definition, config));
-                }
+            if (block == null || item == null) {
+                registerComponent(definition);
+            } else {
+                registerComponent(definition, block, item);
+            }
+            if (postHandler != null) {
+                handlers.add(()->postHandler.accept(definition, config));
             }
         } catch (Exception e) {
             Multiblocked.LOGGER.error("error while loading the definition resource {}", location.toString());
@@ -140,5 +139,29 @@ public class MbdComponents {
         for (ComponentDefinition definition : DEFINITION_REGISTRY.values()) {
             ClientRegistry.bindTileEntityRenderer(definition.getTileType(), ComponentTESR::new);
         }
+    }
+
+    public static void registerNoNeedController(ItemStack catalyst, ControllerDefinition definition) {
+        CATALYST_SET.add(catalyst.getItem());
+        ItemStack key = catalyst;
+        for (ItemStack itemStack : NO_NEED_CONTROLLER_MB.keySet()) {
+            if (ItemStack.isSame(itemStack, catalyst) && ItemStack.tagMatches(itemStack, catalyst)) {
+                key = itemStack;
+                break;
+            }
+        }
+        NO_NEED_CONTROLLER_MB.put(key, ArrayUtils.add(NO_NEED_CONTROLLER_MB.get(catalyst), definition));
+    }
+
+    public static ControllerDefinition[] checkNoNeedController(ItemStack catalyst) {
+        if (catalyst == null) return new ControllerDefinition[0];
+        if (CATALYST_SET.contains(catalyst.getItem())) {
+            for (ItemStack itemStack : NO_NEED_CONTROLLER_MB.keySet()) {
+                if (ItemStack.isSame(itemStack, catalyst) && ItemStack.tagMatches(itemStack, catalyst)) {
+                    return NO_NEED_CONTROLLER_MB.get(itemStack);
+                }
+            }
+        }
+        return new ControllerDefinition[0];
     }
 }

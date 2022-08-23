@@ -32,6 +32,7 @@ import it.unimi.dsi.fastutil.longs.LongSets;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -335,6 +336,11 @@ public class PatternWidget extends WidgetGroup {
                     new Vector3d(0.5, 1, 0.5).add(pos.getX(), pos.getY(), pos.getZ()),
                     Direction.UP,
                     pos), PatternWidget.world, pos, Minecraft.getInstance().player);
+
+            if (itemStack.isEmpty() && !blockState.getFluidState().isEmpty()) {
+                Fluid fluid = blockState.getFluidState().getType();
+                itemStack = fluid.getBucket().getDefaultInstance();
+            }
 
             ItemStackKey itemStackKey = new ItemStackKey(itemStack);
             PartInfo partInfo = partsMap.get(itemStackKey);

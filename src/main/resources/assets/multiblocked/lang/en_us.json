@@ -1,5 +1,5 @@
 {
-  "multiblocked.multiblock.formed": "Multiblock Formed!",
+  "multiblocked.multiblock.formed": " formed!",
   "multiblocked.capability.forge_energy": "Forge Energy",
   "block.multiblocked.forge_energy.any": "Any Forge Energy Containers",
   "multiblocked.capability.entity": "Entity",
@@ -24,7 +24,6 @@
   "block.multiblocked.create_stress.any": "Any Create Kinetic Part",
   "itemGroup.multiblocked.all": "MBD",
   "item.multiblocked.multiblock_builder": "Multiblock Builder",
-  "multiblocked.renderer.tparticle": "particle textures",
 
   "block.multiblocked.energy_output": "Energy Output Hatch",
   "block.multiblocked.energy_input": "Energy Input Hatch",
@@ -145,6 +144,7 @@
   "multiblocked.gui.widget.controller.consume": "Consume Catalyst",
   "multiblocked.gui.widget.controller.need_catalyst": "If this multiblock requires no catalyst, the multiblock will attempt to formed every second",
   "multiblocked.gui.widget.controller.catalyst": "Catalyst | If empty, right-clicking the controller will trigger the formation of the multiblock",
+  "multiblocked.gui.widget.controller.no_controller": "Allow to create a multiblock without controller\nyou can set the controller's replacement block in the Pattern Settings\n§4Note that you must right-click on the block in the controller block position with the catalyst to trigger the structure to form§r",
   "multiblocked.gui.widget.controller.s3": "Step 3: Structure Pattern Setup",
   "multiblocked.gui.widget.controller.s4": "Step 4: Machine,'s Recipe Map",
   "multiblocked.gui.widget.part.shared": "Can be Shared with Different, Adjacent Multiblocks",
@@ -177,7 +177,7 @@
   "multiblocked.gui.content.tips.per_tick_short": "§a/tick§r",
   "multiblocked.gui.content.chance_0": "§cNot Consumed§r",
   "multiblocked.gui.content.chance_0_short": "§cNC§r",
-  "multiblocked.gui.content.chance_1": "§eChance: %s",
+  "multiblocked.gui.content.chance_1": "§eChance: %s§r",
   "multiblocked.gui.trait.energy.progress": "EU Stored: %d / %d",
   "multiblocked.gui.trait.energy.tips": "Capability (EU)",
   "multiblocked.gui.trait.fe.progress": "FE Stored: %d / %d",
@@ -269,6 +269,7 @@
   "multiblocked.recipe.condition.pos_y": "Position Y",
   "multiblocked.recipe.condition.pos_y.tooltip": "%d <= Y <= %d",
   "multiblocked.gui.label.entity_type": "Entity Type",
+  "multiblocked.gui.label.entity_tag": "Entity Tag",
 
   "multiblocked.gui.widget.component.dynamic_shape": "Dynamic Shape",
   "multiblocked.gui.widget.component.collision": "Collision",

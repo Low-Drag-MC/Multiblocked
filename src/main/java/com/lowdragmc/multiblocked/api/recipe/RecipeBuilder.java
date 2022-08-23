@@ -242,6 +242,13 @@ public class RecipeBuilder {
         }
         return this;
     }
+    public RecipeBuilder inputEntities(EntityIngredient... inputs) {
+        return input(EntityMultiblockCapability.CAP, inputs);
+    }
+
+    public RecipeBuilder outputEntities(EntityIngredient... outputs) {
+        return output(EntityMultiblockCapability.CAP, outputs);
+    }
 
     public RecipeBuilder inputCreate(float capacity) {
         if (Multiblocked.isCreateLoaded()) {

@@ -9,16 +9,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.PhantomSlotWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TabButton;
-import com.lowdragmc.lowdraglib.gui.widget.TextBoxWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
@@ -50,8 +41,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
     protected JsonBlockPattern pattern;
@@ -73,11 +62,22 @@ public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
         }
         S1.addWidget(GuiUtils.createBoolSwitch(x + 140, 165, "consumeCatalyst", "multiblocked.gui.widget.controller.consume", definition.consumeCatalyst, r -> definition.consumeCatalyst = r));
 
+        Widget consumeCatalystWidget;
+        S1.addWidget(consumeCatalystWidget = GuiUtils.createBoolSwitch(x + 140, 165, "consumeCatalyst", "multiblocked.gui.widget.controller.consume", definition.consumeCatalyst, r -> definition.consumeCatalyst = r));
+        consumeCatalystWidget.setVisible(definition.getCatalyst() != null);
+
+        Widget noNeedControllerWidget;
+        S1.addWidget(noNeedControllerWidget = GuiUtils.createBoolSwitch(x + 140, 180, "noNeedController", "multiblocked.gui.widget.controller.no_controller", definition.noNeedController, r -> definition.noNeedController = r));
+        noNeedControllerWidget.setVisible(definition.getCatalyst() != null && !definition.getCatalyst().isEmpty());
+
         IItemHandlerModifiable handler;
         PhantomSlotWidget phantomSlotWidget = new PhantomSlotWidget(handler = new ItemStackHandler(1), 0, x + 250, 154);
         S1.addWidget(phantomSlotWidget);
         phantomSlotWidget.setClearSlotOnRightClick(true)
-                .setChangeListener(() -> definition.setCatalyst(handler.getStackInSlot(0)))
+                .setChangeListener(() -> {
+                    definition.setCatalyst(handler.getStackInSlot(0));
+                    noNeedControllerWidget.setVisible(!handler.getStackInSlot(0).isEmpty());
+                })
                 .setBackgroundTexture(new ColorBorderTexture(1, -1))
                 .setHoverTooltips("multiblocked.gui.widget.controller.catalyst")
                 .setVisible(definition.getCatalyst() != null);
@@ -86,6 +86,8 @@ public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
         S1.addWidget(GuiUtils.createBoolSwitch(x + 140, 150, "needCatalyst", "multiblocked.gui.widget.controller.need_catalyst", definition.getCatalyst() != null, r -> {
             definition.setCatalyst(!r ? null : ItemStack.EMPTY);
             phantomSlotWidget.setVisible(r);
+            consumeCatalystWidget.setVisible(r);
+            noNeedControllerWidget.setVisible(r && !handler.getStackInSlot(0).isEmpty());
         }));
 
         tabContainer.addTab((TabButton) new TabButton(111, 26, 20, 20)

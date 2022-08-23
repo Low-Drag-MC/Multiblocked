@@ -21,7 +21,6 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
-import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.client.renderer.MultiblockPreviewRenderer;
 import com.lowdragmc.multiblocked.persistence.IAsyncThreadUpdate;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
@@ -38,6 +37,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -75,6 +75,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     protected LongOpenHashSet parts;
     protected RecipeLogic recipeLogic;
     protected AxisAlignedBB renderBox;
+    protected BlockState oldState;
+    protected CompoundNBT oldNbt;
 
     public ControllerTileEntity(ControllerDefinition definition) {
         super(definition);
@@ -229,6 +231,20 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
     }
 
+    public boolean hasOldBlock() {
+        return getDefinition().noNeedController && oldState != null && this.level != null;
+    }
+
+    public void resetOldBlock(World level, BlockPos pos) {
+        level.setBlockAndUpdate(pos, oldState);
+        if (oldNbt != null) {
+            TileEntity blockEntity = TileEntity.loadStatic(oldState, oldNbt);
+            if (blockEntity != null) {
+                this.level.setBlockEntity(pos, blockEntity);
+            }
+        }
+    }
+
     @Override
     public void receiveCustomData(int dataId, PacketBuffer buf) {
         if (dataId == -1) {
@@ -333,6 +349,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                         .put(MbdCapabilities.get(tag.getString("cap")), new Tuple<>(IO.VALUES[tag.getInt("io")], Direction.values()[tag.getInt("facing")]));
             }
         }
+        if (getDefinition().noNeedController && compound.contains("oldState")) {
+            this.oldState = NBTUtil.readBlockState(compound.getCompound("oldState"));
+            if (compound.contains("oldNbt")) {
+                this.oldNbt = compound.getCompound("oldNbt");
+            }
+        }
     }
 
     @Nonnull
@@ -362,6 +384,12 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
             compound.put("capabilities", tagList);
         }
+        if (getDefinition().noNeedController && oldState != null) {
+            compound.put("oldState", NBTUtil.writeBlockState(oldState));
+            if (oldNbt != null) {
+                compound.put("oldNbt", oldNbt);
+            }
+        }
         return compound;
     }
 
@@ -383,19 +411,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             if (!isFormed() && definition.getCatalyst() != null) {
                 if (state == null) state = new MultiblockState(level, getBlockPos());
                 ItemStack held = player.getItemInHand(hand);
-                if (definition.getCatalyst().isEmpty() || ItemStack.isSame(held, definition.getCatalyst())) {
-                    if (checkPattern()) { // formed
-                        player.swing(hand);
-                        ITextComponent formedMsg = new TranslationTextComponent(getUnlocalizedName()).append(new TranslationTextComponent("multiblocked.multiblock.formed"));
-                        player.sendMessage(formedMsg, NIL_UUID);
-                        if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
-                            held.shrink(1);
-                        }
-                        MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
-                        if (!needAlwaysUpdate()) {
-                            MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
-                        }
-                        onStructureFormed();
+                if (definition.getCatalyst().isEmpty() || (ItemStack.isSame(held, definition.getCatalyst()) && ItemStack.tagMatches(held, definition.getCatalyst()))) {
+                    if (checkCatalystPattern(player, hand, held)) {
                         return ActionResultType.SUCCESS;
                     }
                 }
@@ -407,6 +424,24 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
         }
         return ActionResultType.SUCCESS;
+    }
+
+    public boolean checkCatalystPattern(PlayerEntity player, Hand hand, ItemStack held) {
+        if (checkPattern()) { // formed
+            player.swing(hand);
+            ITextComponent formedMsg = new TranslationTextComponent(getUnlocalizedName()).append(new TranslationTextComponent("multiblocked.multiblock.formed"));
+            player.sendMessage(formedMsg, NIL_UUID);
+            if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
+                held.shrink(1);
+            }
+            MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
+            if (!needAlwaysUpdate()) {
+                MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
+            }
+            onStructureFormed();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -465,4 +500,11 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return getRecipeLogic() != null && getRecipeLogic().isWorking();
     }
 
+    public void saveOldBlock(BlockState oldState, CompoundNBT oldNbt) {
+        this.oldState = oldState;
+        if (oldNbt != null) {
+            this.oldNbt = oldNbt;
+        }
+        markAsDirty();
+    }
 }

@@ -1,6 +1,8 @@
 package com.lowdragmc.multiblocked;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.api.block.ItemComponent;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
@@ -24,8 +26,10 @@ import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.simibubi.create.foundation.block.BlockStressDefaults;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -36,6 +40,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import software.bernie.geckolib3.GeckoLib;
 
 import java.io.File;
+import java.util.Map;
 
 public class CommonProxy {
     public CommonProxy() {
@@ -72,6 +77,21 @@ public class CommonProxy {
                 });
             }
         });
+    }
+
+    @SubscribeEvent
+    public void registerSounds(RegistryEvent.Register<SoundEvent> event) {
+        File file = new File(Multiblocked.location, "assets/multiblocked/sounds.json");
+        if (file.exists() && file.isFile()) {
+            JsonElement sounds = FileUtility.loadJson(file);
+            if (sounds instanceof JsonObject) {
+                IForgeRegistry<SoundEvent> registry = event.getRegistry();
+                for (Map.Entry<String, JsonElement> sound : sounds.getAsJsonObject().entrySet()) {
+                    SoundEvent soundEvent = new SoundEvent(new ResourceLocation(Multiblocked.MODID, sound.getKey()));
+                    registry.register(soundEvent.setRegistryName(new ResourceLocation(Multiblocked.MODID, sound.getKey())));
+                }
+            }
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -142,6 +162,11 @@ public class CommonProxy {
     }
 
     public static void controllerPost(ControllerDefinition definition, JsonObject config) {
-
+        if (definition.noNeedController) {
+            ItemStack catalyst = definition.getCatalyst();
+            if (catalyst != null && !catalyst.isEmpty()) {
+                MbdComponents.registerNoNeedController(catalyst, definition);
+            }
+        }
     }
 }

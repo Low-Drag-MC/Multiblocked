@@ -26,7 +26,7 @@ public class ChunkMixin {
     private void onAddingBlock(BlockPos pos, BlockState state, boolean isMoving, CallbackInfoReturnable<BlockState> cir) {
         MinecraftServer server = level.getServer();
         if (server != null) {
-            server.execute(() -> {
+            server.executeBlocking(() -> {
                 for (MultiblockState structure : MultiblockWorldSavedData.getOrCreate(level).getControllerInChunk(chunkPos)) {
                     if (structure.isPosInCache(pos)) {
                         structure.onBlockStateChanged(pos);

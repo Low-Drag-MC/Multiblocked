@@ -19,7 +19,6 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.gui.blueprint_table.components.PartWidget;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -143,7 +142,9 @@ public class PartBuilderWidget extends WidgetGroup {
                         JsonElement jsonElement = FileUtility.loadJson(file);
                         if (jsonElement != null && jsonElement.isJsonObject()) {
                             try {
-                                setNewRenderer(Multiblocked.GSON.fromJson(jsonElement, PartDefinition.class).getBaseRenderer(), type);
+                                PartDefinition definition = new PartDefinition(new ResourceLocation(jsonElement.getAsJsonObject().get("location").getAsString()));
+                                definition.fromJson(jsonElement.getAsJsonObject());
+                                setNewRenderer(definition.getBaseRenderer(), type);
                             } catch (Exception ignored) {}
                         }
                     })

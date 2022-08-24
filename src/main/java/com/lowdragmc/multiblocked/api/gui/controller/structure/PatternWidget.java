@@ -1,9 +1,6 @@
 package com.lowdragmc.multiblocked.api.gui.controller.structure;
 
-import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
-import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
@@ -32,6 +29,7 @@ import it.unimi.dsi.fastutil.longs.LongSets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -126,7 +124,14 @@ public class PatternWidget extends WidgetGroup {
 
         addWidget(leftButton = new ButtonWidget(9, 151, 18, 18, LEFT_BUTTON, (x) -> reset(index - 1)).setHoverTexture(LEFT_BUTTON_HOVER));
 
-        addWidget(rightButton = new ButtonWidget(149, 151, 18, 18, RIGHT_BUTTON, (x) -> reset(index + 1)).setHoverTexture(RIGHT_BUTTON_HOVER));
+        addWidget(rightButton = new ButtonWidget(150, 53, 18, 18, RIGHT_BUTTON, (x) -> reset(index + 1)).setHoverTexture(RIGHT_BUTTON_HOVER));
+        if (controllerDefinition.getCatalyst() != null && !controllerDefinition.getCatalyst().isEmpty()) {
+            ItemStackHandler itemStackHandler;
+            addWidget(new SlotWidget(itemStackHandler = new ItemStackHandler(), 0, 149, 151 - 20, false, false)
+                    .setBackgroundTexture(ResourceBorderTexture.BUTTON_COMMON)
+                    .setOnAddedTooltips((slot, list)-> list.add(new TranslatableComponent(controllerDefinition.consumeCatalyst ? "multiblocked.gui.catalyst.0" : "multiblocked.gui.catalyst.1"))));
+            itemStackHandler.setStackInSlot(0, controllerDefinition.getCatalyst());
+        }
     }
 
     public static PatternWidget getPatternWidget(ControllerDefinition controllerDefinition) {

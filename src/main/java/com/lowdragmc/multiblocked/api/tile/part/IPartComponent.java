@@ -33,9 +33,9 @@ public interface IPartComponent extends IComponent {
         for (IControllerComponent controller : getControllers()) {
             if (controller.getStatus().equals(StatusProperties.IDLE)) {
                 isIdle = true;
-                if (controller.getStatus().equals(StatusProperties.WORKING)) {
-                    return StatusProperties.WORKING;
-                }
+            }
+            if (controller.getStatus().equals(StatusProperties.WORKING)) {
+                return StatusProperties.WORKING;
             }
         }
         return isIdle ? StatusProperties.IDLE : StatusProperties.UNFORMED;

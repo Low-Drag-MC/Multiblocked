@@ -27,6 +27,11 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+        // Location of the maven for mixed mappings, Registrate, and Flywheel
+        name 'tterrag maven'
+        url 'https://maven.tterrag.com'
+    }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -191,15 +196,17 @@ dependencies {
     // curios
     compileOnly fg.deobf("curse.maven:curios-309927:3748873")
     // create
-    compileOnly fg.deobf("curse.maven:create-328085:3864525")
+    compileOnly fg.deobf("curse.maven:create-328085:3934676")
     // flywheel
-    compileOnly fg.deobf("curse.maven:flywheel-486392:3864518")
+    compileOnly fg.deobf("curse.maven:flywheel-486392:3934664")
     // projecte
     compileOnly fg.deobf("curse.maven:projecte-226410:3722831")
     // nature's aura
     compileOnly fg.deobf("curse.maven:natures-aura-306626:3813427")
     // pneumaticcraft
     compileOnly fg.deobf("curse.maven:pneumaticcraft-repressurized-281849:3837268")
+    // registrate:Registrate
+    compileOnly fg.deobf("com.tterrag.registrate:Registrate:MC1.18.2-1.1.3")
 
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.18')

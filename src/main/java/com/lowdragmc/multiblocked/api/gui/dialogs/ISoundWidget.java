@@ -14,9 +14,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class ISoundWidget extends DialogWidget {
+public class ISoundWidget extends DialogWidget implements SearchComponentWidget.IWidgetSearch<SoundEvent>  {
     public Consumer<SoundState> onSave;
     private SoundState sound;
     @OnlyIn(Dist.CLIENT)
@@ -51,6 +53,7 @@ public class ISoundWidget extends DialogWidget {
                 .setHoverTooltips("multiblocked.gui.tips.save"));
 
         this.addWidget(settings = new WidgetGroup(0, 0, getSize().width, getSize().height));
+        this.addWidget(new SearchComponentWidget<>(35, 22, 150 - 20, 20, this));
         updateStatusList();
     }
 
@@ -65,7 +68,7 @@ public class ISoundWidget extends DialogWidget {
                 .addWidget(new ImageWidget(0, 0, 120, 20, new ColorRectTexture(0x4faaaaaa)))
                 .addWidget(new ImageWidget(2, 0, soundList.getSize().width - 14, 20, new TextTexture("NULL").setWidth(soundList.getSize().width - 14).setType(TextTexture.TextType.ROLL)));
         soundList.addWidget(selected);
-        for (SoundEvent soundEvent : ForgeRegistries.SOUND_EVENTS.getValues()) {
+        for (SoundEvent soundEvent : new ArrayList<>(ForgeRegistries.SOUND_EVENTS.getValues())) {
             SelectableWidgetGroup group = new SelectableWidgetGroup(5, 1 + soundList.widgets.size() * 22, soundList.getSize().width - 10, 20);
             group.setSelectedTexture(-2, 0xff00aa00)
                     .setOnSelected(W -> {
@@ -121,4 +124,23 @@ public class ISoundWidget extends DialogWidget {
         componentSound = sound.playGUISound();
     }
 
+    @Override
+    public String resultDisplay(SoundEvent sound) {
+        return getName(sound);
+    }
+
+    @Override
+    public void selectResult(SoundEvent sound) {
+        int index = new ArrayList<>(ForgeRegistries.SOUND_EVENTS.getValues()).indexOf(sound);
+        soundList.setScrollYOffset(index * 22 + 1);
+    }
+
+    @Override
+    public void search(String word, Consumer<SoundEvent> find) {
+        for (SoundEvent sound : ForgeRegistries.SOUND_EVENTS.getValues()) {
+            if (sound.getRegistryName().toString().toLowerCase().contains(word.toLowerCase()) || getName(sound).toLowerCase().contains(word.toLowerCase())) {
+                find.accept(sound);
+            }
+        }
+    }
 }

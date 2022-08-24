@@ -46,7 +46,7 @@ public class IShaderWidget extends DialogWidget {
         this.addWidget(new ImageWidget(0, 0, getSize().width, getSize().height, new ColorRectTexture(0xaf000000)));
         this.addWidget(new ImageWidget(35, 59, 138, 138, new GuiTextureGroup(new ColorBorderTexture(3, -1),
                 shaderTexture = ShaderTexture.createRawShader(init))));
-        TextFieldWidget textFieldWidget = new TextFieldWidget(181, 55, 120, 20,  null, null).setAllowEnter(true).setCurrentString(init);
+        TextFieldWidget textFieldWidget = new TextFieldWidget(181, 55, 120, 20,  null, null).setCurrentString(init);
         DraggableScrollableWidgetGroup tfGroup = new DraggableScrollableWidgetGroup(181, 80, 170, 120)
                 .setBackground(new ColorRectTexture(0x3faaaaaa))
                 .setYScrollBarWidth(4)

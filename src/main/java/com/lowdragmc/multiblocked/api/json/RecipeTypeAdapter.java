@@ -34,10 +34,7 @@ public class RecipeTypeAdapter implements JsonSerializer<Recipe>,
                 deserializeIO(json.has("outputs") ? json.get("outputs") : new JsonObject()),
                 deserializeIO(json.has("tickInputs") ? json.get("tickInputs") : new JsonObject()),
                 deserializeIO(json.has("tickOutputs") ? json.get("tickOutputs") : new JsonObject()),
-                (json.has("conditions") ? json.getAsJsonObject("conditions") : new JsonObject())
-                        .entrySet().stream()
-                        .map(entry -> MbdRecipeConditions.getCondition(entry.getKey()).deserialize(entry.getValue().getAsJsonObject()))
-                        .collect(ImmutableList.toImmutableList()),
+                deserializeConditions(json.has("conditions") ? json.get("conditions") : new JsonArray()),
                 json.get("duration").getAsInt());
     }
 
@@ -59,9 +56,12 @@ public class RecipeTypeAdapter implements JsonSerializer<Recipe>,
             json.add("tickOutputs", serializeIO(recipe.tickOutputs));
         }
         if (!recipe.conditions.isEmpty()) {
-            JsonObject conditions = new JsonObject();
+            JsonArray conditions = new JsonArray();
             for (RecipeCondition condition : recipe.conditions) {
-                conditions.add(condition.getType(), condition.serialize());
+                JsonObject object = new JsonObject();
+                object.addProperty("type", condition.getType());
+                object.add("condition", condition.serialize());
+                conditions.add(object);
             }
             json.add("conditions", conditions);
         }
@@ -94,6 +94,22 @@ public class RecipeTypeAdapter implements JsonSerializer<Recipe>,
             }
         }
         return builder.build();
+    }
+
+    private ImmutableList<RecipeCondition> deserializeConditions(JsonElement json) {
+        if (json.isJsonObject()) {
+            return json.getAsJsonObject().entrySet().stream()
+                    .map(entry -> MbdRecipeConditions.getCondition(entry.getKey()).createTemplate().deserialize(entry.getValue().getAsJsonObject()))
+                    .collect(ImmutableList.toImmutableList());
+        } else if (json.isJsonArray() && json.getAsJsonArray().size() > 0){
+            ImmutableList.Builder<RecipeCondition> builder = new ImmutableList.Builder<>();
+            for (JsonElement condition : json.getAsJsonArray()) {
+                JsonObject object = (JsonObject) condition;
+                builder.add(MbdRecipeConditions.getCondition(object.get("type").getAsString()).createTemplate().deserialize(object.get("condition").getAsJsonObject()));
+            }
+            return builder.build();
+        }
+        return ImmutableList.of();
     }
 
     private JsonObject serializeIO(ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> recipe) {

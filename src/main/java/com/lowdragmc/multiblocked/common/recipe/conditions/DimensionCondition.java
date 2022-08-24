@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.common.recipe.conditions;
 
 import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib.gui.widget.SearchComponentWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SelectorWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
@@ -19,6 +20,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -77,13 +79,40 @@ public class DimensionCondition extends RecipeCondition {
     @OnlyIn(Dist.CLIENT)
     public void openConfigurator(WidgetGroup group) {
         super.openConfigurator(group);
-        Set<ResourceLocation> types = Minecraft.getInstance().level.registryAccess().registry(Registry.DIMENSION_TYPE_REGISTRY).get().keySet();
-        group.addWidget(new SelectorWidget(0,20, 80, 15, types.stream().map(ResourceLocation::toString).collect(Collectors.toList()), -1)
+        Set<ResourceLocation> types = Minecraft.getInstance().level.registryAccess().registry(
+                Registry.DIMENSION_TYPE_REGISTRY).get().keySet();
+        SelectorWidget selectorWidget = new SelectorWidget(0, 20, 80, 15, types.stream().map(ResourceLocation::toString).collect(Collectors.toList()), -1);
+        SearchComponentWidget<ResourceLocation> searchComponentWidget = new SearchComponentWidget<>(0, 40, 80, 15, new SearchComponentWidget.IWidgetSearch<ResourceLocation>() {
+            @Override
+            public void search(String word, Consumer<ResourceLocation> find) {
+                for (ResourceLocation type : types) {
+                    if (type.toString().toLowerCase().contains(word.toLowerCase())) {
+                        find.accept(type);
+                    }
+                }
+            }
+
+            @Override
+            public String resultDisplay(ResourceLocation value) {
+                return value.toString();
+            }
+
+            @Override
+            public void selectResult(ResourceLocation value) {
+                if (value != null) {
+                    dimension = value;
+                    selectorWidget.setValue(value.toString());
+                }
+            }
+        });
+        group.addWidget(selectorWidget
                 .setButtonBackground(new ColorRectTexture(0x7f2e2e2e))
                 .setOnChanged(dim -> {
                     if (dim != null && !dim.isEmpty() && ResourceLocation.isValidResourceLocation(dim)) {
                         dimension = new ResourceLocation(dim);
+                        searchComponentWidget.setCurrentString(dim);
                     }
-                }).setValue(types.contains(dimension) ? dimension.toString() : ""));
+                }).setIsUp(true).setValue(types.contains(dimension) ? dimension.toString() : ""));
+        group.addWidget(searchComponentWidget.setCapacity(2).setCurrentString(types.contains(dimension) ? dimension.toString() : ""));
     }
 }

@@ -250,7 +250,7 @@
   "multiblocked.gui.label.pattern_settings": "Pattern Settings",
   "multiblocked.jei.multiblock_info": "Multiblock Page",
 
-  "multiblocked.gui.condition.reverse": "reverse (executed if condition failed)",
+  "multiblocked.gui.condition.reverse": "below reverse (executed if condition failed)",
   "multiblocked.gui.condition.reverse.label": "isReverse",
   "multiblocked.gui.condition.rain.level": "Rain Level",
   "multiblocked.gui.condition.thunder.level": "Thunder Level",
@@ -295,5 +295,7 @@
   "multiblocked.gui.widget.sound.delay": "delay time >= 0",
   "multiblocked.gui.widget.sound.volume": "volume 0-1",
   "multiblocked.gui.widget.sound.pitch": "pitch >= 0",
-  "multiblocked.gui.shape.add": "add a box"
+  "multiblocked.gui.shape.add": "add a box",
+  "multiblocked.gui.catalyst.0": "catalyst (consume)",
+  "multiblocked.gui.catalyst.1": "catalyst"
 }

@@ -15,8 +15,12 @@ import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import net.minecraft.client.resources.language.I18n;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 
@@ -86,15 +90,30 @@ public class RecipeWidget extends WidgetGroup {
             outputs.setSize(new Size(64 + 4, 64));
             outputs.setYScrollBarWidth(4).setYBarStyle(null, new ColorRectTexture(-1));
         }
-        index = 0;
+        Map<String, List<RecipeCondition>> conditionMap = new HashMap<>();
         for (RecipeCondition condition : recipe.conditions) {
-            index++;
             if (condition.isReverse()) {
-                this.addWidget(new ImageWidget(168 - index * 16, 70, 16, 16, condition.getValidTexture())
-                        .setHoverTooltips(new TranslatableComponent("multiblocked.gui.condition.reverse"), condition.getTooltips()));
+                conditionMap.computeIfAbsent(condition.getType(), s->new ArrayList<>()).add(condition);
             } else {
-                this.addWidget(new ImageWidget(168 - index * 16, 70, 16, 16, condition.getValidTexture())
-                        .setHoverTooltips(condition.getTooltips()));
+                conditionMap.computeIfAbsent(condition.getType(), s->new ArrayList<>()).add(0, condition);
+            }
+        }
+
+        index = 0;
+        for (Map.Entry<String, List<RecipeCondition>> entry : conditionMap.entrySet()) {
+            List<RecipeCondition> list = entry.getValue();
+            if (!list.isEmpty()) {
+                index++;
+                boolean reversed = false;
+                List<Component> components = new ArrayList<>();
+                for (RecipeCondition condition : list) {
+                    if (!reversed && condition.isReverse()) {
+                        reversed = true;
+                        components.add(new TranslatableComponent("multiblocked.gui.condition.reverse"));
+                    }
+                    components.add(condition.getTooltips());
+                }
+                this.addWidget(new ImageWidget(168 - index * 16, 70, 16, 16, list.get(0).getValidTexture()).setHoverTooltips(components));
             }
 
         }

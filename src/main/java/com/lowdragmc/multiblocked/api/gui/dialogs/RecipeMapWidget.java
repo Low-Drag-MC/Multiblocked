@@ -8,15 +8,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -123,7 +115,7 @@ public class RecipeMapWidget extends DialogWidget {
         private int duration;
         private final Map<MultiblockCapability<?>, List<ContentWidget<?>>> inputs;
         private final Map<MultiblockCapability<?>, List<ContentWidget<?>>> outputs;
-        private final Map<String, RecipeCondition> conditions;
+        private final List<RecipeCondition> conditions;
         private ContentWidget<?> selectedContent;
         private ButtonWidget removed;
 
@@ -134,7 +126,7 @@ public class RecipeMapWidget extends DialogWidget {
             this.duration = recipe.duration;
             inputs = new HashMap<>();
             outputs = new HashMap<>();
-            conditions = new HashMap<>();
+            conditions = new ArrayList<>();
             this.addWidget(new ImageWidget(0, 0, 120, 20, new ColorRectTexture(0x5f49F75C)));
             this.addWidget(new ButtonWidget(104, 4, 12, 12, new ResourceTexture("multiblocked:textures/gui/remove.png"), cd -> {
                 boolean find = false;
@@ -153,7 +145,7 @@ public class RecipeMapWidget extends DialogWidget {
                 recipesList.waitToRemoved(RecipeItem.this);
             }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.dialogs.recipe_map.remove_recipe"));
             for (RecipeCondition condition : recipe.conditions) {
-                conditions.put(condition.getType(), condition.createTemplate().deserialize(condition.serialize()));
+                conditions.add(condition.createTemplate().deserialize(condition.serialize()));
             }
         }
 
@@ -212,7 +204,7 @@ public class RecipeMapWidget extends DialogWidget {
                     rebuild(outputs, false),
                     rebuild(inputs, true),
                     rebuild(outputs, true),
-                    ImmutableList.copyOf(conditions.values()),
+                    ImmutableList.copyOf(conditions),
                     duration);
         }
 
@@ -356,39 +348,37 @@ public class RecipeMapWidget extends DialogWidget {
 
             DraggableScrollableWidgetGroup conditionsGroup = new DraggableScrollableWidgetGroup(0, 0, 86, 70)
                     .setBackground(new ColorRectTexture(0x6f444444));
+            DraggableScrollableWidgetGroup candidateGroup = new DraggableScrollableWidgetGroup(-28, 0, 20, 70)
+                    .setBackground(new ColorRectTexture(0x6f444444));
             WidgetGroup configurator = new WidgetGroup(90, 0, 70, 70);
             conditionGroup.addWidget(new ImageWidget(-5, -5, conditionGroup.getSize().width + 10, conditionGroup.getSize().height + 10, ResourceBorderTexture.BORDERED_BACKGROUND));
+            conditionGroup.addWidget(new ImageWidget(-32, -4, 28, 78, ResourceBorderTexture.BORDERED_BACKGROUND_BLUE));
             conditionGroup.addWidget(conditionsGroup);
+            conditionGroup.addWidget(candidateGroup);
             conditionGroup.addWidget(configurator);
-            int i = 0;
+
             for (RecipeCondition condition : MbdRecipeConditions.RECIPE_CONDITIONS_REGISTRY.values()) {
-                int x = 5 + (i % 4) * 20;
-                int y = 2 + i / 4 * 20;
-                boolean has = this.conditions.containsKey(condition.getType());
-                WidgetGroup buttonGroup = new WidgetGroup(x, y, 16, 16);
-                ButtonWidget config = (ButtonWidget) new ButtonWidget(10, 0, 6, 6, cd -> {
-                    configurator.clearAllWidgets();
-                    RecipeCondition cond = this.conditions.get(condition.getType());
-                    if (cond != null) {
-                        cond.openConfigurator(configurator);
-                    }
-                })
-                        .setButtonTexture(new ResourceTexture("multiblocked:textures/gui/option.png"))
-                        .setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.configuratio");
-                config.setVisible(has);
-                config.setActive(has);
-                buttonGroup.addWidget(new SwitchWidget(0, 0, 16, 16, (cd, pressed)->{
-                    config.setVisible(pressed);
-                    config.setActive(pressed);
-                    if (pressed) {
-                        this.conditions.put(condition.getType(), condition.createTemplate());
-                    } else {
-                        this.conditions.remove(condition.getType());
-                    }
-                }).setPressed(has).setTexture(condition.getInValidTexture(), condition.getValidTexture()).setHoverTooltips(condition.getTranlationKey()));
-                buttonGroup.addWidget(config);
-                conditionsGroup.addWidget(buttonGroup);
-                i++;
+                candidateGroup.addWidget(new ButtonWidget(2, candidateGroup.getAllWidgetSize() * 18, 16, 16, condition.getValidTexture(), cd -> {
+                    conditions.add(condition.createTemplate().deserialize(condition.serialize()));
+                    updateRecipeWidget();
+                }).setHoverTooltips(condition.getTranlationKey()));
+            }
+
+            for (RecipeCondition condition : conditions) {
+                SelectableWidgetGroup conditionWidget = (SelectableWidgetGroup) new SelectableWidgetGroup(0, conditionsGroup.getAllWidgetSize() * 20, conditionsGroup.getSize().width, 20)
+                        .setOnSelected(selected -> {
+                            configurator.clearAllWidgets();
+                            condition.openConfigurator(configurator);
+                        })
+                        .setSelectedTexture(-2, 0xff00aa00)
+                        .addWidget(new ImageWidget(0, 0, conditionsGroup.getSize().width, 20, new ColorRectTexture(0x4faaaaaa)))
+                        .addWidget(new ButtonWidget(conditionsGroup.getSize().width - 15, 4, 12, 12, new ResourceTexture("multiblocked:textures/gui/remove.png"), cd -> {
+                            conditions.remove(condition);
+                            updateRecipeWidget();
+                        }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.remove"))
+                        .addWidget(new ImageWidget(22, 0, conditionsGroup.getSize().width - 22 - 17, 20, new TextTexture("").setSupplier(()->condition.getTooltips().getString()).setWidth(conditionsGroup.getSize().width - 22 - 17).setType(TextTexture.TextType.ROLL)))
+                        .addWidget(new ImageWidget(2, 2, 18, 18, condition.getValidTexture()));
+                conditionsGroup.addWidget(conditionWidget);
             }
         }
 

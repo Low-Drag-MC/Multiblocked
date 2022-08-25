@@ -66,8 +66,8 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
 
     public static void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for (ControllerDefinition definition : REGISTER) {
-            if (definition.recipeMap != null && definition.recipeMap != RecipeMap.EMPTY) {
-                RecipeType<?> recipeType = RecipeType.create(Multiblocked.MODID, definition.recipeMap.name, RecipeMap.class);
+            if (definition.getRecipeMap() != null && definition.getRecipeMap() != RecipeMap.EMPTY) {
+                RecipeType<?> recipeType = RecipeType.create(Multiblocked.MODID, definition.getRecipeMap().name, RecipeMap.class);
                 registration.addRecipeCatalyst(definition.getStackForm(), recipeType);
             }
         }

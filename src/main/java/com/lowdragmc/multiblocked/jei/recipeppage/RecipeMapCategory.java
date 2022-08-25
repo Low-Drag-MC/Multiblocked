@@ -9,6 +9,7 @@ import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
 import com.lowdragmc.multiblocked.common.capability.EntityMultiblockCapability;
 import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
@@ -126,7 +127,7 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
             List<ContentWidget<?>> contentWidgets = getContentWidgets(true, inputContents, recipe, EntityMultiblockCapability.CAP);
             for (ContentWidget<?> widget : contentWidgets) {
                 IRecipeSlotBuilder slotBuilder = builder.addSlot(RecipeIngredientRole.INPUT, allWidgets.indexOf(widget), -1);
-                SpawnEggItem eggItem = ForgeSpawnEggItem.fromEntityType((EntityType<?>) widget.getContent());
+                SpawnEggItem eggItem = ForgeSpawnEggItem.fromEntityType(((EntityIngredient) widget.getContent()).type);
                 if (eggItem != null) {
                     slotBuilder.addItemStack(new ItemStack(eggItem));
                 }
@@ -136,7 +137,7 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
             List<ContentWidget<?>> contentWidgets = getContentWidgets(false, outputContents, recipe, EntityMultiblockCapability.CAP);
             for (ContentWidget<?> widget : contentWidgets) {
                 IRecipeSlotBuilder slotBuilder = builder.addSlot(RecipeIngredientRole.OUTPUT, allWidgets.indexOf(widget), -1);
-                SpawnEggItem eggItem = ForgeSpawnEggItem.fromEntityType((EntityType<?>) widget.getContent());
+                SpawnEggItem eggItem = ForgeSpawnEggItem.fromEntityType(((EntityIngredient) widget.getContent()).type);
                 if (eggItem != null) {
                     slotBuilder.addItemStack(new ItemStack(eggItem));
                 }

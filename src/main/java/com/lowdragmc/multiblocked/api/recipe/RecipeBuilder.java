@@ -21,10 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class RecipeBuilder {
@@ -35,7 +32,7 @@ public class RecipeBuilder {
     public final Map<MultiblockCapability<?>, ImmutableList.Builder<Content>> outputBuilder = new HashMap<>();
     public final Map<MultiblockCapability<?>, ImmutableList.Builder<Content>> tickOutputBuilder = new HashMap<>();
     public CompoundTag data = new CompoundTag();
-    public final Map<String, RecipeCondition> conditions = new HashMap<>();
+    public final List<RecipeCondition> conditions = new ArrayList<>();
     protected int duration;
     protected Component text;
     protected boolean perTick;
@@ -67,7 +64,7 @@ public class RecipeBuilder {
             copy.tickOutputBuilder.put(k, builder.addAll(v.build()));
         });
         copy.data.merge(data);
-        copy.conditions.putAll(conditions);
+        copy.conditions.addAll(conditions);
         copy.duration = this.duration;
         copy.fixedName = null;
         copy.chance = this.chance;
@@ -136,7 +133,7 @@ public class RecipeBuilder {
     }
 
     public RecipeBuilder addCondition(RecipeCondition condition) {
-        conditions.put(condition.getType(), condition);
+        conditions.add(condition);
         return this;
     }
 
@@ -378,7 +375,7 @@ public class RecipeBuilder {
         for (Map.Entry<MultiblockCapability<?>, ImmutableList.Builder<Content>> entry : this.tickOutputBuilder.entrySet()) {
             tickOutputBuilder.put(entry.getKey(), entry.getValue().build());
         }
-        return new Recipe(fixedName == null ? UUID.randomUUID().toString() : fixedName, inputBuilder.build(), outputBuilder.build(), tickInputBuilder.build(), tickOutputBuilder.build(), ImmutableList.copyOf(conditions.values()), data, text, duration);
+        return new Recipe(fixedName == null ? UUID.randomUUID().toString() : fixedName, inputBuilder.build(), outputBuilder.build(), tickInputBuilder.build(), tickOutputBuilder.build(), ImmutableList.copyOf(conditions), data, text, duration);
     }
 
     public void buildAndRegister() {

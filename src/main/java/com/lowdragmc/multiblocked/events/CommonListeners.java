@@ -103,6 +103,7 @@ public class CommonListeners {
                             BlockEntity newBlockEntity = level.getBlockEntity(pos);
                             if (newBlockEntity instanceof ControllerTileEntity controller) {
                                 controller.state = worldState;
+                                controller.setFrontFacing(facing);
                                 if (controller.checkCatalystPattern(player, event.getHand(), held)) { // formed
                                     controller.saveOldBlock(oldState, oldNbt);
                                 }

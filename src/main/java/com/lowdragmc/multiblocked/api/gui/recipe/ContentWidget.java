@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.gui.recipe;
 
 import com.google.common.collect.Lists;
+import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
@@ -16,6 +17,7 @@ import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.SelectableWidgetGroup;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -29,6 +31,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class ContentWidget<T> extends SelectableWidgetGroup {
+public abstract class ContentWidget<T> extends SelectableWidgetGroup implements IRecipeIngredientSlot {
     protected T content;
     protected float chance;
     protected IO io;
@@ -139,11 +142,16 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
         return content;
     }
 
+    @Override
+    public Object getJEIIngredient() {
+        return getJEIIngredient(content);
+    }
+
     public IO getIo() {
         return io;
     }
 
-    public T getContent() {
+    public @NotNull T getContent() {
         return content;
     }
 
@@ -157,6 +165,28 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
 
     public boolean getPerTick() {
         return perTick;
+    }
+
+    @Override
+    public int getPosX() {
+        return getPosition().x;
+    }
+
+    @Override
+    public int getPosY() {
+        return getPosition().y;
+    }
+
+    @Override
+    public IngredientIO getIngredientIo() {
+        if (io == IO.IN){
+            return chance == 0 ?  IngredientIO.CATALYST : IngredientIO.INPUT;
+        }
+        if (io == IO.OUT){
+            return IngredientIO.OUTPUT;
+        }
+
+       return IngredientIO.RENDER_ONLY;
     }
 
     public ContentWidget<T> setOnMouseClicked(Consumer<ContentWidget<T>> onMouseClicked) {

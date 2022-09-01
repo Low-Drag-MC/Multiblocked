@@ -14,18 +14,18 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author KilaBash
@@ -49,7 +49,7 @@ public class JEIPlugin implements IModPlugin {
                 removed.add(definition.getStackForm());
             }
         }
-        jeiRuntime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM, removed);
+        jeiRuntime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, removed);
     }
 
     @Override
@@ -73,7 +73,9 @@ public class JEIPlugin implements IModPlugin {
         Multiblocked.LOGGER.info("JEI register");
         for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
             if (recipeMap == RecipeMap.EMPTY) continue;
-            registration.addRecipes(recipeMap.recipes.values()
+            RecipeType<RecipeWrapper> type = RecipeType.create(Multiblocked.MODID, recipeMap.name, RecipeWrapper.class);
+            registration.addRecipes(type,
+                    recipeMap.recipes.values()
                             .stream()
                             .map(recipe -> {
                                 RecipeWidget recipeWidget = new RecipeWidget(recipe, recipeMap.progressTexture);
@@ -83,8 +85,8 @@ public class JEIPlugin implements IModPlugin {
                                 return recipeWidget;
                             })
                             .map(RecipeWrapper::new)
-                            .collect(Collectors.toList()), 
-                    new ResourceLocation(Multiblocked.MODID, recipeMap.name));
+                            .toList()
+            );
         }
         MultiblockInfoCategory.registerRecipes(registration);
     }

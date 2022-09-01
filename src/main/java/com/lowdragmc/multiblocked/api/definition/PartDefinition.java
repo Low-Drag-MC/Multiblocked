@@ -4,7 +4,7 @@ import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
 import net.minecraft.resources.ResourceLocation;
 import com.google.gson.JsonObject;
-import com.mojang.realmsclient.util.JsonUtils;
+import net.minecraft.util.GsonHelper;
 
 
 public class PartDefinition extends ComponentDefinition {
@@ -22,7 +22,7 @@ public class PartDefinition extends ComponentDefinition {
     @Override
     public void fromJson(JsonObject json) {
         super.fromJson(json);
-        canShared = JsonUtils.getBooleanOr("canShared", json, canShared);
+        canShared = GsonHelper.getAsBoolean(json, "canShared", canShared);
     }
 
     @Override

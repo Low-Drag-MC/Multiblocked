@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.realmsclient.util.JsonUtils;
 import net.minecraft.util.GsonHelper;
 
 /**
@@ -32,7 +31,7 @@ public class CreatePartDefinition extends PartDefinition {
     @Override
     public void fromJson(JsonObject json) {
         super.fromJson(json);
-        isOutput = JsonUtils.getBooleanOr("isOutput", json, isOutput);
+        isOutput = GsonHelper.getAsBoolean(json, "isOutput", isOutput);
         stress = GsonHelper.getAsFloat(json, "stress", stress);
     }
 

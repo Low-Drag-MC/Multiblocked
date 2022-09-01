@@ -9,9 +9,9 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
-import com.mojang.realmsclient.util.JsonUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -128,8 +128,8 @@ public class ControllerDefinition extends ComponentDefinition {
         }
         if (json.has("catalyst")) {
             catalyst = Suppliers.memoize(()-> Multiblocked.GSON.fromJson(json.get("catalyst"), ItemStack.class));
-            consumeCatalyst = JsonUtils.getBooleanOr("consumeCatalyst", json, consumeCatalyst);
-            noNeedController = JsonUtils.getBooleanOr("noNeedController", json, noNeedController);
+            consumeCatalyst = GsonHelper.getAsBoolean(json, "consumeCatalyst", consumeCatalyst);
+            noNeedController = GsonHelper.getAsBoolean(json, "noNeedController", noNeedController);
         }
     }
 

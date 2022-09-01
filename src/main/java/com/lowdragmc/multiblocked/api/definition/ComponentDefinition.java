@@ -7,17 +7,18 @@ import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.capability.trait.InterfaceUser;
-import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.json.IMultiblockedRendererTypeAdapterFactory;
+import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.core.core.DynamicTileEntityGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -26,11 +27,6 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
-import com.mojang.realmsclient.util.JsonUtils;
-
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Definition of a component.
@@ -157,7 +153,7 @@ public class ComponentDefinition {
     public final static int VERSION = 1;
 
     public void fromJson(JsonObject json) {
-        int version = JsonUtils.getIntOr("version", json, 0);
+        int version = GsonHelper.getAsInt(json, "version", 0);
 
         if (version > VERSION) {
             throw new IllegalArgumentException(String.format("using outdated version of mbd. script is {%d}, mbd supports {%d}", version, VERSION));
@@ -180,8 +176,8 @@ public class ComponentDefinition {
                 parseStatus(entry.getKey(), statusJson);
             }
         } else { // legacy
-            properties.rotationState = JsonUtils.getBooleanOr("allowRotate", json, true) ? CustomProperties.RotationState.ALL : CustomProperties.RotationState.NONE;
-            properties.showInJei = JsonUtils.getBooleanOr("showInJei", json, properties.showInJei);
+            properties.rotationState = GsonHelper.getAsBoolean(json, "allowRotate", true) ? CustomProperties.RotationState.ALL : CustomProperties.RotationState.NONE;
+            properties.showInJei = GsonHelper.getAsBoolean(json, "showInJei", properties.showInJei);
 
             if (json.has("baseRenderer")) {
                 JsonElement renderer = json.get("baseRenderer");

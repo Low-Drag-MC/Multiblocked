@@ -2,8 +2,8 @@ package com.lowdragmc.multiblocked.api.definition;
 
 import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.api.tile.part.PartTileEntity;
-import com.mojang.realmsclient.util.JsonUtils;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Function;
@@ -29,7 +29,7 @@ public class PartDefinition extends ComponentDefinition {
     @Override
     public void fromJson(JsonObject json) {
         super.fromJson(json);
-        canShared = JsonUtils.getBooleanOr("canShared", json, canShared);
+        canShared = JSONUtils.getAsBoolean(json, "canShared", canShared);
     }
 
     @Override

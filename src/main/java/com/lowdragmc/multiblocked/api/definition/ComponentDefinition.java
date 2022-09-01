@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -116,7 +117,7 @@ public class ComponentDefinition {
     public final static int VERSION = 1;
 
     public void fromJson(JsonObject json) {
-        int version = JsonUtils.getIntOr("version", json, 0);
+        int version = JSONUtils.getAsInt(json, "version", 0);
 
         if (version > VERSION) {
             throw new IllegalArgumentException(String.format("using outdated version of mbd. script is {%d}, mbd supports {%d}", version, VERSION));
@@ -139,8 +140,8 @@ public class ComponentDefinition {
                 parseStatus(entry.getKey(), statusJson);
             }
         } else { // legacy
-            properties.rotationState = JsonUtils.getBooleanOr("allowRotate", json, true) ? CustomProperties.RotationState.ALL : CustomProperties.RotationState.NONE;
-            properties.showInJei = JsonUtils.getBooleanOr("showInJei", json, properties.showInJei);
+            properties.rotationState = JSONUtils.getAsBoolean(json, "allowRotate", true) ? CustomProperties.RotationState.ALL : CustomProperties.RotationState.NONE;
+            properties.showInJei = JSONUtils.getAsBoolean(json, "showInJei", properties.showInJei);
 
             if (json.has("baseRenderer")) {
                 JsonElement renderer = json.get("baseRenderer");

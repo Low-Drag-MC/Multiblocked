@@ -29,7 +29,7 @@ import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.api.registry.MbdItems;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.lowdragmc.multiblocked.client.renderer.impl.MBDBlockStateRenderer;
@@ -92,19 +92,19 @@ public class TemplateBuilderWidget extends WidgetGroup {
                 BlockPos[] poses = ItemBlueprint.getPos(selected);
                 Level world = table.getLevel();
                 if (poses != null && world.hasChunksAt(poses[0], poses[1])) {
-                    ControllerTileEntity controller = null;
+                    IControllerComponent controller = null;
                     for (int x = poses[0].getX(); x <= poses[1].getX(); x++) {
                         for (int y = poses[0].getY(); y <= poses[1].getY(); y++) {
                             for (int z = poses[0].getZ(); z <= poses[1].getZ(); z++) {
                                 BlockEntity te = world.getBlockEntity(new BlockPos(x, y, z));
-                                if (te instanceof ControllerTileEntity) {
-                                    controller = (ControllerTileEntity) te;
+                                if (te instanceof IControllerComponent) {
+                                    controller = (IControllerComponent) te;
                                 }
                             }
                         }
                     }
                     if (controller != null) {
-                        pattern = new JsonBlockPattern(table.getLevel(), controller.getLocation(), controller.getBlockPos(), controller.getFrontFacing(),
+                        pattern = new JsonBlockPattern(table.getLevel(), controller.getDefinition().location, controller.self().getBlockPos(), controller.getFrontFacing(),
                                 poses[0].getX(), poses[0].getY(), poses[0].getZ(),
                                 poses[1].getX(), poses[1].getY(), poses[1].getZ());
 

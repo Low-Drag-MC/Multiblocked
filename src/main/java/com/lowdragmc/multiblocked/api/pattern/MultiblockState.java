@@ -6,7 +6,7 @@ import com.lowdragmc.multiblocked.api.pattern.error.PatternError;
 import com.lowdragmc.multiblocked.api.pattern.error.PatternStringError;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import com.lowdragmc.multiblocked.api.pattern.util.PatternMatchContext;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
 import com.lowdragmc.multiblocked.network.s2c.SPacketRemoveDisabledRendering;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
@@ -39,7 +39,7 @@ public class MultiblockState {
     public PatternError error;
     public final Level world;
     public final BlockPos controllerPos;
-    public ControllerTileEntity lastController;
+    public IControllerComponent lastController;
 
     // persist
     public LongOpenHashSet cache;
@@ -70,11 +70,11 @@ public class MultiblockState {
         return true;
     }
 
-    public ControllerTileEntity getController() {
+    public IControllerComponent getController() {
         if (world.isLoaded(controllerPos)) {
             BlockEntity tileEntity = world.getBlockEntity(controllerPos);
-            if (tileEntity instanceof ControllerTileEntity) {
-                return lastController = (ControllerTileEntity) tileEntity;
+            if (tileEntity instanceof IControllerComponent) {
+                return lastController = (IControllerComponent) tileEntity;
             }
         } else {
             error = UNLOAD_ERROR;
@@ -160,7 +160,7 @@ public class MultiblockState {
             mbds.removeMapping(this);
             mbds.removeLoading(controllerPos);
         } else if (error != UNLOAD_ERROR) {
-            ControllerTileEntity controller = getController();
+            IControllerComponent controller = getController();
             boolean hasRenderMask = getMatchContext().containsKey("renderMask");
             if (controller != null && !controller.checkPattern()) {
                 controller.onStructureInvalid();
@@ -180,7 +180,7 @@ public class MultiblockState {
 
     public void onChunkLoad() {
         try {
-            ControllerTileEntity controller = getController();
+            IControllerComponent controller = getController();
             if (controller != null) {
                 if (controller.checkPattern()) {
                     if (!controller.needAlwaysUpdate()) {
@@ -200,7 +200,7 @@ public class MultiblockState {
     }
 
     public void onChunkUnload() {
-        ControllerTileEntity controller = getController();
+        IControllerComponent controller = getController();
         if (controller != null) {
             error = UNLOAD_ERROR;
             if (!controller.needAlwaysUpdate()) {

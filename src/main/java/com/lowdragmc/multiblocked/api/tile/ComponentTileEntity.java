@@ -139,15 +139,10 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         return definition.location;
     }
 
-    public String getUnlocalizedName() {
-        return "block." + definition.getID();
-    }
-
     @OnlyIn(Dist.CLIENT)
     public String getLocalizedName() {
         return I18n.get(getUnlocalizedName());
     }
-
 
     public abstract boolean isFormed();
 

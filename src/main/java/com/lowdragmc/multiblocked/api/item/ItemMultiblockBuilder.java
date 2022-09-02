@@ -4,7 +4,7 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -54,9 +54,9 @@ public class ItemMultiblockBuilder extends Item {
             if (!player.level.isClientSide) {
                 BlockEntity tileEntity = player.level.getBlockEntity(context.getClickedPos());
                 ItemStack hold = player.getItemInHand(context.getHand());
-                if (isItemMultiblockBuilder(hold) && tileEntity instanceof ControllerTileEntity) {
+                if (isItemMultiblockBuilder(hold) && tileEntity instanceof IControllerComponent) {
                     if (isRaw(hold)) {
-                        BlockPattern pattern = ((ControllerTileEntity) tileEntity).getPattern();
+                        BlockPattern pattern = ((IControllerComponent) tileEntity).getPattern();
                         if (pattern != null) {
                             pattern.autoBuild(player, new MultiblockState(player.level, context.getClickedPos()));
                         }
@@ -65,7 +65,7 @@ public class ItemMultiblockBuilder extends Item {
                         String json = hold.getOrCreateTagElement("pattern").getString("json");
                         String controller = hold.getOrCreateTagElement("pattern").getString("controller");
                         if (!json.isEmpty() && !controller.isEmpty()) {
-                            if (controller.equals(((ControllerTileEntity) tileEntity).getDefinition().location.toString())) {
+                            if (controller.equals(((IControllerComponent) tileEntity).getDefinition().location.toString())) {
                                 JsonBlockPattern jsonBlockPattern = Multiblocked.GSON.fromJson(json, JsonBlockPattern.class);
                                 jsonBlockPattern.build().autoBuild(player, new MultiblockState(player.level, context.getClickedPos()));
                                 return InteractionResult.SUCCESS;

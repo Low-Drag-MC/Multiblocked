@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.api.tile;
 
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
@@ -85,6 +86,14 @@ public interface IComponent {
         return false;
     }
 
+    default void update() {
+
+    }
+
+    default String getUnlocalizedName() {
+        return "block." + getDefinition().getID();
+    }
+
     IRenderer getRenderer();
 
     boolean isFormed();
@@ -99,5 +108,19 @@ public interface IComponent {
 
     default VoxelShape getDynamicShape() {
         return getDefinition().getStatus(getStatus()).getShape(getFrontFacing());
+    }
+
+    default boolean needAlwaysUpdate() {
+        Level level = self().getLevel();
+        return level != null && !level.isClientSide && (getDefinition().needUpdateTick() );
+    }
+
+    default void markAsDirty() {
+        self().setChanged();
+    }
+
+    default boolean isRemote() {
+        Level level = self().getLevel();
+        return level == null ? LDLMod.isRemote() : level.isClientSide;
     }
 }

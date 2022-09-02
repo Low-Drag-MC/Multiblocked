@@ -1,7 +1,6 @@
 package com.lowdragmc.multiblocked.common.tile;
 
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
@@ -74,12 +73,12 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
         return currentRenderer;
     }
 
-    public List<ControllerTileEntity> getControllers() {
-        List<ControllerTileEntity> result = new ArrayList<>();
+    public List<IControllerComponent> getControllers() {
+        List<IControllerComponent> result = new ArrayList<>();
         for (BlockPos blockPos : controllerPos) {
             BlockEntity controller = level.getBlockEntity(blockPos);
-            if (controller instanceof ControllerTileEntity && ((ControllerTileEntity) controller).isFormed()) {
-                result.add((ControllerTileEntity) controller);
+            if (controller instanceof IControllerComponent && ((IControllerComponent) controller).isFormed()) {
+                result.add((IControllerComponent) controller);
             }
         }
         return result;

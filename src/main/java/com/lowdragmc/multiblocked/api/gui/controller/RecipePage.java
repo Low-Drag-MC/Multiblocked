@@ -5,7 +5,6 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
 import com.lowdragmc.lowdraglib.utils.Position;
@@ -15,7 +14,7 @@ import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -32,7 +31,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class RecipePage extends PageWidget{
     public static ResourceTexture resourceTexture = new ResourceTexture("multiblocked:textures/gui/recipe_page.png");
-    public final ControllerTileEntity controller;
+    public final IControllerComponent controller;
     public final DraggableScrollableWidgetGroup tips;
     private Recipe recipe;
     @OnlyIn(Dist.CLIENT)
@@ -40,26 +39,13 @@ public class RecipePage extends PageWidget{
     private RecipeLogic.Status status;
     private int progress;
     
-    public RecipePage(ControllerTileEntity controller, TabContainer tabContainer) {
+    public RecipePage(IControllerComponent controller, TabContainer tabContainer) {
         super(resourceTexture, tabContainer);
         this.controller = controller;
         this.status = RecipeLogic.Status.IDLE;
         this.addWidget(tips = new DraggableScrollableWidgetGroup(8, 34, 160, 112));
         tips.addWidget(new LabelWidget(5, 5, () -> I18n.get("multiblocked.recipe.status." + status.name)).setTextColor(-1));
         tips.addWidget(new LabelWidget(5, 20, () -> I18n.get("multiblocked.recipe.remaining", recipe == null ? 0 : (recipe.duration - progress) / 20)).setTextColor(-1));
-        this.addWidget(new SwitchWidget(153, 131, 12, 12, (cd, r) -> {
-            controller.asyncRecipeSearching = r;
-            if (!cd.isRemote) {
-                controller.markAsDirty();
-            }
-        })
-                .setPressed(controller.asyncRecipeSearching)
-                .setSupplier(() -> controller.asyncRecipeSearching)
-                .setTexture(resourceTexture.getSubTexture(176 / 256.0, 143 / 256.0, 12 / 256.0, 12 / 256.0),
-                        resourceTexture.getSubTexture(176 / 256.0, 155 / 256.0, 12 / 256.0, 12 / 256.0))
-                .setHoverTooltips("Async/Sync recipes searching:",
-                        "Async has better performance and only tries to match recipes when the internal contents changed",
-                        "Sync always tries to match recipes, never miss matching recipes"));
         this.addWidget(new ImageWidget(7, 7, 162, 16,
                 new TextTexture(controller.getUnlocalizedName(), -1)
                         .setType(TextTexture.TextType.ROLL)

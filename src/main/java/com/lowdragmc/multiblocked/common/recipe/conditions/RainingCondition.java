@@ -43,7 +43,7 @@ public class RainingCondition extends RecipeCondition {
 
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
-        Level level = recipeLogic.controller.getLevel();
+        Level level = recipeLogic.controller.self().getLevel();
         return level != null && level.getRainLevel(1) >= this.level;
     }
 

@@ -6,7 +6,7 @@ import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,8 +26,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Set;
-
-import static net.minecraft.Util.NIL_UUID;
 
 /**
  * Author: KilaBash
@@ -90,7 +88,7 @@ public class CommonListeners {
                     MultiblockState worldState = new MultiblockState(level, pos);
                     BlockState oldState = level.getBlockState(pos);
                     BlockEntity oldBlockEntity = level.getBlockEntity(pos);
-                    if (oldBlockEntity instanceof ControllerTileEntity) {
+                    if (oldBlockEntity instanceof IControllerComponent) {
                         return;
                     }
                     for (Direction facing : facings) {
@@ -101,8 +99,8 @@ public class CommonListeners {
                             }
                             level.setBlockAndUpdate(pos, MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(definition.location).defaultBlockState());
                             BlockEntity newBlockEntity = level.getBlockEntity(pos);
-                            if (newBlockEntity instanceof ControllerTileEntity controller) {
-                                controller.state = worldState;
+                            if (newBlockEntity instanceof IControllerComponent controller) {
+                                controller.setMultiblockState(worldState);
                                 controller.setFrontFacing(facing);
                                 if (controller.checkCatalystPattern(player, event.getHand(), held)) { // formed
                                     controller.saveOldBlock(oldState, oldNbt);

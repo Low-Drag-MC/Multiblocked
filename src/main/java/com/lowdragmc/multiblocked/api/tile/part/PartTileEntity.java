@@ -70,8 +70,8 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public void addedToController(@Nonnull IControllerComponent controller){
         if (controllerPos.add(controller.self().getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity && level != null) {
-                new PartAddedEvent((ControllerTileEntity) controller).post(ScriptType.of(level), PartAddedEvent.ID, getSubID());
+            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity controllerTile && level != null) {
+                new PartAddedEvent(controllerTile).post(ScriptType.of(level), PartAddedEvent.ID, getSubID());
             }
             setStatus("idle");
         }
@@ -80,8 +80,8 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     public void removedFromController(@Nonnull IControllerComponent controller){
         if (controllerPos.remove(controller.self().getBlockPos())) {
             writeCustomData(-1, this::writeControllersToBuffer);
-            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity && level != null) {
-                new PartRemovedEvent((ControllerTileEntity) controller).post(ScriptType.of(level), PartRemovedEvent.ID, getSubID());
+            if (Multiblocked.isKubeJSLoaded() && controller instanceof ControllerTileEntity controllerTile && level != null) {
+                new PartRemovedEvent(controllerTile).post(ScriptType.of(level), PartRemovedEvent.ID, getSubID());
             }
             if (getControllers().isEmpty()) {
                 setStatus("unformed");

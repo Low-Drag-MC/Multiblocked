@@ -1,7 +1,6 @@
 package com.lowdragmc.multiblocked.api.gui.controller;
 
 import com.google.common.collect.Table;
-import com.lowdragmc.lowdraglib.client.utils.RenderUtils;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
@@ -17,7 +16,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -64,7 +63,7 @@ public class IOPageWidget extends PageWidget {
         LINE_1_MAP.put(IO.BOTH, PAGE.getSubTexture(194 / 256.0, 0, 4 / 256.0, 35 / 256.0));
     }
 
-    private final ControllerTileEntity controller;
+    private final IControllerComponent controller;
     private final ImageWidget[][] lines;
     private final TextTexture[] labels;
     private final SelectorWidget[] selectors;
@@ -75,13 +74,13 @@ public class IOPageWidget extends PageWidget {
     private BlockPos pos;
     int index;
 
-    public IOPageWidget(ControllerTileEntity controller, TabContainer container) {
+    public IOPageWidget(IControllerComponent controller, TabContainer container) {
         super(PAGE, container);
         this.controller = controller;
-        if (controller.state.cache == null) {
+        if (controller.getMultiblockState().cache == null) {
             controller.checkPattern();
         }
-        capabilityMap = controller.state.getMatchContext().get("capabilities");
+        capabilityMap = controller.getMultiblockState().getMatchContext().get("capabilities");
         capabilityMap = capabilityMap == null ? new HashMap<>() : capabilityMap;
         if (controller.isRemote()) {
             capabilitySettings = new HashMap<>();
@@ -98,11 +97,11 @@ public class IOPageWidget extends PageWidget {
         SceneWidget sceneWidget;
         addWidget(sceneWidget = new SceneWidget(6, 6, 164, 132, isRemote() ? getWorld() : null)
                 .useCacheBuffer()
-                .setRenderedCore(controller.state.getCache(), null)
+                .setRenderedCore(controller.getMultiblockState().getCache(), null)
                 .setOnSelected(this::onPosSelected)
                 .setRenderFacing(false));
         if (isRemote()) {
-            sceneWidget.getRenderer().setBlocked(controller.state.getCache().stream().filter(pos -> MultiblockWorldSavedData.modelDisabled.contains(pos)).collect(Collectors.toSet()));
+            sceneWidget.getRenderer().setBlocked(controller.getMultiblockState().getCache().stream().filter(pos -> MultiblockWorldSavedData.modelDisabled.contains(pos)).collect(Collectors.toSet()));
         }
         addWidget(new ButtonWidget(4, 156, 5, 17, LEFT_BUTTON, this::onLeftClick).setHoverTexture(LEFT_BUTTON_HOVER));
         addWidget(new ButtonWidget(167, 156, 5, 17, RIGHT_BUTTON, this::onRightClick).setHoverTexture(RIGHT_BUTTON_HOVER));
@@ -337,7 +336,7 @@ public class IOPageWidget extends PageWidget {
         if (id == -1) {
             MultiblockCapability<?> capability = MbdCapabilities.get(buffer.readUtf());
             Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities = controller.getCapabilitiesProxy();
-            Map<Long, Set<String>> slotsMap = controller.state != null && controller.state.getMatchContext() != null ? controller.state.getMatchContext().get("slots") : null;
+            Map<Long, Set<String>> slotsMap = controller.getMultiblockState() != null && controller.getMultiblockState().getMatchContext() != null ? controller.getMultiblockState().getMatchContext().get("slots") : null;
             if (buffer.readBoolean()) {
                 IO io = buffer.readEnum(IO.class);
                 capabilities.get(io, capability).remove(pos.asLong());
@@ -347,7 +346,7 @@ public class IOPageWidget extends PageWidget {
             }
             if (buffer.readBoolean()) {
                 IO io = buffer.readEnum(IO.class);
-                BlockEntity entity = controller.getLevel().getBlockEntity(pos);
+                BlockEntity entity = controller.self().getLevel().getBlockEntity(pos);
                 if (entity != null && capability.isBlockHasCapability(io, entity)) {
                     if (!capabilities.contains(io, capability)) {
                         capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());
@@ -362,9 +361,9 @@ public class IOPageWidget extends PageWidget {
         } else if (id == -2) {
             MultiblockCapability<?> capability = MbdCapabilities.get(buffer.readUtf());
             Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities = controller.getCapabilitiesProxy();
-            Map<Long, Set<String>> slotsMap = controller.state != null && controller.state.getMatchContext() != null ? controller.state.getMatchContext().get("slots") : null;
+            Map<Long, Set<String>> slotsMap = controller.getMultiblockState() != null && controller.getMultiblockState().getMatchContext() != null ? controller.getMultiblockState().getMatchContext().get("slots") : null;
             IO io = buffer.readEnum(IO.class);
-            BlockEntity entity = controller.getLevel().getBlockEntity(pos);
+            BlockEntity entity = controller.self().getLevel().getBlockEntity(pos);
             if (entity != null && capability.isBlockHasCapability(io, entity)) {
                 if (!capabilities.contains(io, capability)) {
                     capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());

@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -46,7 +46,7 @@ public class MultiblockPreviewRenderer {
     private static int layer;
     private static Direction facing, previewFacing, spin;
     private static Rotation rotatePreviewBy;
-    private static ControllerTileEntity mte;
+    private static IControllerComponent mte;
     private static BlockPos controllerPos;
     private static TrackedDummyWorld world;
     private static Map<BlockPos, BlockInfo> blockMap;
@@ -56,7 +56,7 @@ public class MultiblockPreviewRenderer {
         if (mbpPos != null) {
             Minecraft mc = Minecraft.getInstance();
             long time = System.currentTimeMillis();
-            if (time > mbpEndTime || !(mc.level != null && mc.level.getBlockEntity(mbpPos) instanceof ControllerTileEntity)) {
+            if (time > mbpEndTime || !(mc.level != null && mc.level.getBlockEntity(mbpPos) instanceof IControllerComponent)) {
                 resetMultiblockRender();
                 layer = 0;
                 return;
@@ -84,8 +84,8 @@ public class MultiblockPreviewRenderer {
     }
 
 
-    public static void renderMultiBlockPreview(ControllerTileEntity controller, long durTimeMillis) {
-        if (!controller.getBlockPos().equals(mbpPos)) {
+    public static void renderMultiBlockPreview(IControllerComponent controller, long durTimeMillis) {
+        if (!controller.self().getBlockPos().equals(mbpPos)) {
             layer = 0;
         } else {
             if (mbpEndTime - System.currentTimeMillis() < 200) return;
@@ -102,7 +102,7 @@ public class MultiblockPreviewRenderer {
         mbpEndTime = 0;
     }
 
-    public static void renderControllerInList(ControllerTileEntity controllerBase, MultiblockShapeInfo shapeInfo, int layer) {
+    public static void renderControllerInList(IControllerComponent controllerBase, MultiblockShapeInfo shapeInfo, int layer) {
         Direction frontFacing;
         previewFacing = Direction.NORTH;
         controllerPos = BlockPos.ZERO;
@@ -118,7 +118,7 @@ public class MultiblockPreviewRenderer {
                 for (int z = 0; z < column.length; z++) {
                     blockMap.put(new BlockPos(x, y, z), column[z]);
                     BlockEntity te = column[z].getBlockEntity(new BlockPos(x, y, z));
-                    ControllerTileEntity metaTE = te instanceof ControllerTileEntity ? (ControllerTileEntity) te : null;
+                    IControllerComponent metaTE = te instanceof IControllerComponent ? (IControllerComponent) te : null;
                     if (metaTE != null) {
                         if (metaTE.getDefinition().location.equals(controllerBase.getDefinition().location)) {
                             controllerPos = new BlockPos(x, y, z);
@@ -138,8 +138,8 @@ public class MultiblockPreviewRenderer {
         frontFacing = facing.getStepY() == 0 ? facing : facing.getStepY() < 0 ? spin : spin.getOpposite();
         rotatePreviewBy = Rotation.values()[(4 + frontFacing.get2DDataValue() - previewFacing.get2DDataValue()) % 4];
         if (mte != null) {
-            mbpPos = controllerBase.getBlockPos();
-            world.setBlockEntity(mte);
+            mbpPos = controllerBase.self().getBlockPos();
+            world.setBlockEntity(mte.self());
         }
     }
 

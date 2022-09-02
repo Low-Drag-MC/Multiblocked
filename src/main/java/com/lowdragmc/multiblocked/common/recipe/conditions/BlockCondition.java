@@ -50,8 +50,8 @@ public class BlockCondition extends RecipeCondition {
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
         int amount = 0;
-        for (BlockPos pos : recipeLogic.controller.state.getCache()) {
-            if (recipeLogic.controller.getLevel().getBlockState(pos) == blockState) {
+        for (BlockPos pos : recipeLogic.controller.getMultiblockState().getCache()) {
+            if (recipeLogic.controller.self().getLevel().getBlockState(pos) == blockState) {
                 amount++;
                 if (amount >= count) break;
             }

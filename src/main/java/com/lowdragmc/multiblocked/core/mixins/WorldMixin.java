@@ -1,6 +1,6 @@
 package com.lowdragmc.multiblocked.core.mixins;
 
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -35,10 +35,10 @@ public abstract class WorldMixin implements LevelAccessor {
     private void afterUpdatingEntities(CallbackInfo ci, ProfilerFiller profilerfiller) {
         profilerfiller.popPush("multiblocked_update");
         if (!((Level) (Object) this).isClientSide) {
-            List<ComponentTileEntity<?>> isRemoved = null;
+            List<IComponent> isRemoved = null;
             MultiblockWorldSavedData mbds = MultiblockWorldSavedData.getOrCreate((Level) (Object) this);
-            for (ComponentTileEntity<?> loading : mbds.getLoadings()) {
-                if (loading.isRemoved()) {
+            for (IComponent loading : mbds.getLoadings()) {
+                if (loading.self().isRemoved()) {
                     if (isRemoved == null) {
                         isRemoved = new ArrayList<>();
                     }
@@ -48,8 +48,8 @@ public abstract class WorldMixin implements LevelAccessor {
                 }
             }
             if (isRemoved != null) {
-                for (ComponentTileEntity<?> inValid : isRemoved) {
-                    mbds.removeLoading(inValid.getBlockPos());
+                for (IComponent inValid : isRemoved) {
+                    mbds.removeLoading(inValid.self().getBlockPos());
                 }
             }
         }

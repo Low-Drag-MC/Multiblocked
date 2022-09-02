@@ -20,7 +20,7 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -33,7 +33,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
@@ -148,7 +147,7 @@ public class PatternWidget extends WidgetGroup {
         this.index = index;
         MBPattern pattern = patterns[index];
         if (pattern.controllerBase.isFormed()) {
-            LongSet set = pattern.controllerBase.state.getMatchContext().getOrDefault("renderMask", LongSets.EMPTY_SET);
+            LongSet set = pattern.controllerBase.getMultiblockState().getMatchContext().getOrDefault("renderMask", LongSets.EMPTY_SET);
             Set<BlockPos> modelDisabled = set.stream().map(BlockPos::of).collect(Collectors.toSet());
             if (!modelDisabled.isEmpty()) {
                 sceneWidget.setRenderedCore(pattern.blockMap.keySet().stream().filter(pos->!modelDisabled.contains(pos)).collect(Collectors.toList()), null);
@@ -178,12 +177,12 @@ public class PatternWidget extends WidgetGroup {
 
     private void onFormedSwitch(ClickData clickData, Boolean isPressed) {
         MBPattern pattern = patterns[index];
-        ControllerTileEntity controllerBase = pattern.controllerBase;
+        IControllerComponent controllerBase = pattern.controllerBase;
         if (isPressed) {
             loadControllerFormed(pattern.blockMap.keySet(), controllerBase);
         } else {
             sceneWidget.setRenderedCore(pattern.blockMap.keySet(), null);
-            controllerBase.state = null;
+            controllerBase.setMultiblockState(null);
             controllerBase.onStructureInvalid();
         }
     }
@@ -269,7 +268,7 @@ public class PatternWidget extends WidgetGroup {
 
     private MBPattern initializePattern(MultiblockShapeInfo shapeInfo, HashSet<ItemStackKey> blockDrops) {
         Map<BlockPos, BlockInfo> blockMap = new HashMap<>();
-        ControllerTileEntity controllerBase = null;
+        IControllerComponent controllerBase = null;
         BlockPos multiPos = locateNextRegion(500);
 
         BlockInfo[][][] blocks = shapeInfo.getBlocks();
@@ -280,9 +279,9 @@ public class PatternWidget extends WidgetGroup {
                 for (int z = 0; z < column.length; z++) {
                     BlockState blockState = column[z].getBlockState();
                     BlockPos pos = multiPos.offset(x, y, z);
-                    if (column[z].getBlockEntity(pos) instanceof ControllerTileEntity) {
+                    if (column[z].getBlockEntity(pos) instanceof IControllerComponent) {
 
-                        controllerBase = (ControllerTileEntity) column[z].getBlockEntity(world, pos);
+                        controllerBase = (IControllerComponent) column[z].getBlockEntity(world, pos);
                     }
                     blockMap.put(pos, BlockInfo.fromBlockState(blockState));
                 }
@@ -291,7 +290,7 @@ public class PatternWidget extends WidgetGroup {
 
         world.addBlocks(blockMap);
         if (controllerBase != null) {
-            world.setBlockEntity(controllerBase);
+            world.setBlockEntity(controllerBase.self());
         }
 
         Map<ItemStackKey, PartInfo> parts = gatherBlockDrops(blockMap);
@@ -300,7 +299,7 @@ public class PatternWidget extends WidgetGroup {
         Map<BlockPos, TraceabilityPredicate> predicateMap = new HashMap<>();
         if (controllerBase != null) {
             loadControllerFormed(predicateMap.keySet(), controllerBase);
-            predicateMap = controllerBase.state.getMatchContext().get("predicates");
+            predicateMap = controllerBase.getMultiblockState().getMatchContext().get("predicates");
         }
         return controllerBase == null ? null : new MBPattern(blockMap, parts.values().stream().sorted((one, two) -> {
             if (one.isController) return -1;
@@ -312,14 +311,14 @@ public class PatternWidget extends WidgetGroup {
         }).map(PartInfo::getItemStack).toArray(ItemStack[]::new), predicateMap, controllerBase);
     }
 
-    private void loadControllerFormed(Collection<BlockPos> poses, ControllerTileEntity controllerBase) {
-        controllerBase.state = new MultiblockState(world, controllerBase.getBlockPos());
+    private void loadControllerFormed(Collection<BlockPos> poses, IControllerComponent controllerBase) {
+        controllerBase.setMultiblockState(new MultiblockState(world, controllerBase.self().getBlockPos()));
         BlockPattern pattern = controllerBase.getPattern();
-        if (pattern != null && pattern.checkPatternAt(controllerBase.state, true)) {
+        if (pattern != null && pattern.checkPatternAt(controllerBase.getMultiblockState(), true)) {
             controllerBase.onStructureFormed();
         }
         if (controllerBase.isFormed()) {
-            LongSet set = controllerBase.state.getMatchContext().getOrDefault("renderMask", LongSets.EMPTY_SET);
+            LongSet set = controllerBase.getMultiblockState().getMatchContext().getOrDefault("renderMask", LongSets.EMPTY_SET);
             Set<BlockPos> modelDisabled = set.stream().map(BlockPos::of).collect(Collectors.toSet());
             if (!modelDisabled.isEmpty()) {
                 sceneWidget.setRenderedCore(poses.stream().filter(pos->!modelDisabled.contains(pos)).collect(Collectors.toList()), null);
@@ -391,9 +390,9 @@ public class PatternWidget extends WidgetGroup {
         @Nonnull
         final Map<BlockPos, BlockInfo> blockMap;
         @Nonnull
-        final ControllerTileEntity controllerBase;
+        final IControllerComponent controllerBase;
 
-        public MBPattern(@Nonnull Map<BlockPos, BlockInfo> blockMap, @Nonnull ItemStack[] parts, @Nonnull Map<BlockPos, TraceabilityPredicate> predicateMap, @Nonnull ControllerTileEntity controllerBase) {
+        public MBPattern(@Nonnull Map<BlockPos, BlockInfo> blockMap, @Nonnull ItemStack[] parts, @Nonnull Map<BlockPos, TraceabilityPredicate> predicateMap, @Nonnull IControllerComponent controllerBase) {
             this.parts = NonNullList.of(ItemStack.EMPTY, parts);
             this.blockMap = blockMap;
             this.predicateMap = predicateMap;

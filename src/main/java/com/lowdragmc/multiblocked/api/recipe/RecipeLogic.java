@@ -5,7 +5,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeFinishEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.SetupRecipeEvent;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeLogic {
-    public final ControllerTileEntity controller;
+    public final IControllerComponent controller;
     public Recipe lastRecipe;
     public List<Recipe> lastFaildMattches;
 
@@ -26,11 +26,11 @@ public class RecipeLogic {
     private long lastPeriod;
     private final MultiblockWorldSavedData mbwsd;
 
-    public RecipeLogic(ControllerTileEntity controller) {
+    public RecipeLogic(IControllerComponent controller) {
         this.controller = controller;
         this.timer = Multiblocked.RNG.nextInt();
         this.lastPeriod = Long.MIN_VALUE;
-        this.mbwsd = MultiblockWorldSavedData.getOrCreate(controller.getLevel());
+        this.mbwsd = MultiblockWorldSavedData.getOrCreate(controller.self().getLevel());
     }
 
     public void update() {
@@ -74,17 +74,13 @@ public class RecipeLogic {
     }
 
     private void checkAsyncRecipeSearching(Runnable changed) {
-        if (controller.asyncRecipeSearching) {
-            if (mbwsd.getPeriodID() < lastPeriod) {
-                lastPeriod = mbwsd.getPeriodID();
-                changed.run();
-            } else {
-                if (controller.hasProxies() && asyncChanged()) {
-                    changed.run();
-                }
-            }
-        } else {
+        if (mbwsd.getPeriodID() < lastPeriod) {
+            lastPeriod = mbwsd.getPeriodID();
             changed.run();
+        } else {
+            if (controller.hasProxies() && asyncChanged()) {
+                changed.run();
+            }
         }
     }
 
@@ -147,9 +143,9 @@ public class RecipeLogic {
     }
 
     public void setupRecipe(Recipe recipe) {
-        if (Multiblocked.isKubeJSLoaded() && controller != null && controller.getLevel() != null) {
+        if (Multiblocked.isKubeJSLoaded() && controller != null && controller.self().getLevel() != null) {
             SetupRecipeEvent event = new SetupRecipeEvent(this, recipe);
-            if (event.post(ScriptType.of(controller.getLevel()), SetupRecipeEvent.ID, controller.getSubID())) {
+            if (event.post(ScriptType.of(controller.self().getLevel()), SetupRecipeEvent.ID, controller.getSubID())) {
                 return;
             }
             recipe = event.getRecipe();
@@ -189,9 +185,9 @@ public class RecipeLogic {
 
     public void onRecipeFinish() {
         Recipe recipe = lastRecipe;
-        if (Multiblocked.isKubeJSLoaded() && controller != null && controller.getLevel() != null) {
+        if (Multiblocked.isKubeJSLoaded() && controller != null && controller.self().getLevel() != null) {
             RecipeFinishEvent event = new RecipeFinishEvent(this);
-            if (event.post(ScriptType.of(controller.getLevel()), RecipeFinishEvent.ID, controller.getSubID())) {
+            if (event.post(ScriptType.of(controller.self().getLevel()), RecipeFinishEvent.ID, controller.getSubID())) {
                 return;
             }
             recipe = event.getRecipe();

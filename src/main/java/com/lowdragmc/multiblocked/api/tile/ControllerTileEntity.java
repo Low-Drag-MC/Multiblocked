@@ -36,8 +36,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -60,8 +58,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static net.minecraft.Util.NIL_UUID;
-
 /**
  * A TileEntity that defies all controller machines.
  *
@@ -69,7 +65,6 @@ import static net.minecraft.Util.NIL_UUID;
  */
 public class ControllerTileEntity extends ComponentTileEntity<ControllerDefinition> implements ICapabilityProxyHolder, IAsyncThreadUpdate, IControllerComponent {
     public MultiblockState state;
-    public boolean asyncRecipeSearching = true;
     protected Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities;
     private Map<Long, Map<MultiblockCapability<?>, Tuple<IO, Direction>>> settings;
     protected LongOpenHashSet parts;
@@ -99,12 +94,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     public RecipeLogic createRecipeLogic() {
         return new RecipeLogic(this);
-    }
-
-    public boolean checkPattern() {
-        if (state == null) return false;
-        BlockPattern pattern = getPattern();
-        return pattern != null && pattern.checkPatternAt(state, false);
     }
 
     public boolean isFormed() {
@@ -231,6 +220,16 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
     }
 
+    @Override
+    public MultiblockState getMultiblockState() {
+        return state;
+    }
+
+    @Override
+    public void setMultiblockState(MultiblockState multiblockState) {
+        this.state = multiblockState;
+    }
+
     public boolean hasOldBlock() {
         return getDefinition().noNeedController && oldState != null && this.level != null;
     }
@@ -332,9 +331,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                 return;
             }
         }
-        if (compound.contains("ars")) {
-            asyncRecipeSearching = compound.getBoolean("ars");
-        }
         if (compound.contains("recipeLogic")) {
             recipeLogic = createRecipeLogic();
             recipeLogic.readFromNBT(compound.getCompound("recipeLogic"));
@@ -360,9 +356,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     @Override
     public void saveAdditional(@Nonnull CompoundTag compound) {
         super.saveAdditional(compound);
-        if (!asyncRecipeSearching) {
-            compound.putBoolean("ars", false);
-        }
         if (recipeLogic != null) compound.put("recipeLogic", recipeLogic.writeToNBT(new CompoundTag()));
         if (capabilities != null) {
             ListTag tagList = new ListTag();
@@ -424,24 +417,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return InteractionResult.SUCCESS;
     }
 
-    public boolean checkCatalystPattern(Player player, InteractionHand hand, ItemStack held) {
-        if (checkPattern()) { // formed
-            player.swing(hand);
-            Component formedMsg = new TranslatableComponent(getUnlocalizedName()).append(new TranslatableComponent("multiblocked.multiblock.formed"));
-            player.sendMessage(formedMsg, NIL_UUID);
-            if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
-                held.shrink(1);
-            }
-            MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
-            if (!needAlwaysUpdate()) {
-                MultiblockWorldSavedData.getOrCreate(level).addLoading(this);
-            }
-            onStructureFormed();
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public ModularUI createComponentUI(Player entityPlayer) {
         TabContainer tabContainer = new TabContainer(0, 0, 200, 232);
@@ -491,11 +466,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         } catch (Exception e) {
             Multiblocked.LOGGER.error("something run while checking proxy changes");
         }
-    }
-
-    @Override
-    public boolean isWorking() {
-        return getRecipeLogic() != null && getRecipeLogic().isWorking();
     }
 
     public void saveOldBlock(BlockState oldState, CompoundTag oldNbt) {

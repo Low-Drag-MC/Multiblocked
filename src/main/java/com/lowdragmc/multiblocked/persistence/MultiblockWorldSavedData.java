@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.lowdragmc.lowdraglib.utils.DummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IComponent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -47,7 +47,7 @@ public class MultiblockWorldSavedData extends SavedData {
         }
 
         @Override
-        public void addLoading(ComponentTileEntity<?> tileEntity) {
+        public void addLoading(IComponent tileEntity) {
         }
 
         @Override
@@ -86,7 +86,7 @@ public class MultiblockWorldSavedData extends SavedData {
 
     public final Map<BlockPos, MultiblockState> mapping;
     public final Map<ChunkPos, Set<MultiblockState>> chunkPosMapping;
-    public final Map<BlockPos, ComponentTileEntity<?>> loading;
+    public final Map<BlockPos, IComponent> loading;
 
     public MultiblockWorldSavedData() {
         this.mapping = new Object2ObjectOpenHashMap<>();
@@ -108,7 +108,7 @@ public class MultiblockWorldSavedData extends SavedData {
         return new ArrayList<>(chunkPosMapping.getOrDefault(chunkPos, Collections.emptySet()));
     }
 
-    public Collection<ComponentTileEntity<?>> getLoadings() {
+    public Collection<IComponent> getLoadings() {
         return loading.values();
     }
 
@@ -128,8 +128,8 @@ public class MultiblockWorldSavedData extends SavedData {
         setDirty(true);
     }
 
-    public void addLoading(ComponentTileEntity<?> tileEntity) {
-        ComponentTileEntity<?> last = loading.put(tileEntity.getBlockPos(), tileEntity);
+    public void addLoading(IComponent tileEntity) {
+        IComponent last = loading.put(tileEntity.self().getBlockPos(), tileEntity);
         if (last != tileEntity) {
             if (last instanceof IAsyncThreadUpdate) {
                 asyncComponents.remove(last);
@@ -145,7 +145,7 @@ public class MultiblockWorldSavedData extends SavedData {
     }
 
     public void removeLoading(BlockPos componentPos) {
-        ComponentTileEntity<?> component = loading.remove(componentPos);
+        IComponent component = loading.remove(componentPos);
         if (component instanceof IAsyncThreadUpdate) {
             asyncComponents.remove(component);
             if (asyncComponents.isEmpty()) {

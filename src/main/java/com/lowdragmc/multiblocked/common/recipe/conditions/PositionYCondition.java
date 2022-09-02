@@ -44,7 +44,7 @@ public class PositionYCondition extends RecipeCondition {
 
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
-        int y = recipeLogic.controller.getBlockPos().getY();
+        int y = recipeLogic.controller.self().getBlockPos().getY();
         return y >= this.min && y <= this.max;
     }
 

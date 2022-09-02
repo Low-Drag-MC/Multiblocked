@@ -55,9 +55,9 @@ public class BiomeCondition extends RecipeCondition {
 
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
-        Level level = recipeLogic.controller.getLevel();
+        Level level = recipeLogic.controller.self().getLevel();
         if (level == null) return false;
-        Holder<Biome> biome = level.getBiome(recipeLogic.controller.getBlockPos());
+        Holder<Biome> biome = level.getBiome(recipeLogic.controller.self().getBlockPos());
         return this.biome.equals(biome.value().getRegistryName());
     }
 

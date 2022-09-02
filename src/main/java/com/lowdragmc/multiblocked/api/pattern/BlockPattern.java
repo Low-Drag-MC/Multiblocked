@@ -12,8 +12,8 @@ import com.lowdragmc.multiblocked.api.pattern.error.SinglePredicateError;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import com.lowdragmc.multiblocked.api.pattern.util.PatternMatchContext;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
-import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
+import com.lowdragmc.multiblocked.api.tile.IComponent;
+import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.impl.CycleBlockStateRenderer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -81,12 +81,12 @@ public class BlockPattern {
     }
 
     public boolean checkPatternAt(MultiblockState worldState, boolean savePredicate) {
-        ControllerTileEntity controller = worldState.getController();
+        IControllerComponent controller = worldState.getController();
         if (controller == null) {
             worldState.setError(new PatternStringError("no controller found"));
             return false;
         }
-        BlockPos centerPos = controller.getBlockPos();
+        BlockPos centerPos = controller.self().getBlockPos();
         Direction frontFacing = controller.getFrontFacing();
         Set<MultiblockCapability<?>> inputCapabilities = controller.getDefinition().getRecipeMap().inputCapabilities;
         Set<MultiblockCapability<?>> outputCapabilities = controller.getDefinition().getRecipeMap().outputCapabilities;
@@ -211,8 +211,8 @@ public class BlockPattern {
         Level world = player.level;
         int minZ = -centerOffset[4];
         worldState.clean();
-        ControllerTileEntity controller = worldState.getController();
-        BlockPos centerPos = controller.getBlockPos();
+        IControllerComponent controller = worldState.getController();
+        BlockPos centerPos = controller.self().getBlockPos();
         Direction facing = controller.getFrontFacing();
         Map<SimplePredicate, Integer> cacheGlobal = worldState.globalCount;
         Map<BlockPos, Object> blocks = new HashMap<>();
@@ -309,7 +309,7 @@ public class BlockPattern {
                             BlockPlaceContext context = new BlockPlaceContext(world, player, InteractionHand.MAIN_HAND, found, BlockHitResult.miss(player.getEyePosition(0), Direction.UP, pos));
                             itemBlock.place(context);
                             BlockEntity tileEntity = world.getBlockEntity(pos);
-                            if (tileEntity instanceof ComponentTileEntity) {
+                            if (tileEntity instanceof IComponent) {
                                 blocks.put(pos, tileEntity);
                             } else {
                                 blocks.put(pos, world.getBlockState(pos));
@@ -327,11 +327,11 @@ public class BlockPattern {
                     Object object = blocks.get(p.relative(f));
                     return object == null || (object instanceof BlockState && ((BlockState) object).getBlock() == Blocks.AIR);
                 }, state -> world.setBlock(pos, state, 3));
-            } else if (block instanceof ComponentTileEntity) {
-                resetFacing(pos, ((ComponentTileEntity<?>) block).getBlockState(), frontFacing, (p, f) -> {
+            } else if (block instanceof IComponent) {
+                resetFacing(pos, ((IComponent) block).self().getBlockState(), frontFacing, (p, f) -> {
                     Object object = blocks.get(p.relative(f));
                     if (object == null || (object instanceof BlockState && ((BlockState) object).getBlock() == Blocks.AIR)) {
-                        return ((ComponentTileEntity<?>) block).isValidFrontFacing(f);
+                        return ((IComponent) block).isValidFrontFacing(f);
                     }
                     return false;
                 }, state -> world.setBlock(pos, state, 3));
@@ -457,8 +457,8 @@ public class BlockPattern {
                             return false;
                         } else {
                             BlockEntity te = component.newBlockEntity(BlockPos.ZERO, component.defaultBlockState());
-                            if (te instanceof ComponentTileEntity) {
-                                return ((ComponentTileEntity<?>) te).isValidFrontFacing(f);
+                            if (te instanceof IComponent) {
+                                return ((IComponent) te).isValidFrontFacing(f);
                             }
                         }
                     }

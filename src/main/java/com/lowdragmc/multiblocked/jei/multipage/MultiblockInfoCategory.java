@@ -1,30 +1,25 @@
 package com.lowdragmc.multiblocked.jei.multipage;
 
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
-import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.jei.IGui2IDrawable;
 import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
-import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
-import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -32,9 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("removal")
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockInfoWrapper> {
     private final static ResourceLocation UID = new ResourceLocation(Multiblocked.MODID + ":multiblock_info");
     private final static RecipeType<MultiblockInfoWrapper> RECIPE_TYPE = new RecipeType<>(UID, MultiblockInfoWrapper.class);
@@ -67,32 +59,15 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     public static void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for (ControllerDefinition definition : REGISTER) {
             if (definition.getRecipeMap() != null && definition.getRecipeMap() != RecipeMap.EMPTY) {
-                RecipeType<?> recipeType = RecipeType.create(Multiblocked.MODID, definition.getRecipeMap().name, RecipeMap.class);
-                registration.addRecipeCatalyst(definition.getStackForm(), recipeType);
+                registration.addRecipeCatalyst(definition.getStackForm(), new ResourceLocation(Multiblocked.MODID + ":" + definition.getRecipeMap().name));
             }
         }
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, MultiblockInfoWrapper wrapper, IFocusGroup focuses) {
-        List<Widget> flatVisibleWidgetCollection = wrapper.modularUI.getFlatWidgetCollection();
-        for (int index = 0, flatVisibleWidgetCollectionSize = flatVisibleWidgetCollection.size(); index < flatVisibleWidgetCollectionSize; index++) {
-            Widget widget = flatVisibleWidgetCollection.get(index);
-            if (widget instanceof SlotWidget slotWidget) {
-                //TODO:Check all slot are input?
-                //TODO:Check Fluid block and others?
-                //Write the index into the position so that we can get the widget in the RecipeLayoutWrapper.
-                IRecipeSlotBuilder slotBuilder = builder.addSlot(RecipeIngredientRole.INPUT, index, -1);
-                if (slotWidget.getHandle() instanceof SlotItemHandler handler) {
-                    if (handler.getItemHandler() instanceof CycleItemStackHandler cycleHandler) {
-                        slotBuilder.addItemStacks(cycleHandler.getStackList(0));
-                    }else {
-                        slotBuilder.addItemStack(handler.getItem());
-                    }
-                }
-            }
-        }
-        builder.addInvisibleIngredients(RecipeIngredientRole.OUTPUT).addItemStack(wrapper.definition.getStackForm());
+    public void setIngredients(@Nonnull MultiblockInfoWrapper recipe, IIngredients ingredients) {
+        ingredients.setInputs(VanillaTypes.ITEM, recipe.getWidget().allItemStackInputs);
+        ingredients.setOutput(VanillaTypes.ITEM, recipe.definition.getStackForm());
     }
 
     @Nonnull

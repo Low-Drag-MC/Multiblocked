@@ -1,4 +1,4 @@
 [submodule "LDLib"]
 	path = LDLib
-	url = https://github.com/vfyjxf/LDLib
-	branch = 1.18-jei-9
+	url = https://github.com/Low-Drag-MC/LDLib
+	branch = 1.18

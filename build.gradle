@@ -3,11 +3,11 @@ buildscript {
         jcenter()
         mavenCentral()
         maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
+		maven { url = 'https://maven.parchmentmc.org' }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
+		classpath 'org.parchmentmc:librarian:1.+'
         classpath 'org.spongepowered:mixingradle:0.7.+'
     }
 }
@@ -52,7 +52,6 @@ println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getPro
 
 // from gti
 import org.apache.tools.ant.taskdefs.condition.Os
-
 static def getPathSeparator() {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         return ";"
@@ -168,7 +167,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+	minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     // Apply Mixin AP
 
     // LDLib
@@ -177,7 +176,7 @@ dependencies {
     } else {
         //compileOnly sources jar.
         runtimeOnly fg.deobf("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
-        compileOnly("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
+        compileOnly ("com.github.Low-Drag-MC:LDLib:${ldlib_version}")
     }
 
     // KubeJS
@@ -211,22 +210,10 @@ dependencies {
 
     //geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.18')
+
     //JEI
-    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
-    //REI
-    compileOnly fg.deobf("curse.maven:roughly-enough-items-310111:3939267")
-    compileOnly fg.deobf("curse.maven:cloth-config-348521:3782776")
-
-    if (project.runtime_itemview_mod == 'jei') {
-        runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
-    }
-
-    if (project.runtime_itemview_mod == 'rei') {
-        runtimeOnly fg.deobf("curse.maven:roughly-enough-items-310111:3939267")
-        runtimeOnly fg.deobf("curse.maven:architectury-api-419699:3929416")
-        runtimeOnly fg.deobf("curse.maven:roughly-enough-items-hacks-521393:3939270")
-        runtimeOnly fg.deobf("curse.maven:cloth-config-348521:3782776")
-    }
+    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
+    implementation fg.deobf("mezz.jei:jei-${jei_version}")
 
     if (System.getProperty('idea.sync.active') != 'true') {
         annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
@@ -236,9 +223,6 @@ dependencies {
 }
 
 mixin {
-    debug.export = true
-    mixin.hotSwap = true
-    mixin.checks.interfaces=true
     add sourceSets.main, 'multiblocked.refmap.json'
 }
 
@@ -246,14 +230,14 @@ mixin {
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : project.name,
-                "Specification-Vendor"    : "Multiblocked",
-                "Specification-Version"   : project.version,
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.version,
-                "Implementation-Vendor"   : "Multiblocked",
+                "Specification-Title": project.name,
+                "Specification-Vendor": "Multiblocked",
+                "Specification-Version": project.version,
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Multiblocked",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : 'multiblocked.mixins.json'
+                'MixinConfigs': 'multiblocked.mixins.json'
         ])
     }
 }
@@ -267,7 +251,7 @@ task sourcesJar(type: Jar) {
 
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar')
+jar.finalizedBy('reobfJar') 
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
 

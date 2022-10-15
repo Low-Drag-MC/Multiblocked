@@ -21,11 +21,13 @@ import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import dev.latvian.kubejs.KubeJSPlugin;
 import dev.latvian.kubejs.fluid.FluidStackJS;
+import dev.latvian.kubejs.item.ItemStackJS;
 import dev.latvian.kubejs.item.ingredient.IngredientJS;
 import dev.latvian.kubejs.script.BindingsEvent;
 import dev.latvian.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -101,6 +103,10 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
     }
 
     public static ItemsIngredient ItemsIngredientWrapper(Object o) {
+        ItemStackJS item = ItemStackJS.of(o);
+        if (item.isEmpty()) {
+            return new ItemsIngredient(item.getItemStack());
+        }
         IngredientJS ingredient = IngredientJS.of(o);
         return new ItemsIngredient(ingredient.createVanillaIngredient());
     }

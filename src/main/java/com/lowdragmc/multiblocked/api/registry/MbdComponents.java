@@ -150,7 +150,7 @@ public class MbdComponents {
                 break;
             }
         }
-        NO_NEED_CONTROLLER_MB.put(key, ArrayUtils.add(NO_NEED_CONTROLLER_MB.get(catalyst), definition));
+        NO_NEED_CONTROLLER_MB.put(key, ArrayUtils.add(NO_NEED_CONTROLLER_MB.get(key), definition));
     }
 
     public static ControllerDefinition[] checkNoNeedController(ItemStack catalyst) {

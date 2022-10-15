@@ -55,7 +55,7 @@
   "multiblocked.blueprint_table.description": "Multiblock Creator and Customizer",
   "block.multiblocked.blueprint_table_part": "Blueprint Table",
   "block.multiblocked.controller_tester": "Controller Test Block",
-  "block.multiblocked.part_tester": "Controller Test Block",
+  "block.multiblocked.part_tester": "Part Test Block",
   "multiblocked.controller_tester.description": "You could use this block to test your scripts without restart game. It's unsafe, which can only be used in the single play.",
   "item.multiblocked.blueprint": "Blueprint",
   "multiblocked.recipe.duration": "Duration: %ds",

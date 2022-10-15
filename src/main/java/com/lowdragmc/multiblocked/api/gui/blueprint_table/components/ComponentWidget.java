@@ -371,11 +371,7 @@ public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget
         DummyComponentTileEntity tileEntity = (DummyComponentTileEntity) world.getBlockEntity(BlockPos.ZERO);
         tileEntity.setDefinition(new PartDefinition(new ResourceLocation(Multiblocked.MODID, "component_widget")));
         tileEntity.getDefinition().getBaseStatus().setRenderer(init.get());
-        Widget buttonWidget = new ButtonWidget(width - 17, 2, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"),(cd) ->
-                new IRendererWidget(this, tileEntity.getRenderer(), r -> {
-                    tileEntity.getDefinition().getBaseStatus().setRenderer(r);
-                    onUpdate.accept(r);
-                })).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.settings");
+        ButtonWidget buttonWidget = (ButtonWidget) new ButtonWidget(width - 17, 2, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"), null).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.settings");
         buttonWidget.setVisible(custom.get());
         WidgetGroup widgetGroup = new WidgetGroup(-110, 75, width, height) {
             @Override
@@ -389,6 +385,14 @@ public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget
                 buttonWidget.setVisible(custom.get());
             }
         };
+        buttonWidget.setOnPressCallback(cd -> {
+            widgetGroup.setVisible(false);
+            new IRendererWidget(this, tileEntity.getRenderer(), r -> {
+                widgetGroup.setVisible(true);
+                tileEntity.getDefinition().getBaseStatus().setRenderer(r);
+                onUpdate.accept(r);
+            });
+        });
         widgetGroup.addWidget(new ImageWidget(0, 0,  width, height, new ColorBorderTexture(2, 0xff4A82F7)));
         widgetGroup.addWidget(new SceneWidget(0, 0,  width, height, world) {
             @Override

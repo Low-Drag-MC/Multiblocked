@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.common.tile;
 
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
@@ -50,7 +51,7 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
     }
 
     @Override
-    public ComponentDefinition getDefinition() {
+    public PartDefinition getDefinition() {
         return definition;
     }
 

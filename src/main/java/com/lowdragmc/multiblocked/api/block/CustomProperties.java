@@ -19,7 +19,6 @@ public class CustomProperties {
     public boolean showInJei;
     public boolean isOpaque;
     public boolean hasDynamicShape;
-
     public boolean hasCollision;
     public float destroyTime;
     public float explosionResistance;

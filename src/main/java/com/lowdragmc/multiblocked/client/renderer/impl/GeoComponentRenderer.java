@@ -87,6 +87,8 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     public final boolean isGlobal;
     @OnlyIn(Dist.CLIENT)
     private ComponentFactory itemFactory;
+    @OnlyIn(Dist.CLIENT)
+    protected MultiBufferSource rtb;
 
     public GeoComponentRenderer(String modelName, boolean isGlobal) {
         this.modelName = modelName;
@@ -301,6 +303,16 @@ public class GeoComponentRenderer extends AnimatedGeoModel<GeoComponentRenderer.
     @Override
     public ResourceLocation getTextureLocation(ComponentFactory entity) {
         return new ResourceLocation(Multiblocked.MODID, String.format("textures/%s.png", modelName));
+    }
+
+    @Override
+    public void setCurrentRTB(MultiBufferSource multiBufferSource) {
+        this.rtb = multiBufferSource;
+    }
+
+    @Override
+    public MultiBufferSource getCurrentRTB() {
+        return rtb;
     }
 
     @Override

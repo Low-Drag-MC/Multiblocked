@@ -209,7 +209,7 @@ dependencies {
     compileOnly fg.deobf("com.tterrag.registrate:Registrate:MC1.18.2-1.1.3")
 
     //geckolib
-    implementation fg.deobf('software.bernie.geckolib:geckolib-1.18-forge:3.0.18')
+    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.18:3.0.42')
 
     //JEI
     compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")

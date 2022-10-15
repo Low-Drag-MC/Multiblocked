@@ -40,7 +40,7 @@
   "multiblocked.blueprint_table.description": "多方块创建器与定制工具",
   "block.multiblocked.blueprint_table_part": "蓝图工作台",
   "block.multiblocked.controller_tester": "测试控制器方块",
-  "block.multiblocked.part_tester": "测试控制器方块",
+  "block.multiblocked.part_tester": "测试部件方块",
   "multiblocked.controller_tester.description": "你可以用这个方块来测试你的脚本且而不需要重启游戏。它是不安全的，只能在单人游戏中使用。",
   "item.multiblocked.blueprint": "蓝图",
   "item.multiblocked.multiblock_builder": "多方块构建器",

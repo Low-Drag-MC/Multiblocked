@@ -32,6 +32,12 @@ description='''Multiblocked, a mod for custom multiblock.'''
 [[dependencies.multiblocked]]
     modId="ldlib"
     mandatory=true
-    versionRange="[0.7.3,)"
+    versionRange="[0.7.5,)"
     ordering="AFTER"
     side="BOTH"
+[[dependencies.multiblocked]]
+    modId="geckolib3"
+    mandatory=false
+    versionRange="[3.0.42,)"
+    ordering="NONE"
+    side="CLIENT"

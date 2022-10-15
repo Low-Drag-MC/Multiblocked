@@ -33,6 +33,7 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
+import com.lowdragmc.multiblocked.api.block.ItemComponent;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.predicates.PredicateComponent;
@@ -383,8 +384,8 @@ public class JsonBlockPatternWidget extends DialogWidget {
         definition.properties.isOpaque = false;
         definition.properties.tabGroup = null;
         definition.properties.showInJei = false;
-        MbdComponents.registerComponent(definition);
-        symbolBlock = (BlockComponent) MbdComponents.COMPONENT_BLOCKS_REGISTRY.get(definition.location);
+        symbolBlock = new BlockComponent(definition);
+        MbdComponents.registerComponent(definition, x -> symbolBlock, ItemComponent::new);
     }
 
     public class BlockPatternSceneWidget extends SceneWidget {

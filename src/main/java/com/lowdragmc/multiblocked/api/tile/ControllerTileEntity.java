@@ -96,10 +96,6 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return new RecipeLogic(this);
     }
 
-    public boolean isFormed() {
-        return state != null && state.isFormed();
-    }
-
     @Override
     public void update() {
         super.update();

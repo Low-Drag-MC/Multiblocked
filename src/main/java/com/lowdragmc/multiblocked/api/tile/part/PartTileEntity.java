@@ -37,21 +37,6 @@ public abstract class PartTileEntity<T extends PartDefinition> extends Component
     }
 
     @Override
-    public boolean isFormed() {
-        for (BlockPos blockPos : controllerPos) {
-            BlockEntity controller = level.getBlockEntity(blockPos);
-            if (controller instanceof IControllerComponent && ((IControllerComponent) controller).isFormed()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean canShared() {
-        return definition.canShared;
-    }
-
-    @Override
     public boolean hasController(BlockPos controllerPos) {
         return this.controllerPos.contains(controllerPos);
     }

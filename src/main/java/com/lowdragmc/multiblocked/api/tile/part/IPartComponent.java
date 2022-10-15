@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.api.tile.part;
 
+import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,9 @@ import java.util.List;
  */
 public interface IPartComponent extends IComponent {
     List<? extends IControllerComponent> getControllers();
+
+    @Override
+    PartDefinition getDefinition();
 
     @Override
     default boolean isFormed() {
@@ -45,7 +49,9 @@ public interface IPartComponent extends IComponent {
 
     void removedFromController(@Nonnull IControllerComponent controller);
 
-    boolean canShared();
+    default boolean canShared() {
+        return getDefinition().canShared;
+    }
 
     boolean hasController(BlockPos controllerPos);
 }

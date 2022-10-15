@@ -144,8 +144,6 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
         return I18n.get(getUnlocalizedName());
     }
 
-    public abstract boolean isFormed();
-
     public int getOffset() {
         return offset;
     }

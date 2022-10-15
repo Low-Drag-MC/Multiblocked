@@ -1,30 +1,23 @@
 package com.lowdragmc.multiblocked.jei;
 
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
-import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeMapCategory;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeWrapper;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -34,22 +27,9 @@ import java.util.stream.Collectors;
  */
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {
-    public static IJeiRuntime jeiRuntime;
 
     public JEIPlugin() {
         Multiblocked.LOGGER.debug("Multiblocked JEI Plugin created");
-    }
-
-    @Override
-    public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
-        JEIPlugin.jeiRuntime = jeiRuntime;
-        List<ItemStack> removed = new ArrayList<>();
-        for (ComponentDefinition definition : MbdComponents.DEFINITION_REGISTRY.values()) {
-            if (!definition.properties.showInJei) {
-                removed.add(definition.getStackForm());
-            }
-        }
-        jeiRuntime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM, removed);
     }
 
     @Override

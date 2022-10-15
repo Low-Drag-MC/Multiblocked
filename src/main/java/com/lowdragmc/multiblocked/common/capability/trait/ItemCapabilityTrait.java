@@ -61,7 +61,7 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
             public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
                 if (validItems[slot] != null) {
                     for (ItemStack itemStack : validItems[slot]) {
-                        if (ItemStack.isSameItemSameTags(stack, itemStack)) {
+                        if (itemStack != null && ItemStack.isSameItemSameTags(stack, itemStack)) {
                             return true;
                         }
                     }

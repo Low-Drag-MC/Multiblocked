@@ -37,8 +37,9 @@ public class MbdComponents {
     public static final Map<ResourceLocation, BlockItem> COMPONENT_ITEMS_REGISTRY = new HashMap<>();
     public static final Map<ItemStack, ControllerDefinition[]> NO_NEED_CONTROLLER_MB = new HashMap<>();
     public static final Set<Item> CATALYST_SET = new HashSet<>();
-    public static final BlockComponent DummyComponentBlock;
-    public static final ItemComponent DummyComponentItem;
+    public static BlockComponent DummyComponentBlock;
+    public static ItemComponent DummyComponentItem;
+    private static final List<RegistryEntry<?, ?>> ENTRIES = new ArrayList<>();
 
     static {
         ComponentDefinition definition = new ComponentDefinition(new ResourceLocation(Multiblocked.MODID, "dummy_component"), DummyComponentTileEntity.class);
@@ -46,27 +47,34 @@ public class MbdComponents {
         definition.properties.tabGroup = null;
         definition.properties.showInJei = false;
         registerComponent(definition);
-        DummyComponentBlock = (BlockComponent) COMPONENT_BLOCKS_REGISTRY.get(definition.location);
-        DummyComponentItem = (ItemComponent) COMPONENT_ITEMS_REGISTRY.get(definition.location);
     }
 
     public static void registerComponent(ComponentDefinition definition) {
         if (DEFINITION_REGISTRY.containsKey(definition.location)) return;
-        registerComponent(definition, BlockComponent::new, ItemComponent::new);
+        registerComponent(definition, x -> new BlockComponent(definition), block -> new ItemComponent(block));
     }
+
+
+    public static <T extends ComponentDefinition, B extends Block> void registerComponent(T definition, Function<T, B> block, Function<B, BlockItem> item) {
+        ENTRIES.add(new RegistryEntry<>(definition, block, item));
+    }
+
+    private record RegistryEntry<T extends ComponentDefinition, B extends Block>(T definition, Function<T, B> block, Function<B, BlockItem> item){ }
 
     @SuppressWarnings("unchecked")
-    public static <T extends ComponentDefinition, B extends Block> void registerComponent(T definition, Function<T, B> block, Function<B, BlockItem> item) {
-        if (DEFINITION_REGISTRY.containsKey(definition.location)) return;
-        DEFINITION_REGISTRY.put(definition.location, definition);
-        COMPONENT_ITEMS_REGISTRY.computeIfAbsent(definition.location, x -> item.apply(
-                (B) COMPONENT_BLOCKS_REGISTRY.computeIfAbsent(definition.location, X -> block.apply(definition))));
-        if (Multiblocked.isClient() && definition instanceof ControllerDefinition && Multiblocked.isJeiLoaded()) {
-            MultiblockInfoCategory.registerMultiblock((ControllerDefinition) definition);
-        }
-    }
-
     public static void registerBlocks(IForgeRegistry<Block> registry) {
+        for (RegistryEntry entry : ENTRIES) {
+            if (DEFINITION_REGISTRY.containsKey(entry.definition.location)) return;
+            DEFINITION_REGISTRY.put(entry.definition.location, entry.definition);
+            COMPONENT_ITEMS_REGISTRY.computeIfAbsent(entry.definition.location, x -> (BlockItem) entry.item.apply(
+                    COMPONENT_BLOCKS_REGISTRY.computeIfAbsent(entry.definition.location, X -> (Block) entry.block.apply(entry.definition))));
+            if (Multiblocked.isClient() && entry.definition instanceof ControllerDefinition && Multiblocked.isJeiLoaded()) {
+                MultiblockInfoCategory.registerMultiblock((ControllerDefinition) entry.definition);
+            }
+        }
+        ENTRIES.clear();
+        DummyComponentBlock = (BlockComponent) COMPONENT_BLOCKS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "dummy_component"));
+        DummyComponentItem = (ItemComponent) COMPONENT_ITEMS_REGISTRY.get(new ResourceLocation(Multiblocked.MODID, "dummy_component"));
         COMPONENT_BLOCKS_REGISTRY.values().forEach(registry::register);
     }
     
@@ -164,7 +172,7 @@ public class MbdComponents {
                 break;
             }
         }
-        NO_NEED_CONTROLLER_MB.put(key, ArrayUtils.add(NO_NEED_CONTROLLER_MB.get(catalyst), definition));
+        NO_NEED_CONTROLLER_MB.put(key, ArrayUtils.add(NO_NEED_CONTROLLER_MB.get(key), definition));
     }
 
     public static ControllerDefinition[] checkNoNeedController(ItemStack catalyst) {
@@ -177,5 +185,8 @@ public class MbdComponents {
             }
         }
         return new ControllerDefinition[0];
+    }
+
+    public static void init() {
     }
 }

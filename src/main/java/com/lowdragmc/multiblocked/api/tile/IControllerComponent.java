@@ -30,6 +30,11 @@ public interface IControllerComponent extends IComponent, ICapabilityProxyHolder
     ControllerDefinition getDefinition();
 
     @Override
+    default boolean isFormed() {
+        return getMultiblockState() != null && getMultiblockState().isFormed();
+    }
+
+    @Override
     default boolean isValidFrontFacing(Direction up) {
         return IComponent.super.isValidFrontFacing(up) && up.getAxis() != Direction.Axis.Y;
     }

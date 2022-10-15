@@ -71,18 +71,6 @@ public class CycleBlockStateRenderer extends MBDBlockStateRenderer {
     }
 
     @Override
-    public BlockState getState(BlockState blockState) {
-        BlockState state = getBlockInfo().getBlockState();
-        if (blockState.hasProperty(BlockStateProperties.FACING) && state.hasProperty(BlockStateProperties.FACING)) {
-            state = state.setValue(BlockStateProperties.FACING, blockState.getValue(
-                    BlockStateProperties.FACING));
-        } else if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-            state = state.setValue(BlockStateProperties.HORIZONTAL_FACING, blockState.getValue(BlockStateProperties.HORIZONTAL_FACING));
-        }
-        return state;
-    }
-
-    @Override
     @OnlyIn(Dist.CLIENT)
     public List<BakedQuad> renderModel(BlockAndTintGetter level, BlockPos pos, BlockState state, Direction side, Random rand, IModelData modelData) {
         return Collections.emptyList();

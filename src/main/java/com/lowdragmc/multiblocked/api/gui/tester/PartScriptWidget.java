@@ -63,6 +63,7 @@ public class PartScriptWidget extends PageWidget {
                 try {
                     PartDefinition definition = new PartDefinition(new ResourceLocation(jsonElement.getAsJsonObject().get("location").getAsString()));
                     definition.fromJson(jsonElement.getAsJsonObject());
+                    part.setDefinition(definition);
                     MbdComponents.TEST_DEFINITION_REGISTRY.put(definition.location, definition);
                     writeClientAction(-1, buffer -> buffer.writeUtf(definition.location.toString()));
                 } catch (Exception e) {

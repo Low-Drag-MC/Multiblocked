@@ -46,26 +46,13 @@ public class JEIPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(@Nonnull IRecipeCatalystRegistration registration) {
         MultiblockInfoCategory.registerRecipeCatalysts(registration);
+        RecipeMapCategory.registerRecipeCatalysts(registration);
     }
 
     @Override
     public void registerRecipes(@Nonnull IRecipeRegistration registration) {
         Multiblocked.LOGGER.info("JEI register");
-        for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
-            if (recipeMap == RecipeMap.EMPTY) continue;
-            registration.addRecipes(recipeMap.recipes.values()
-                            .stream()
-                            .map(recipe -> {
-                                RecipeWidget recipeWidget = new RecipeWidget(recipe, recipeMap.progressTexture);
-                                if (Multiblocked.isKubeJSLoaded()) {
-                                    new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, recipeMap.name);
-                                }
-                                return recipeWidget;
-                            })
-                            .map(RecipeWrapper::new)
-                            .collect(Collectors.toList()), 
-                    new ResourceLocation(Multiblocked.MODID, recipeMap.name));
-        }
+        RecipeMapCategory.registerRecipes(registration);
         MultiblockInfoCategory.registerRecipes(registration);
     }
 

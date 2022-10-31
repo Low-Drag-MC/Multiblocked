@@ -3,43 +3,30 @@ package com.lowdragmc.multiblocked.jei.recipeppage;
 import com.lowdragmc.lowdraglib.jei.IGui2IDrawable;
 import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
-import com.lowdragmc.multiblocked.api.recipe.Content;
-import com.lowdragmc.multiblocked.api.recipe.Recipe;
+import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
+import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
+import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
-import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
-import com.lowdragmc.multiblocked.common.capability.ChemicalMekanismCapability;
-import com.lowdragmc.multiblocked.common.capability.EntityMultiblockCapability;
-import com.lowdragmc.multiblocked.common.capability.FluidMultiblockCapability;
-import com.lowdragmc.multiblocked.common.capability.ItemMultiblockCapability;
-import com.lowdragmc.multiblocked.core.mixins.NBTIngredientMixin;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.infuse.InfusionStack;
-import mekanism.api.chemical.pigment.PigmentStack;
-import mekanism.api.chemical.slurry.SlurryStack;
-import mekanism.client.jei.MekanismJEI;
-import mezz.jei.api.constants.VanillaTypes;
+import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
-import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
+import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.common.crafting.NBTIngredient;
-import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
+    public static final Function<ResourceLocation, RecipeType<RecipeWrapper>> TYPES = Util.memoize(location -> new RecipeType<>(location, RecipeWrapper.class));
+
     private final RecipeMap recipeMap;
     private final IDrawable background;
     private IDrawable icon;
@@ -50,16 +37,22 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
         this.recipeMap = recipeMap;
     }
 
+    @Override
+    @Nonnull
+    public RecipeType<RecipeWrapper> getRecipeType() {
+        return TYPES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name));
+    }
+
     @Nonnull
     @Override
     public ResourceLocation getUid() {
-        return new ResourceLocation(Multiblocked.MODID, recipeMap.name);
+        return getRecipeType().getUid();
     }
 
     @Nonnull
     @Override
     public Class<? extends RecipeWrapper> getRecipeClass() {
-        return RecipeWrapper.class;
+        return getRecipeType().getRecipeClass();
     }
 
     @Nonnull
@@ -80,78 +73,30 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
         return icon == null ? (icon = IGui2IDrawable.toDrawable(recipeMap.categoryTexture, 18, 18)) : icon;
     }
 
-    @Override
-    public void setIngredients(@Nonnull RecipeWrapper wrapper, @Nonnull IIngredients ingredients) {
-        Recipe recipe = wrapper.recipe;
-        if (recipe.inputs.containsKey(ItemMultiblockCapability.CAP)) {
-            ingredients.setInputIngredients(recipe.inputs.get(ItemMultiblockCapability.CAP).stream()
-                    .map(Content::getContent)
-                    .map(Ingredient.class::cast)
-                    .collect(Collectors.toList()));
-        }
-        if (recipe.outputs.containsKey(ItemMultiblockCapability.CAP)) {
-            ingredients.setOutputs(VanillaTypes.ITEM, recipe.outputs.get(ItemMultiblockCapability.CAP).stream()
-                    .map(Content::getContent)
-                    .map(Ingredient.class::cast)
-                    .flatMap(r -> r instanceof NBTIngredient ? Stream.of(((NBTIngredientMixin) r).getStack()) : Arrays.stream(r.getItems()))
-                    .collect(Collectors.toList()));
-        }
-
-        if (recipe.inputs.containsKey(EntityMultiblockCapability.CAP)) {
-            ingredients.setInputIngredients(recipe.inputs.get(EntityMultiblockCapability.CAP).stream()
-                    .map(Content::getContent)
-                    .map(EntityIngredient.class::cast)
-                    .map(content -> {
-                        if (content.isEntityItem()) {
-                            return content.getEntityItem();
-                        } else {
-                            SpawnEggItem item = ForgeSpawnEggItem.fromEntityType(content.type);
-                            return item == null ? ItemStack.EMPTY : item.getDefaultInstance();
+    public static void registerRecipes(IRecipeRegistration registration) {
+        for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
+            if (recipeMap == RecipeMap.EMPTY || recipeMap.recipes.isEmpty()) continue;
+            registration.addRecipes(RecipeMapCategory.TYPES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name)), recipeMap.recipes.values()
+                    .stream()
+                    .map(recipe -> {
+                        RecipeWidget recipeWidget = new RecipeWidget(recipe, recipeMap.progressTexture);
+                        if (Multiblocked.isKubeJSLoaded()) {
+                            new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, recipeMap.name);
                         }
+                        return recipeWidget;
                     })
-                    .filter(itemStack -> !itemStack.isEmpty())
-                    .map(Ingredient::of)
+                    .map(RecipeWrapper::new)
                     .collect(Collectors.toList()));
         }
-        if (recipe.outputs.containsKey(EntityMultiblockCapability.CAP)) {
-            ingredients.setOutputs(VanillaTypes.ITEM, recipe.outputs.get(EntityMultiblockCapability.CAP).stream()
-                    .map(Content::getContent)
-                    .map(EntityIngredient.class::cast)
-                    .map(content -> {
-                        if (content.isEntityItem()) {
-                            return content.getEntityItem();
-                        } else {
-                            SpawnEggItem item = ForgeSpawnEggItem.fromEntityType(content.type);
-                            return item == null ? ItemStack.EMPTY : item.getDefaultInstance();
-                        }
-                    })
-                    .filter(itemStack -> !itemStack.isEmpty())
-                    .collect(Collectors.toList()));
-        }
-
-        checkCommonIngredients(recipe, FluidMultiblockCapability.CAP, ingredients, VanillaTypes.FLUID, FluidStack.class);
-
-        if (Multiblocked.isMekLoaded()) {
-            checkCommonIngredients(recipe, ChemicalMekanismCapability.CAP_GAS, ingredients, MekanismJEI.TYPE_GAS, GasStack.class);
-            checkCommonIngredients(recipe, ChemicalMekanismCapability.CAP_INFUSE, ingredients, MekanismJEI.TYPE_INFUSION, InfusionStack.class);
-            checkCommonIngredients(recipe, ChemicalMekanismCapability.CAP_PIGMENT, ingredients, MekanismJEI.TYPE_PIGMENT, PigmentStack.class);
-            checkCommonIngredients(recipe, ChemicalMekanismCapability.CAP_SLURRY, ingredients, MekanismJEI.TYPE_SLURRY, SlurryStack.class);
-        }
-
     }
 
-    private <T> void checkCommonIngredients(Recipe recipe, MultiblockCapability<T> CAP, IIngredients ingredients, IIngredientType<T> type, Class<T> clazz) {
-        if (recipe.inputs.containsKey(CAP)) {
-            ingredients.setInputs(type, recipe.inputs.get(CAP).stream()
-                    .map(Content::getContent)
-                    .map(clazz::cast)
-                    .collect(Collectors.toList()));
-        }
-        if (recipe.outputs.containsKey(CAP)) {
-            ingredients.setOutputs(type, recipe.outputs.get(CAP).stream()
-                    .map(Content::getContent)
-                    .map(clazz::cast)
-                    .collect(Collectors.toList()));
+    public static void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        for (ControllerDefinition definition : MultiblockInfoCategory.REGISTER) {
+            for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
+                if (recipeMap == definition.getRecipeMap()) {
+                    registration.addRecipeCatalyst(definition.getStackForm(), RecipeMapCategory.TYPES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name)));
+                }
+            }
         }
     }
 

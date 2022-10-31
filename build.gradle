@@ -13,18 +13,25 @@ buildscript {
 }
 
 repositories {
-//    flatDir {
-//        dir 'libs'
-//    }
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     maven { url 'https://dvs1.progwml6.com/files/maven' }
-//    maven {
-//        url 'https://cfa2.cursemaven.com'
-//    }
+    maven { url "https://maven.shedaniel.me" }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
     maven {
         url "https://www.cursemaven.com"
         content {
             includeGroup "curse.maven"
+        }
+    }
+    maven {
+        // saps.dev Maven (KubeJS and Rhino)
+        url = "https://maven.saps.dev/minecraft"
+        content {
+            includeGroup "dev.latvian.mods"
         }
     }
     maven {
@@ -180,9 +187,9 @@ dependencies {
     }
 
     // KubeJS
-    compileOnly fg.deobf("curse.maven:rhino-416294:${rhino_file}")
-    compileOnly fg.deobf("curse.maven:architecturyforge-419699:${architectury_file}")
-    compileOnly fg.deobf("curse.maven:kubejs-238086:${kubejs_file}")
+    implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+    implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
+    implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
 
     // Rubidium
     compileOnly fg.deobf("curse.maven:rubidium-574856:3749094")
@@ -212,8 +219,15 @@ dependencies {
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.18:3.0.42')
 
     //JEI
-    compileOnly fg.deobf("mezz.jei:jei-${jei_version}:api")
-    implementation fg.deobf("mezz.jei:jei-${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
+    //REI
+    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
+    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
+    compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
+
+    compileOnly fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
 
     if (System.getProperty('idea.sync.active') != 'true') {
         annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'

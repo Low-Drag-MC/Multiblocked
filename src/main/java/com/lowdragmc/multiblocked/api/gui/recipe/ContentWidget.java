@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.gui.recipe;
 
 import com.google.common.collect.Lists;
+import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
@@ -16,6 +17,7 @@ import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.SelectableWidgetGroup;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
@@ -36,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class ContentWidget<T> extends SelectableWidgetGroup {
+public abstract class ContentWidget<T> extends SelectableWidgetGroup implements IRecipeIngredientSlot {
     protected T content;
     protected float chance;
     protected IO io;
@@ -80,6 +82,11 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
     }
 
     @Override
+    public IngredientIO getIngredientIo() {
+        return io == IO.IN ? IngredientIO.INPUT : io == IO.OUT ? IngredientIO.OUTPUT : IngredientIO.RENDER_ONLY;
+    }
+
+    @Override
     public List<Target> getPhantomTargets(Object ingredient) {
         List<Target> pattern = super.getPhantomTargets(ingredient);
         if (pattern != null && pattern.size() > 0) return pattern;
@@ -113,12 +120,13 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup {
 
     @Override
     public Object getIngredientOverMouse(double mouseX, double mouseY) {
-        Object result = super.getIngredientOverMouse(mouseX, mouseY);
-        if (result != null) return  result;
-        if (isMouseOverElement(mouseX, mouseY)) {
-            return getJEIIngredient(getContent());
-        }
-        return null;
+        return IRecipeIngredientSlot.super.getIngredientOverMouse(mouseX, mouseY);
+    }
+
+    @Nullable
+    @Override
+    public Object getJEIIngredient() {
+        return getJEIIngredient(getContent());
     }
 
     /**

@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib.gui.widget.SceneWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.lowdraglib.utils.ItemStackKey;
@@ -77,7 +78,6 @@ public class PatternWidget extends WidgetGroup {
     private final SwitchWidget switchWidget;
     public final ControllerDefinition controllerDefinition;
     public final MBPattern[] patterns;
-    public final List<ItemStack> allItemStackInputs;
     private final List<SimplePredicate> predicates;
     private int index;
     private SlotWidget[] slotWidgets;
@@ -86,7 +86,6 @@ public class PatternWidget extends WidgetGroup {
     private PatternWidget(ControllerDefinition controllerDefinition) {
         super(0, 0, 176, 219);
         setClientSideWidget();
-        allItemStackInputs = new ArrayList<>();
         predicates = new ArrayList<>();
 
         addWidget(new ImageWidget(7, 7, 162, 16,
@@ -110,12 +109,6 @@ public class PatternWidget extends WidgetGroup {
                 .map(it -> initializePattern(it, drops))
                 .filter(Objects::nonNull)
                 .toArray(MBPattern[]::new);
-
-        drops.forEach(it -> {
-            if (!it.getItemStack().isEmpty()) {
-                allItemStackInputs.add(it.getItemStack());
-            }
-        });
 
         addWidget(switchWidget = (SwitchWidget) new SwitchWidget(151, 33, 16, 16, this::onFormedSwitch)
                 .setTexture(FORMED_BUTTON, FORMED_BUTTON_PRESSED)
@@ -166,7 +159,7 @@ public class PatternWidget extends WidgetGroup {
         IItemHandler itemHandler = new ItemStackHandler(pattern.parts);
         for (int i = 0; i < slotWidgets.length; i++) {
             slotWidgets[i] = new SlotWidget(itemHandler, i, 7 + (i % 9) * 18, 176 + (i / 9) * 18, false, false)
-                    .setItemHook(this::itemHook);
+                    .setItemHook(this::itemHook).setIngredientIO(IngredientIO.INPUT);
             addWidget(slotWidgets[i]);
         }
         leftButton.setVisible(index > 0);

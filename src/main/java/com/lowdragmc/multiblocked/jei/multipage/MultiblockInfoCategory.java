@@ -7,13 +7,9 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.BlueprintTableTileEntity;
-import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
-import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
@@ -22,14 +18,12 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockInfoWrapper> {
-    private final static ResourceLocation UID = new ResourceLocation(Multiblocked.MODID + ":multiblock_info");
-    private final static RecipeType<MultiblockInfoWrapper> RECIPE_TYPE = new RecipeType<>(UID, MultiblockInfoWrapper.class);
+    public final static RecipeType<MultiblockInfoWrapper> RECIPE_TYPE = new RecipeType<>(new ResourceLocation(Multiblocked.MODID + ":multiblock_info"), MultiblockInfoWrapper.class);
     private final IDrawable background;
     private final IDrawable icon;
 
@@ -59,27 +53,21 @@ public class MultiblockInfoCategory extends ModularUIRecipeCategory<MultiblockIn
     public static void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         for (ControllerDefinition definition : REGISTER) {
             if (definition.getRecipeMap() != null && definition.getRecipeMap() != RecipeMap.EMPTY) {
-                registration.addRecipeCatalyst(definition.getStackForm(), new ResourceLocation(Multiblocked.MODID + ":" + definition.getRecipeMap().name));
+                registration.addRecipeCatalyst(definition.getStackForm(), RECIPE_TYPE);
             }
         }
-    }
-
-    @Override
-    public void setIngredients(@Nonnull MultiblockInfoWrapper recipe, IIngredients ingredients) {
-        ingredients.setInputs(VanillaTypes.ITEM, recipe.getWidget().allItemStackInputs);
-        ingredients.setOutput(VanillaTypes.ITEM, recipe.definition.getStackForm());
     }
 
     @Nonnull
     @Override
     public ResourceLocation getUid() {
-        return UID;
+        return RECIPE_TYPE.getUid();
     }
 
     @Nonnull
     @Override
     public Class<? extends MultiblockInfoWrapper> getRecipeClass() {
-        return MultiblockInfoWrapper.class;
+        return RECIPE_TYPE.getRecipeClass();
     }
 
     @Override

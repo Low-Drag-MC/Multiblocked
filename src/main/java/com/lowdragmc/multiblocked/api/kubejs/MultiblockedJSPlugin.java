@@ -11,7 +11,6 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.RecipePage;
-import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
@@ -27,7 +26,6 @@ import dev.latvian.kubejs.script.BindingsEvent;
 import dev.latvian.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.fluids.FluidStack;
 

@@ -125,7 +125,7 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
         super.createUI(component, group, player);
         if (handler != null) {
             for (int i = 0; i < handler.getSlots(); i++) {
-                group.addWidget(new SlotWidget(new ProxyItemHandler(handler, guiIO, false), i, x[i], y[i], true, true));
+                group.addWidget(new SlotWidget(new ProxyItemHandler(handler, guiIO, this.slotName, null), i, x[i], y[i], true, true));
             }
         }
     }
@@ -218,24 +218,26 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new ProxyItemHandler(handler, capabilityIO, false)));
+        return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new ProxyItemHandler(handler, capabilityIO, this.slotName, null)));
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new ProxyItemHandler(handler, capabilityIO, true)));
+    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
+        return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new ProxyItemHandler(handler, getRealMbdIO(), this.slotName, slotName)));
     }
 
     private class ProxyItemHandler implements IItemHandler, IItemHandlerModifiable {
         public ItemStackHandler proxy;
         public IO[] ios;
-        public boolean inner;
+        public String[] slotNames;
+        public String slotName;
 
-        public ProxyItemHandler(ItemStackHandler proxy, IO[] ios, boolean inner) {
+        public ProxyItemHandler(ItemStackHandler proxy, IO[] ios, String[] slotNames, @Nullable String slotName) {
             this.proxy = proxy;
             this.ios = ios;
-            this.inner = inner;
+            this.slotNames = slotNames;
+            this.slotName = slotName;
         }
 
         @Override
@@ -252,8 +254,11 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
         @Nonnull
         @Override
         public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            if (slotName != null && !slotNames[slot].equals(slotName)) {
+                return stack;
+            }
             IO io = ios[slot];
-            if (io == IO.BOTH || (inner ? io == IO.OUT : io == IO.IN)) {
+            if (io == IO.BOTH || io == IO.IN) {
                 if (!simulate) markAsDirty();
                 return proxy.insertItem(slot, stack, simulate);
             }
@@ -263,8 +268,11 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
         @Nonnull
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if (slotName != null && !slotNames[slot].equals(slotName)) {
+                return ItemStack.EMPTY;
+            }
             IO io = ios[slot];
-            if (io == IO.BOTH || (inner ? io == IO.IN : io == IO.OUT)) {
+            if (io == IO.BOTH || io == IO.OUT) {
                 if (!simulate) markAsDirty();
                 return proxy.extractItem(slot, amount, simulate);
             }

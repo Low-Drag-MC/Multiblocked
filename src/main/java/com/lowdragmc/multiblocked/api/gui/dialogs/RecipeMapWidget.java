@@ -13,7 +13,6 @@ import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
-import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;

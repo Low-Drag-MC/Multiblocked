@@ -20,6 +20,7 @@ import net.minecraft.tileentity.TileEntity;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -92,8 +93,8 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
         }
 
         @Override
-        protected List<Double> handleRecipeInner(IO io, Recipe recipe, List<Double> left, boolean simulate) {
-            IHeatHandler capability = getCapability();
+        protected List<Double> handleRecipeInner(IO io, Recipe recipe, List<Double> left, @Nullable String slotName, boolean simulate) {
+            IHeatHandler capability = getCapability(slotName);
             if (capability == null || capability.getTotalTemperature() <= 0) return left;
             double sum = left.stream().reduce(0d, Double::sum);
             if (io == IO.IN) {
@@ -112,7 +113,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
 
         @Override
         protected boolean hasInnerChanged() {
-            IHeatHandler capability = getCapability();
+            IHeatHandler capability = getCapability(null);
             if (capability == null || capability.getTotalTemperature() <= 0) return false;
             if (lastTemp == capability.getTotalTemperature()) return false;
             lastTemp = capability.getTotalTemperature();

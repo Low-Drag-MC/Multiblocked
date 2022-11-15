@@ -28,6 +28,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
@@ -123,8 +124,8 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
         }
 
         @Override
-        protected List<ItemsIngredient> handleRecipeInner(IO io, Recipe recipe, List<ItemsIngredient> left, boolean simulate) {
-            IItemHandler capability = getCapability();
+        protected List<ItemsIngredient> handleRecipeInner(IO io, Recipe recipe, List<ItemsIngredient> left, @Nullable String slotName, boolean simulate) {
+            IItemHandler capability = getCapability(slotName);
             if (capability == null) return left;
             Iterator<ItemsIngredient> iterator = left.iterator();
             if (io == IO.IN) {
@@ -162,7 +163,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<ItemsIngredie
 
         @Override
         protected boolean hasInnerChanged() {
-            IItemHandler capability = getCapability();
+            IItemHandler capability = getCapability(null);
             if (capability == null) return false;
             boolean same = true;
             if (lastStacks.length == capability.getSlots()) {

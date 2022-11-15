@@ -176,7 +176,7 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
         super.createUI(component, group, player);
         if (handlers != null) {
             for (int i = 0; i < handlers.size(); i++) {
-                group.addWidget(new ChemicalStackWidget<>(getCap(), new ProxyChemicalHandler(guiIO, false), i, x[i], y[i]));
+                group.addWidget(new ChemicalStackWidget<>(getCap(), new ProxyChemicalHandler(guiIO, this.slotName, null), i, x[i], y[i]));
             }
         }
     }
@@ -188,22 +188,24 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(capabilityIO, false)));
+        return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(capabilityIO, this.slotName, null)));
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(capabilityIO, true)));
+    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
+        return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(getRealMbdIO(), this.slotName, slotName)));
     }
 
     public class ProxyChemicalHandler implements IChemicalHandler<CHEMICAL, STACK> {
-        public boolean inner;
         public IO[] ios;
+        public String[] slotNames;
+        public String slotName;
 
-        public ProxyChemicalHandler(IO[] ios, boolean inner) {
-            this.inner = inner;
+        public ProxyChemicalHandler(IO[] ios, String[] slotNames, @Nullable String slotName) {
             this.ios = ios;
+            this.slotNames = slotNames;
+            this.slotName = slotName;
         }
 
 
@@ -236,8 +238,11 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
 
         @Override
         public STACK insertChemical(int i, STACK stack, Action action) {
+            if (slotName != null && !slotNames[i].equals(slotName)) {
+                return stack;
+            }
             IO io = ios[i];
-            if (io == IO.BOTH || (inner ? io == IO.OUT : io == IO.IN)) {
+            if (io == IO.BOTH || io == IO.IN) {
                 return i < handlers.size() ? handlers.get(i).insert(stack, action, AutomationType.EXTERNAL) : stack;
             }
             return stack;
@@ -245,8 +250,11 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
 
         @Override
         public STACK extractChemical(int i, long l, Action action) {
+            if (slotName != null && !slotNames[i].equals(slotName)) {
+                return getEmptyStack();
+            }
             IO io = ios[i];
-            if (io == IO.BOTH || (inner ? io == IO.IN : io == IO.OUT)) {
+            if (io == IO.BOTH || io == IO.OUT) {
                 return i < handlers.size() ? handlers.get(i).extract(l, action, AutomationType.EXTERNAL) : this.getEmptyStack();
 
             }

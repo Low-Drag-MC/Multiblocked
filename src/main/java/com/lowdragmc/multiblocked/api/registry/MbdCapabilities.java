@@ -10,12 +10,14 @@ import com.lowdragmc.multiblocked.common.capability.*;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class MbdCapabilities {
 
     public static final Map<String, MultiblockCapability<?>> CAPABILITY_REGISTRY = Maps.newHashMap();
+    public static final Map<String, MultiblockCapability<?>> TRAIT_ONLY_CAPABILITY_REGISTRY = Maps.newHashMap();
     public static final List<String> CAPABILITY_ORDER = new ArrayList<>();
 
     public static void registerCapability(MultiblockCapability<?> capability) {
@@ -23,7 +25,14 @@ public class MbdCapabilities {
         CAPABILITY_ORDER.add(capability.name);
     }
 
+    public static void registerTraitOnlyCapability(MultiblockCapability<?> capability) {
+        if (capability.hasTrait()) {
+            TRAIT_ONLY_CAPABILITY_REGISTRY.put(capability.name, capability);
+        }
+    }
+
     public static void registerCapabilities() {
+        registerTraitOnlyCapability(RecipeProgressCapability.CAP);
         registerCapability(FEMultiblockCapability.CAP);
         registerCapability(ItemMultiblockCapability.CAP);
         registerCapability(FluidMultiblockCapability.CAP);
@@ -53,7 +62,7 @@ public class MbdCapabilities {
     }
 
     public static MultiblockCapability<?> get(String s) {
-        return CAPABILITY_REGISTRY.get(s);
+        return CAPABILITY_REGISTRY.getOrDefault(s, TRAIT_ONLY_CAPABILITY_REGISTRY.get(s));
     }
 
     /**
@@ -77,4 +86,15 @@ public class MbdCapabilities {
             MbdComponents.registerComponent(definition);
         }
     }
+
+    public static Collection<MultiblockCapability<?>> getTraitCaps() {
+        List<MultiblockCapability<?>> result = new ArrayList<>(TRAIT_ONLY_CAPABILITY_REGISTRY.values());
+        for (MultiblockCapability<?> cap : CAPABILITY_REGISTRY.values()) {
+            if (cap.hasTrait()) {
+                result.add(cap);
+            }
+        }
+        return result;
+    }
+
 }

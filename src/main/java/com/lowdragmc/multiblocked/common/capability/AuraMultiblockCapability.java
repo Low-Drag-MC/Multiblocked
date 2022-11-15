@@ -20,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -86,7 +87,7 @@ public class AuraMultiblockCapability extends MultiblockCapability<Integer> {
         }
 
         @Override
-        protected List<Integer> handleRecipeInner(IO io, Recipe recipe, List<Integer> left, boolean simulate) {
+        protected List<Integer> handleRecipeInner(IO io, Recipe recipe, List<Integer> left, @Nullable String slotName, boolean simulate) {
             Level world = getTileEntity().getLevel();
             BlockPos pos = getTileEntity().getBlockPos();
 

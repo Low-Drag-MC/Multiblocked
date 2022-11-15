@@ -32,6 +32,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -231,8 +232,8 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
         }
 
         @Override
-        protected List<STACK> handleRecipeInner(IO io, Recipe recipe, List<STACK> left, boolean simulate) {
-            IChemicalHandler<CHEMICAL, STACK> capability = getCapability();
+        protected List<STACK> handleRecipeInner(IO io, Recipe recipe, List<STACK> left, @Nullable String slotName, boolean simulate) {
+            IChemicalHandler<CHEMICAL, STACK> capability = getCapability(slotName);
             if (capability == null) return left;
             Iterator<STACK> iterator = left.iterator();
             if (io == IO.IN) {
@@ -270,7 +271,7 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
 
         @Override
         protected boolean hasInnerChanged() {
-            IChemicalHandler<CHEMICAL, STACK> capability = getCapability();
+            IChemicalHandler<CHEMICAL, STACK> capability = getCapability(null);
             if (capability == null) return false;
             boolean same = true;
             if (lastStacks.size() == capability.getTanks()) {

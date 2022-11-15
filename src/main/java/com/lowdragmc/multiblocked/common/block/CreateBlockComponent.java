@@ -2,12 +2,18 @@ package com.lowdragmc.multiblocked.common.block;
 
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
 import com.simibubi.create.content.contraptions.base.IRotate;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author KilaBash
@@ -30,4 +36,13 @@ public class CreateBlockComponent extends BlockComponent implements IRotate {
         return state.getValue(BlockStateProperties.FACING).getAxis();
     }
 
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+        return (level, blockPos, blockState, t) -> {
+            if (level.getBlockEntity(blockPos) instanceof CreateKineticSourceTileEntity createKineticSourceTile) {
+                createKineticSourceTile.tick();
+            }
+        };
+    }
 }

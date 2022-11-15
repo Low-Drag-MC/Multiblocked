@@ -101,13 +101,13 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     @Override
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, capabilityIO, false)));
+        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, capabilityIO)));
     }
 
     @Override
     @Nonnull
     public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, capabilityIO, true)));
+        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, guiIO)));
     }
 
     @Override
@@ -145,17 +145,15 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     private class ProxyEnergyStorage implements IEnergyStorage {
         public EnergyStorage proxy;
         public IO io;
-        public boolean inner;
 
-        public ProxyEnergyStorage(EnergyStorage proxy, IO io, boolean inner) {
+        public ProxyEnergyStorage(EnergyStorage proxy, IO io) {
             this.proxy = proxy;
             this.io = io;
-            this.inner = inner;
         }
 
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
-            if (io == IO.BOTH || (inner ? io == IO.OUT : io == IO.IN)) {
+            if (io == IO.BOTH || io == IO.IN) {
                 if (!simulate) markAsDirty();
                 return proxy.receiveEnergy(maxReceive, simulate);
             }
@@ -164,7 +162,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
-            if (io == IO.BOTH || (inner ? io == IO.IN : io == IO.OUT)) {
+            if (io == IO.BOTH || io == IO.OUT) {
                 if (!simulate) markAsDirty();
                 return proxy.extractEnergy(maxExtract, simulate);
             }
@@ -183,7 +181,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
 
         @Override
         public boolean canExtract() {
-            if (io == IO.BOTH || (inner ? io == IO.IN : io == IO.OUT)) {
+            if (io == IO.BOTH ||io == IO.OUT) {
                 return proxy.canExtract();
             }
             return false;
@@ -191,7 +189,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
 
         @Override
         public boolean canReceive() {
-            if (io == IO.BOTH || (inner ? io == IO.OUT : io == IO.IN)) {
+            if (io == IO.BOTH || io == IO.IN) {
                 return proxy.canReceive();
             }
             return false;

@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
@@ -99,7 +100,7 @@ public class EntityMultiblockCapability extends MultiblockCapability<EntityIngre
         }
 
         @Override
-        protected List<EntityIngredient> handleRecipeInner(IO io, Recipe recipe, List<EntityIngredient> left, boolean simulate) {
+        protected List<EntityIngredient> handleRecipeInner(IO io, Recipe recipe, List<EntityIngredient> left, @Nullable String slotName, boolean simulate) {
             if (getTileEntity() instanceof ComponentTileEntity<?> component) {
                 BlockPos pos = component.getBlockPos().relative(component.getFrontFacing());
                 if (io == IO.IN) {

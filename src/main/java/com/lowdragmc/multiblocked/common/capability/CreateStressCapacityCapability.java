@@ -106,7 +106,7 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
         }
 
         @Override
-        protected List<Float> handleRecipeInner(IO io, Recipe recipe, List<Float> left, boolean simulate) {
+        protected List<Float> handleRecipeInner(IO io, Recipe recipe, List<Float> left, @Nullable String slotName, boolean simulate) {
             CreateKineticSourceTileEntity capability = getCapability();
             if (capability == null) return left;
             float sum = left.stream().reduce(0f, Float::sum);

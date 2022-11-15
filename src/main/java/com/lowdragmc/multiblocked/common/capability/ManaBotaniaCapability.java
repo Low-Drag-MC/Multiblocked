@@ -11,6 +11,7 @@ import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerInteger;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jetbrains.annotations.Nullable;
 import vazkii.botania.api.BotaniaForgeCapabilities;
 import vazkii.botania.api.mana.IManaReceiver;
 import vazkii.botania.common.block.ModBlocks;
@@ -70,8 +71,8 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
         }
 
         @Override
-        protected List<Integer> handleRecipeInner(IO io, Recipe recipe, List<Integer> left, boolean simulate) {
-            IManaReceiver capability = getCapability();
+        protected List<Integer> handleRecipeInner(IO io, Recipe recipe, List<Integer> left, @Nullable String slotName, boolean simulate) {
+            IManaReceiver capability = getCapability(slotName);
             if (capability == null) return left;
             int sum = left.stream().reduce(0, Integer::sum);
             if (io == IO.IN) {
@@ -96,7 +97,7 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
 
         @Override
         protected boolean hasInnerChanged() {
-            IManaReceiver capability = getCapability();
+            IManaReceiver capability = getCapability(null);
             if (capability == null) return false;
             if (lastMana == capability.getCurrentMana()) return false;
             lastMana = capability.getCurrentMana();

@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.crafting.NBTIngredient;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
@@ -94,8 +95,8 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
         }
 
         @Override
-        protected List<Ingredient> handleRecipeInner(IO io, Recipe recipe, List<Ingredient> left, boolean simulate) {
-            IItemHandler capability = getCapability();
+        protected List<Ingredient> handleRecipeInner(IO io, Recipe recipe, List<Ingredient> left, @Nullable String slotName, boolean simulate) {
+            IItemHandler capability = getCapability(slotName);
             if (capability == null) return left;
             Iterator<Ingredient> iterator = left.iterator();
             if (io == IO.IN) {
@@ -140,7 +141,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
 
         @Override
         protected boolean hasInnerChanged() {
-            IItemHandler capability = getCapability();
+            IItemHandler capability = getCapability(null);
             if (capability == null) return false;
             boolean same = true;
             if (lastStacks.length == capability.getSlots()) {

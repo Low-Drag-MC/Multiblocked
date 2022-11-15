@@ -20,8 +20,10 @@ import net.minecraftforge.common.capabilities.Capability;
 import org.checkerframework.checker.units.qual.K;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -66,8 +68,25 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
     /**
      * create a proxy of this block.
      */
-    public abstract CapabilityProxy<? extends T> createProxy(@Nonnull IO io, @Nonnull
+    protected abstract CapabilityProxy<? extends T> createProxy(@Nonnull IO io, @Nonnull
             BlockEntity tileEntity);
+
+    /**
+     * create a proxy of this block.
+     */
+    public CapabilityProxy<? extends T> createProxy(@Nonnull IO io, @Nonnull BlockEntity tileEntity, Direction facing, @Nullable Map<Long, Set<String>> slotsMap) {
+        CapabilityProxy<? extends T> proxy = createProxy(io, tileEntity);
+        proxy.facing = facing;
+        proxy.slots = slotsMap == null ? null : slotsMap.get(tileEntity.getBlockPos().asLong());
+        if (tileEntity instanceof IInnerCapabilityProvider slotNameProvider) {
+            if (proxy.slots == null) {
+                proxy.slots = slotNameProvider.getSlotNames();
+            } else {
+                proxy.slots.addAll(slotNameProvider.getSlotNames());
+            }
+        }
+        return proxy;
+    }
 
     /**
      * Create a Widget of given contents

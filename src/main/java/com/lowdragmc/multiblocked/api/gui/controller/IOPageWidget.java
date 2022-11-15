@@ -351,9 +351,7 @@ public class IOPageWidget extends PageWidget {
                     if (!capabilities.contains(io, capability)) {
                         capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());
                     }
-                    CapabilityProxy<?> proxy = capability.createProxy(io, entity);
-                    proxy.facing = buffer.readEnum(Direction.class);
-                    proxy.slots = slotsMap == null ? null : slotsMap.get(entity.getBlockPos().asLong());
+                    CapabilityProxy<?> proxy = capability.createProxy(io, entity, buffer.readEnum(Direction.class), slotsMap);
                     capabilities.get(io, capability).put(pos.asLong(), proxy);
                 }
             }
@@ -368,9 +366,7 @@ public class IOPageWidget extends PageWidget {
                 if (!capabilities.contains(io, capability)) {
                     capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());
                 }
-                CapabilityProxy<?> proxy = capability.createProxy(io, entity);
-                proxy.facing = buffer.readEnum(Direction.class);
-                proxy.slots = slotsMap == null ? null : slotsMap.get(entity.getBlockPos().asLong());
+                CapabilityProxy<?> proxy = capability.createProxy(io, entity, buffer.readEnum(Direction.class), slotsMap);
                 capabilities.get(io, capability).put(pos.asLong(), proxy);
             }
             controller.markAsDirty();

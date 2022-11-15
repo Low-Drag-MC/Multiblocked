@@ -24,6 +24,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -106,8 +107,8 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
         }
 
         @Override
-        protected List<FluidStack> handleRecipeInner(IO io, Recipe recipe, List<FluidStack> left, boolean simulate) {
-            IFluidHandler capability = getCapability();
+        protected List<FluidStack> handleRecipeInner(IO io, Recipe recipe, List<FluidStack> left, @Nullable String slotName, boolean simulate) {
+            IFluidHandler capability = getCapability(slotName);
             if (capability == null) return left;
             Iterator<FluidStack> iterator = left.iterator();
             if (io == IO.IN) {
@@ -146,7 +147,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
 
         @Override
         protected boolean hasInnerChanged() {
-            IFluidHandler capability = getCapability();
+            IFluidHandler capability = getCapability(null);
             if (capability == null) return false;
             boolean same = true;
             if (capability.getTanks() == lastContents.length) {

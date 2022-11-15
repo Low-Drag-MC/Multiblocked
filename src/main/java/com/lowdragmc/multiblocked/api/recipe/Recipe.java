@@ -123,19 +123,20 @@ public class Recipe {
             MultiblockCapability<?> capability = entry.getKey();
             content = content.stream().map(capability::copyContent).toList();
             if (content.isEmpty() && contentSlot.isEmpty()) continue;
+            if (content.isEmpty()) content = null;
             if (capabilityProxies.contains(io, capability)) {
                 for (CapabilityProxy<?> proxy : capabilityProxies.get(io, capability).values()) { // search same io type
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {
-                        content = proxy.searchingRecipe(io, this, content);
+                        content = proxy.searchingRecipe(io, this, content, null);
                     }
                     if (proxy.slots != null) {
                         Iterator<String> iterator = contentSlot.keySet().iterator();
                         while (iterator.hasNext()) {
                             String key = iterator.next();
                             if (proxy.slots.contains(key)) {
-                                List<?> left = proxy.searchingRecipe(io, this, contentSlot.get(key).stream().map(capability::copyContent).toList());
+                                List<?> left = proxy.searchingRecipe(io, this, contentSlot.get(key), key);
                                 if (left == null) iterator.remove();
                             }
                         }
@@ -149,14 +150,14 @@ public class Recipe {
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {
-                        content = proxy.searchingRecipe(io, this, content);
+                        content = proxy.searchingRecipe(io, this, content, null);
                     }
                     if (proxy.slots != null) {
                         Iterator<String> iterator = contentSlot.keySet().iterator();
                         while (iterator.hasNext()) {
                             String key = iterator.next();
                             if (proxy.slots.contains(key)) {
-                                List<?> left = proxy.searchingRecipe(io, this, contentSlot.get(key));
+                                List<?> left = proxy.searchingRecipe(io, this, contentSlot.get(key), key);
                                 if (left == null) iterator.remove();
                             }
                         }
@@ -198,19 +199,20 @@ public class Recipe {
             MultiblockCapability<?> capability = entry.getKey();
             content = content.stream().map(capability::copyContent).toList();
             if (content.isEmpty() && contentSlot.isEmpty()) continue;
+            if (content.isEmpty()) content = null;
             if (capabilityProxies.contains(io, capability)) {
                 for (CapabilityProxy<?> proxy : capabilityProxies.get(io, capability).values()) { // search same io type
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {
-                        content = proxy.handleRecipe(io, this, content);
+                        content = proxy.handleRecipe(io, this, content, null);
                     }
                     if (proxy.slots != null) {
                         Iterator<String> iterator = contentSlot.keySet().iterator();
                         while (iterator.hasNext()) {
                             String key = iterator.next();
                             if (proxy.slots.contains(key)) {
-                                List<?> left = proxy.handleRecipe(io, this, contentSlot.get(key).stream().map(capability::copyContent).toList());
+                                List<?> left = proxy.handleRecipe(io, this, contentSlot.get(key), key);
                                 if (left == null) iterator.remove();
                             }
                         }
@@ -224,14 +226,14 @@ public class Recipe {
                     if (used.contains(proxy)) continue;
                     used.add(proxy);
                     if (content != null) {
-                        content = proxy.handleRecipe(io, this, content);
+                        content = proxy.handleRecipe(io, this, content, null);
                     }
                     if (proxy.slots != null) {
                         Iterator<String> iterator = contentSlot.keySet().iterator();
                         while (iterator.hasNext()) {
                             String key = iterator.next();
                             if (proxy.slots.contains(key)) {
-                                List<?> left = proxy.handleRecipe(io, this, contentSlot.get(key));
+                                List<?> left = proxy.handleRecipe(io, this, contentSlot.get(key), key);
                                 if (left == null) iterator.remove();
                             }
                         }

@@ -20,6 +20,7 @@ import com.lowdragmc.multiblocked.common.capability.trait.EMCPlayerCapabilityTra
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import moze_intel.projecte.api.capabilities.IKnowledgeProvider;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -108,7 +109,7 @@ public class EMCProjectECapability extends MultiblockCapability<BigInteger> {
         }
 
         @Override
-        protected List<BigInteger> handleRecipeInner(IO io, Recipe recipe, List<BigInteger> left, boolean simulate) {
+        protected List<BigInteger> handleRecipeInner(IO io, Recipe recipe, List<BigInteger> left, @Nullable String slotName, boolean simulate) {
             EMCPlayerCapabilityTrait trait = getTrait();
             if (trait == null) return left;
             BigInteger sum = left.stream().reduce(BigInteger.ZERO, BigInteger::add);

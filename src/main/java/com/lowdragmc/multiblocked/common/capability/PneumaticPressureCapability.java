@@ -16,6 +16,7 @@ import me.desht.pneumaticcraft.api.PNCCapabilities;
 import me.desht.pneumaticcraft.api.tileentity.IAirHandlerMachine;
 import me.desht.pneumaticcraft.common.core.ModBlocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -80,7 +81,7 @@ public class PneumaticPressureCapability extends MultiblockCapability<Float> {
 
         @Override
         protected boolean hasInnerChanged() {
-            IAirHandlerMachine airHandler = getCapability();
+            IAirHandlerMachine airHandler = getCapability(null);
             if (airHandler == null) return false;
             if (airHandler.getAir() == air && airHandler.getVolume() == volume) {
                 return false;
@@ -91,8 +92,8 @@ public class PneumaticPressureCapability extends MultiblockCapability<Float> {
         }
 
         @Override
-        protected List<Float> handleRecipeInner(IO io, Recipe recipe, List<Float> left, boolean simulate) {
-            IAirHandlerMachine handler = getCapability();
+        protected List<Float> handleRecipeInner(IO io, Recipe recipe, List<Float> left, @Nullable String slotName, boolean simulate) {
+            IAirHandlerMachine handler = getCapability(slotName);
             float sum = left.stream().reduce(0.0f, Float::sum);
             int consumeAir = (int) (sum * 50);
             if (handler != null && io == IO.IN) {

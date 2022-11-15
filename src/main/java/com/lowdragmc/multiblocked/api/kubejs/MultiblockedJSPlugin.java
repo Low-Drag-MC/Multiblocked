@@ -18,7 +18,6 @@ import com.lowdragmc.multiblocked.api.capability.ICapabilityProxyHolder;
 import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.PageWidget;
 import com.lowdragmc.multiblocked.api.gui.controller.RecipePage;
-import com.lowdragmc.multiblocked.api.gui.recipe.ProgressWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;

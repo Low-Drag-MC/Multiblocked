@@ -1,6 +1,5 @@
 package com.lowdragmc.multiblocked.common.tile;
 
-import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;

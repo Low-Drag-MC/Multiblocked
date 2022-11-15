@@ -74,6 +74,10 @@ def isVSTask() {
     return gradle.startParameter.taskNames[0].equals("genVSCodeRuns")
 }
 
+def isJetBrainsRuntime() {
+    return System.getProperty('java.vm.vendor').contains('JetBrains')
+}
+
 def getEnv() {
     boolean vscode = isVSTask()
     String resourcePath = vscode ? 'bin/main' : 'build/resources/main'
@@ -98,10 +102,14 @@ minecraft {
             arg "-mixin.config=multiblocked.mixins.json"
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
             property 'forge.logging.markers', 'REGISTRIES'
-
             property 'forge.logging.console.level', 'debug'
+            property "file.encoding", "UTF-8"
+
+            if (isJetBrainsRuntime()) {
+                jvmArgs "-XX:+AllowEnhancedClassRedefinition"
+                jvmArgs "-XX:HotswapAgent=fatjar"
+            }
 
             if (findProject(':LDLib') != null) arg "-mixin.config=ldlib.mixins.json"
             if (shouldCheckEnv()) {
@@ -119,12 +127,16 @@ minecraft {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
-
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             arg "-mixin.config=multiblocked.mixins.json"
-
             property 'forge.logging.console.level', 'debug'
+            property "file.encoding", "UTF-8"
+
+            if (isJetBrainsRuntime()) {
+                jvmArgs "-XX:+AllowEnhancedClassRedefinition"
+                jvmArgs "-XX:HotswapAgent=fatjar"
+            }
 
             if (findProject(':LDLib') != null) arg "-mixin.config=ldlib.mixins.json"
             if (shouldCheckEnv()) {
@@ -203,7 +215,7 @@ dependencies {
     // curios
     compileOnly fg.deobf("curse.maven:curios-309927:3748873")
     // create
-    compileOnly fg.deobf("curse.maven:create-328085:3934676")
+    compileOnly fg.deobf("curse.maven:create-328085:4007544")
     // flywheel
     compileOnly fg.deobf("curse.maven:flywheel-486392:3934664")
     // projecte

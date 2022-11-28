@@ -79,8 +79,13 @@ public class PatternWidget extends WidgetGroup {
     public int layer;
     private SlotWidget[] slotWidgets;
     private SlotWidget[] candidates;
+    private TextTexture textTexture;
 
     private PatternWidget(ControllerDefinition controllerDefinition) {
+        this(controllerDefinition, false);
+    }
+
+    public PatternWidget(ControllerDefinition controllerDefinition, boolean isREI) {
         super(0, 0, 176, 219);
         setClientSideWidget();
         predicates = new ArrayList<>();
@@ -93,10 +98,12 @@ public class PatternWidget extends WidgetGroup {
                 .setHoverTooltips(controllerDefinition.getDescription()));
 
         addWidget(sceneWidget = new SceneWidget(6, 30, 164, 140, world)
-                .useCacheBuffer(false)
                 .setOnSelected(this::onPosSelected)
                 .setRenderFacing(false)
                 .setRenderFacing(false));
+        if (!isREI) {
+            sceneWidget.useCacheBuffer(false);
+        }
 
         this.controllerDefinition = controllerDefinition;
 
@@ -116,7 +123,7 @@ public class PatternWidget extends WidgetGroup {
         addWidget(rightButton = new ButtonWidget(150, 53, 18, 18, RIGHT_BUTTON, (x) -> reset(index + 1)).setHoverTexture(RIGHT_BUTTON_HOVER));
 
         addWidget(new ButtonWidget(10, 80, 10, 10, new ResourceTexture("multiblocked:textures/gui/up.png"), cd -> updateLayer(1)).setHoverTooltips("multiblocked.gui.dialogs.pattern.next_aisle"));
-        addWidget(new ImageWidget(10, 90, 10, 10, new TextTexture("").setSupplier(() -> layer == -1 ? "all" : layer + "")));
+        addWidget(new ImageWidget(10, 90, 10, 10, textTexture = new TextTexture("all")));
         addWidget(new ButtonWidget(10, 100, 10, 10, new ResourceTexture("multiblocked:textures/gui/down.png"), cd -> updateLayer(-1)).setHoverTooltips("multiblocked.gui.dialogs.pattern.last_aisle"));
 
         if (controllerDefinition.getCatalyst() != null && !controllerDefinition.getCatalyst().isEmpty()) {
@@ -137,6 +144,7 @@ public class PatternWidget extends WidgetGroup {
                 switchWidget.setPressed(pattern.controllerBase.isFormed());
             }
             layer += add;
+            textTexture.updateText(layer == -1 ? "all" : layer + "");
         }
         setupScene(pattern);
     }
@@ -165,10 +173,11 @@ public class PatternWidget extends WidgetGroup {
         return patternWidget;
     }
 
-    private void reset(int index) {
+    public void reset(int index) {
         if (index >= patterns.length || index < 0) return;
         this.index = index;
         this.layer = -1;
+        textTexture.updateText("all");
         MBPattern pattern = patterns[index];
         setupScene(pattern);
         if (slotWidgets != null) {
@@ -194,6 +203,7 @@ public class PatternWidget extends WidgetGroup {
         IControllerComponent controllerBase = pattern.controllerBase;
         if (isPressed) {
             this.layer = -1;
+            textTexture.updateText("all");
             loadControllerFormed(pattern.blockMap.keySet(), controllerBase);
         } else {
             sceneWidget.setRenderedCore(pattern.blockMap.keySet(), null);

@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.common.capability.widget;
 
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
@@ -7,6 +8,7 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -59,6 +61,10 @@ public class EntityContentWidget extends ContentWidget<EntityIngredient> {
 
     @Override
     public Object getJEIIngredient(EntityIngredient content) {
+        if (itemHandler.getStackInSlot(0).isEmpty()) return null;
+        if (LDLMod.isReiLoaded()) {
+            return EntryStacks.of(itemHandler.getStackInSlot(0));
+        }
         return itemHandler.getStackInSlot(0);
     }
 

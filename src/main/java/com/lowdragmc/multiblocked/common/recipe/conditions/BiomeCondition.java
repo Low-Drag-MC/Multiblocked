@@ -49,6 +49,11 @@ public class BiomeCondition extends RecipeCondition {
     }
 
     @Override
+    public boolean isOr() {
+        return true;
+    }
+
+    @Override
     public Component getTooltips() {
         return new TranslatableComponent(String.format("biome.%s.%s", biome.getNamespace(), biome.getPath()));
     }

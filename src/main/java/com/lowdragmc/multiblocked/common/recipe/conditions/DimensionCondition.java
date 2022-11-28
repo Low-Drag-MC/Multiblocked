@@ -16,7 +16,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -45,6 +44,11 @@ public class DimensionCondition extends RecipeCondition {
     @Override
     public String getType() {
         return "dimension";
+    }
+
+    @Override
+    public boolean isOr() {
+        return true;
     }
 
     @Override

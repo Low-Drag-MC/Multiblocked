@@ -43,7 +43,6 @@ public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
 
     private void setContent(STACK stack) {
         setContent(IO.BOTH, stack, 1, false);
-
     }
 
     @Override

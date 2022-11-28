@@ -1,14 +1,18 @@
 package com.lowdragmc.multiblocked.common.capability.widget;
 
 import com.google.common.collect.Lists;
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -34,13 +38,22 @@ public class FluidContentWidget extends ContentWidget<FluidStack> {
         fluidTank.fill(content.copy(), IFluidHandler.FluidAction.EXECUTE);
     }
 
-
+    @Nullable
+    @Override
+    public Object getJEIIngredient(FluidStack content) {
+        if (LDLMod.isReiLoaded()) {
+            return EntryStacks.of(FluidStackHooksForge.fromForge(content));
+        }
+        return super.getJEIIngredient(content);
+    }
 
     @Override
     public List<Target> getPhantomTargets(Object ingredient) {
         List<Target> pattern = super.getPhantomTargets(ingredient);
         if (pattern != null && pattern.size() > 0) return pattern;
-
+        if (LDLMod.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
+            ingredient = FluidStackHooksForge.toForge(fluidStack);
+        }
         if (!(ingredient instanceof FluidStack) && PhantomFluidWidget.drainFrom(ingredient) == null) {
             return Collections.emptyList();
         }
@@ -56,6 +69,9 @@ public class FluidContentWidget extends ContentWidget<FluidStack> {
             @Override
             public void accept(@Nonnull Object ingredient) {
                 FluidStack content;
+                if (LDLMod.isReiLoaded() && ingredient instanceof dev.architectury.fluid.FluidStack fluidStack) {
+                    ingredient = FluidStackHooksForge.toForge(fluidStack);
+                }
                 if (ingredient instanceof FluidStack)
                     content = (FluidStack) ingredient;
                 else

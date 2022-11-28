@@ -2,6 +2,8 @@ package com.lowdragmc.multiblocked.client.renderer.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.client.model.ModelFactory;
+import com.lowdragmc.lowdraglib.client.model.custommodel.CustomBakedModel;
 import com.lowdragmc.lowdraglib.client.renderer.impl.IModelRenderer;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
@@ -12,8 +14,18 @@ import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.model.ForgeModelBakery;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.function.Supplier;
 
@@ -31,6 +43,26 @@ public class MBDIModelRenderer extends IModelRenderer implements IMultiblockedRe
 
     public MBDIModelRenderer(ResourceLocation modelLocation) {
         super(modelLocation);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @Nullable
+    protected BakedModel getBlockBakedModel(BlockPos pos, BlockAndTintGetter blockAccess) {
+        BlockState blockState = blockAccess.getBlockState(pos);
+        Direction frontFacing = Direction.NORTH;
+        if (blockState.hasProperty(BlockStateProperties.FACING)) {
+            frontFacing = blockState.getValue(BlockStateProperties.FACING);
+        } else if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            frontFacing = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        }
+        return blockModels.computeIfAbsent(frontFacing, facing -> {
+            BakedModel model = getModel().bake(
+                    ForgeModelBakery.instance(),
+                    ForgeModelBakery.defaultTextureGetter(),
+                    ModelFactory.getRotation(facing),
+                    modelLocation);
+            return model == null ? null : new CustomBakedModel(model);
+        });
     }
 
     @Override

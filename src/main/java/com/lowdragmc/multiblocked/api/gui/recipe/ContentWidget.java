@@ -8,23 +8,15 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.SelectableWidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Rect2i;
@@ -82,7 +74,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
     }
 
     @Override
-    public IngredientIO getIngredientIo() {
+    public IngredientIO getIngredientIO() {
         return io == IO.IN ? IngredientIO.INPUT : io == IO.OUT ? IngredientIO.OUTPUT : IngredientIO.RENDER_ONLY;
     }
 

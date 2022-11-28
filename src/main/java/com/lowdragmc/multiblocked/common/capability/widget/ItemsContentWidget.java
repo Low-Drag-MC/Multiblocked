@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.common.capability.widget;
 
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
@@ -9,6 +10,8 @@ import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -59,6 +62,9 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
 
     @Override
     public Object getJEIIngredient(Ingredient content) {
+        if (LDLMod.isReiLoaded()) {
+            return EntryIngredients.ofIngredient(content);
+        }
         return itemHandler.getStackInSlot(0);
     }
     

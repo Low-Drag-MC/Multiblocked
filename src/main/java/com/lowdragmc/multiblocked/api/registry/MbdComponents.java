@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.registry;
 
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
@@ -10,6 +11,7 @@ import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.tile.DummyComponentTileEntity;
 import com.lowdragmc.multiblocked.client.renderer.ComponentTESR;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
+import com.lowdragmc.multiblocked.rei.multipage.MultiblockInfoDisplayCategory;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -68,8 +70,12 @@ public class MbdComponents {
             DEFINITION_REGISTRY.put(entry.definition.location, entry.definition);
             COMPONENT_ITEMS_REGISTRY.computeIfAbsent(entry.definition.location, x -> (BlockItem) entry.item.apply(
                     COMPONENT_BLOCKS_REGISTRY.computeIfAbsent(entry.definition.location, X -> (Block) entry.block.apply(entry.definition))));
-            if (Multiblocked.isClient() && entry.definition instanceof ControllerDefinition && Multiblocked.isJeiLoaded()) {
-                MultiblockInfoCategory.registerMultiblock((ControllerDefinition) entry.definition);
+            if (Multiblocked.isClient() && entry.definition instanceof ControllerDefinition) {
+                if (Multiblocked.isJeiLoaded()) {
+                    MultiblockInfoCategory.registerMultiblock((ControllerDefinition) entry.definition);
+                } if (LDLMod.isReiLoaded()) {
+                    MultiblockInfoDisplayCategory.registerMultiblock((ControllerDefinition) entry.definition);
+                }
             }
         }
         ENTRIES.clear();

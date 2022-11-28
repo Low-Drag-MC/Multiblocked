@@ -189,6 +189,10 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     // Apply Mixin AP
 
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
     // LDLib
     if (findProject(':LDLib') != null) {
         implementation project(path: ':LDLib')

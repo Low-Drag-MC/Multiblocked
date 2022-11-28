@@ -42,6 +42,10 @@ public abstract class RecipeCondition {
         return isReverse;
     }
 
+    public boolean isOr() {
+        return false;
+    }
+
     public RecipeCondition setReverse(boolean reverse) {
         isReverse = reverse;
         return this;

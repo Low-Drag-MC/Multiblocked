@@ -49,6 +49,7 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
         jsonObject.addProperty("width", width);
         jsonObject.addProperty("height", height);
         jsonObject.addProperty("texture", texture);
+        jsonObject.addProperty("fillDirection", fillDirection.name());
         return jsonObject;
     }
 

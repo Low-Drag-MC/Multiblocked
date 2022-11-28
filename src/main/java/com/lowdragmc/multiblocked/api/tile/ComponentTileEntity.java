@@ -54,12 +54,7 @@ import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -295,14 +290,23 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     @Nullable
     @Override
-    public  <K> LazyOptional<K> getInnerCapability(@Nonnull Capability<K> capability, @Nullable Direction facing) {
+    public  <K> LazyOptional<K> getInnerCapability(@Nonnull Capability<K> capability, @Nullable Direction facing, @Nullable String slotName) {
         for (CapabilityTrait trait : traits.values()) {
-            LazyOptional<K> result = trait.getInnerCapability(capability, facing);
+            LazyOptional<K> result = trait.getInnerCapability(capability, facing, slotName);
             if (result.isPresent()) {
                 return result;
             }
         }
         return getCapability(capability, facing);
+    }
+
+    @Override
+    public Set<String> getSlotNames() {
+        Set<String> result = new HashSet<>();
+        for (CapabilityTrait trait : traits.values()) {
+            result.addAll(trait.getSlotNames());
+        }
+        return result;
     }
 
     //************* gui *************//

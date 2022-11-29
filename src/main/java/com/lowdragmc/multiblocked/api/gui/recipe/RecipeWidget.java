@@ -3,51 +3,65 @@ package com.lowdragmc.multiblocked.api.gui.recipe;
 import com.google.common.collect.ImmutableList;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.texture.ProgressTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
+import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.utils.Size;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
+import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.function.DoubleSupplier;
 
 public class RecipeWidget extends WidgetGroup {
+    public final RecipeMap recipeMap;
     public final Recipe recipe;
     public final DraggableScrollableWidgetGroup inputs;
     public final DraggableScrollableWidgetGroup outputs;
 
-    public RecipeWidget(Recipe recipe, ResourceTexture progress, IGuiTexture background) {
-        this(recipe, ProgressWidget.JEIProgress, progress, background);
-    }
-
-    public RecipeWidget(Recipe recipe, ResourceTexture progress) {
-        this(recipe, ProgressWidget.JEIProgress, progress, new ColorRectTexture(0x1f000000));
-    }
-
-    public RecipeWidget(Recipe recipe, DoubleSupplier doubleSupplier, ResourceTexture progress, IGuiTexture background) {
+    public RecipeWidget(RecipeMap recipeMap, @Nullable Recipe recipe, DoubleSupplier progress, DoubleSupplier fuel) {
         super(0, 0, 176, 84);
+        this.recipeMap = recipeMap;
         this.recipe = recipe;
         setClientSideWidget();
-        inputs = new DraggableScrollableWidgetGroup(5, 5, 64, 64).setBackground(background);
-        outputs = new DraggableScrollableWidgetGroup(176 - 64 - 5, 5, 64, 64).setBackground(background);
+
+        IGuiTexture overlay = new ColorRectTexture(0x1f000000);
+        inputs = new DraggableScrollableWidgetGroup(5, 5, 64, 64).setBackground(overlay);
+        outputs = new DraggableScrollableWidgetGroup(176 - 64 - 5, 5, 64, 64).setBackground(overlay);
         this.addWidget(inputs);
         this.addWidget(outputs);
-        String duration = I18n.get("multiblocked.recipe.duration", this.recipe.duration / 20.);
-        this.addWidget(new ProgressWidget(doubleSupplier, 78, 27, 20, 20, progress).setHoverTooltips(duration));
-        this.addWidget(new LabelWidget(5, 73, duration).setTextColor(0xff000000).setDrop(false));
+
+        this.addWidget(new ProgressWidget(progress, 78, 27, 20, 20, recipeMap.progressTexture).setFillDirection(ProgressTexture.FillDirection.LEFT_TO_RIGHT));
+        this.addWidget(new ButtonWidget(78, 27, 20, 20, IGuiTexture.EMPTY, cd -> {
+            if (Multiblocked.isJeiLoaded()) {
+                JEIPlugin.jeiRuntime.getRecipesGui().showCategories(Collections.singletonList(new ResourceLocation(Multiblocked.MODID, recipeMap.name)));
+            }
+        }).setHoverTexture(overlay));
+        if (recipeMap.isFuelRecipeMap()) {
+            this.addWidget(new ProgressWidget(fuel, 78, 47, 20, 20, recipeMap.fuelTexture).setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP));
+            this.addWidget(new ButtonWidget(78, 47, 20, 20, IGuiTexture.EMPTY, cd -> {
+                if (Multiblocked.isJeiLoaded()) {
+                    JEIPlugin.jeiRuntime.getRecipesGui().showCategories(Collections.singletonList(new ResourceLocation(Multiblocked.MODID, recipeMap.name + ".fuel")));
+                }
+            }).setHoverTexture(overlay));
+        }
+
+        if (recipe == null) return;
+        this.addWidget(new LabelWidget(5, 73, I18n.get("multiblocked.recipe.duration", recipe.duration / 20.)).setTextColor(0xff000000).setDrop(false));
         if (recipe.text != null) {
             this.addWidget(new LabelWidget(80, 73, recipe.text.getString()).setTextColor(0xff000000).setDrop(false));
         }
+
         int index = 0;
         for (Map.Entry<MultiblockCapability<?>, ImmutableList<Content>> entry : recipe.inputs.entrySet()) {
             MultiblockCapability<?> capability = entry.getKey();

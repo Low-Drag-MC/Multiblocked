@@ -18,6 +18,7 @@ import com.lowdragmc.multiblocked.api.gui.controller.structure.StructurePageWidg
 import com.lowdragmc.multiblocked.api.kubejs.events.*;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
+import com.lowdragmc.multiblocked.api.pattern.error.PatternStringError;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
@@ -425,12 +426,13 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
 
     public boolean checkCatalystPattern(PlayerEntity player, Hand hand, ItemStack held) {
         if (checkPattern()) { // formed
+            if (!player.isCreative() && !getDefinition().consumeCatalyst.test(held)) {
+                state.setError(new PatternStringError("catalyst failed"));
+                return false;
+            }
             player.swing(hand);
             ITextComponent formedMsg = new TranslationTextComponent(getUnlocalizedName()).append(new TranslationTextComponent("multiblocked.multiblock.formed"));
             player.sendMessage(formedMsg, NIL_UUID);
-            if (!player.isCreative() && !definition.getCatalyst().isEmpty()) {
-                held.shrink(1);
-            }
             MultiblockWorldSavedData.getOrCreate(level).addMapping(state);
             if (!needAlwaysUpdate()) {
                 MultiblockWorldSavedData.getOrCreate(level).addLoading(this);

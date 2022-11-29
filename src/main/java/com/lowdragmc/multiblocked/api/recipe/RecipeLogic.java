@@ -18,10 +18,11 @@ import java.util.List;
 public class RecipeLogic {
     public final ControllerTileEntity controller;
     public Recipe lastRecipe;
-    public List<Recipe> lastFaildMattches;
+    public List<Recipe> lastFailedMatches;
 
     public int progress;
     public int duration;
+    public int fuelTime;
     public int timer;
     private Status status = Status.IDLE;
     private long lastPeriod;
@@ -34,8 +35,13 @@ public class RecipeLogic {
         this.mbwsd = MultiblockWorldSavedData.getOrCreate(controller.getLevel());
     }
 
+    public boolean needFuel() {
+        return controller.getDefinition().getRecipeMap().isFuelRecipeMap();
+    }
+
     public void update() {
         timer++;
+        if (fuelTime > 0) fuelTime--;
         if (getStatus() != Status.IDLE && lastRecipe != null) {
             if (getStatus() == Status.SUSPEND && timer % 5 == 0) {
                 checkAsyncRecipeSearching(this::handleRecipeWorking);
@@ -49,13 +55,13 @@ public class RecipeLogic {
             findAndHandleRecipe();
         } else if (timer % 5 == 0) {
             checkAsyncRecipeSearching(this::findAndHandleRecipe);
-            if (lastFaildMattches != null) {
-                for (Recipe recipe : lastFaildMattches) {
+            if (lastFailedMatches != null) {
+                for (Recipe recipe : lastFailedMatches) {
                     if (recipe.checkConditions(this)) {
                         setupRecipe(recipe);
                     }
                     if (lastRecipe != null && getStatus() == Status.WORKING) {
-                        lastFaildMattches = null;
+                        lastFailedMatches = null;
                         return;
                     }
                 }
@@ -64,12 +70,18 @@ public class RecipeLogic {
     }
 
     public void handleRecipeWorking() {
-        if (lastRecipe.checkConditions(this)) {
+        Status last = this.status;
+        if (lastRecipe.checkConditions(this) && handleFuelRecipe()) {
             setStatus(Status.WORKING);
             progress++;
             handleTickRecipe(lastRecipe);
         } else {
             setStatus(Status.SUSPEND);
+        }
+        if (last == Status.WORKING && getStatus() != Status.WORKING) {
+            lastRecipe.postWorking(controller);
+        } else if (last != Status.WORKING && getStatus() == Status.WORKING) {
+            lastRecipe.preWorking(controller);
         }
         markDirty();
     }
@@ -110,7 +122,7 @@ public class RecipeLogic {
 
     public void findAndHandleRecipe() {
         Recipe recipe;
-        lastFaildMattches = null;
+        lastFailedMatches = null;
         if (lastRecipe != null && lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller) && lastRecipe.checkConditions(this)) {
             recipe = lastRecipe;
             lastRecipe = null;
@@ -123,15 +135,27 @@ public class RecipeLogic {
                     setupRecipe(match);
                 }
                 if (lastRecipe != null && getStatus() == Status.WORKING) {
-                    lastFaildMattches = null;
+                    lastFailedMatches = null;
                     break;
                 }
-                if (lastFaildMattches == null) {
-                    lastFaildMattches = new ArrayList<>();
+                if (lastFailedMatches == null) {
+                    lastFailedMatches = new ArrayList<>();
                 }
-                lastFaildMattches.add(match);
+                lastFailedMatches.add(match);
             }
         }
+    }
+
+    public boolean handleFuelRecipe() {
+        if (!needFuel() || fuelTime > 0) return true;
+        for (Recipe recipe : controller.getDefinition().getRecipeMap().searchFuelRecipe(controller)) {
+            if (recipe.checkConditions(this) && recipe.handleRecipeIO(IO.IN, this.controller)) {
+                fuelTime += recipe.duration;
+                markDirty();
+            }
+            if (fuelTime > 0) return true;
+        }
+        return false;
     }
 
     public void handleTickRecipe(Recipe recipe) {
@@ -155,13 +179,15 @@ public class RecipeLogic {
             }
             recipe = event.getRecipe();
         }
-        recipe.preWorking(this.controller);
-        if (recipe.handleRecipeIO(IO.IN, this.controller)) {
-            lastRecipe = recipe;
-            setStatus(Status.WORKING);
-            progress = 0;
-            duration = recipe.duration;
-            markDirty();
+        if (handleFuelRecipe()) {
+            recipe.preWorking(this.controller);
+            if (recipe.handleRecipeIO(IO.IN, this.controller)) {
+                lastRecipe = recipe;
+                setStatus(Status.WORKING);
+                progress = 0;
+                duration = recipe.duration;
+                markDirty();
+            }
         }
     }
 
@@ -214,6 +240,7 @@ public class RecipeLogic {
             status = compound.contains("status") ? Status.values()[compound.getInt("status")] : Status.WORKING;
             duration = lastRecipe.duration;
             progress = compound.contains("progress") ? compound.getInt("progress") : 0;
+            fuelTime = compound.contains("fuelTime") ? compound.getInt("fuelTime") : 0;
         }
     }
 
@@ -222,6 +249,7 @@ public class RecipeLogic {
             compound.putString("recipe", lastRecipe.uid);
             compound.putInt("status", status.ordinal());
             compound.putInt("progress", progress);
+            compound.putInt("fuelTime", fuelTime);
         }
         return compound;
     }

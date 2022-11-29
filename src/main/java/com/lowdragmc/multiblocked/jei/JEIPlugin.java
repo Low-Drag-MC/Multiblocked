@@ -1,13 +1,17 @@
 package com.lowdragmc.multiblocked.jei;
 
+import com.lowdragmc.lowdraglib.gui.widget.ProgressWidget;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
+import com.lowdragmc.multiblocked.api.gui.recipe.FuelWidget;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
+import com.lowdragmc.multiblocked.jei.recipeppage.FuelWrapper;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeMapCategory;
+import com.lowdragmc.multiblocked.jei.recipeppage.RecipeMapFuelCategory;
 import com.lowdragmc.multiblocked.jei.recipeppage.RecipeWrapper;
 import dev.latvian.kubejs.script.ScriptType;
 import mezz.jei.api.IModPlugin;
@@ -60,6 +64,7 @@ public class JEIPlugin implements IModPlugin {
         for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
             if (recipeMap == RecipeMap.EMPTY) continue;
             registry.addRecipeCategories(new RecipeMapCategory(jeiHelpers, recipeMap));
+            registry.addRecipeCategories(new RecipeMapFuelCategory(jeiHelpers, recipeMap));
         }
     }
 
@@ -76,7 +81,11 @@ public class JEIPlugin implements IModPlugin {
             registration.addRecipes(recipeMap.recipes.values()
                             .stream()
                             .map(recipe -> {
-                                RecipeWidget recipeWidget = new RecipeWidget(recipe, recipeMap.progressTexture);
+                                RecipeWidget recipeWidget = new RecipeWidget(
+                                        recipeMap,
+                                        recipe,
+                                        ProgressWidget.JEIProgress,
+                                        ProgressWidget.JEIProgress);
                                 if (Multiblocked.isKubeJSLoaded()) {
                                     new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, recipeMap.name);
                                 }
@@ -85,6 +94,14 @@ public class JEIPlugin implements IModPlugin {
                             .map(RecipeWrapper::new)
                             .collect(Collectors.toList()), 
                     new ResourceLocation(Multiblocked.MODID, recipeMap.name));
+            if (recipeMap.isFuelRecipeMap()) {
+                registration.addRecipes(recipeMap.recipes.values()
+                                .stream()
+                                .map(recipe -> new FuelWidget(recipeMap, recipe))
+                                .map(FuelWrapper::new)
+                                .collect(Collectors.toList()),
+                        new ResourceLocation(Multiblocked.MODID, recipeMap.name + ".fuel"));
+            }
         }
         MultiblockInfoCategory.registerRecipes(registration);
     }

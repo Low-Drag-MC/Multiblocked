@@ -10,6 +10,7 @@ import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
+import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.latvian.kubejs.script.ScriptType;
@@ -31,7 +32,7 @@ public class RecipePage extends PageWidget{
     @OnlyIn(Dist.CLIENT)
     private RecipeWidget recipeWidget;
     private RecipeLogic.Status status;
-    private int progress;
+    private int progress, fuelTime;
     
     public RecipePage(ControllerTileEntity controller, TabContainer tabContainer) {
         super(resourceTexture, tabContainer);
@@ -53,6 +54,9 @@ public class RecipePage extends PageWidget{
                 .setHoverTooltips("Async/Sync recipes searching:",
                         "Async has better performance and only tries to match recipes when the internal contents changed",
                         "Sync always tries to match recipes, never miss matching recipes"));
+        if (controller.getDefinition().getRecipeMap().isFuelRecipeMap()) {
+            tips.addWidget(new LabelWidget(5, 35, () -> (status == RecipeLogic.Status.SUSPEND && fuelTime == 0) ? I18n.get("multiblocked.recipe.lack_fuel") : I18n.get("multiblocked.recipe.remaining_fuel", fuelTime / 20)).setTextColor(-1));
+        }
         this.addWidget(new ImageWidget(7, 7, 162, 16,
                 new TextTexture(controller.getUnlocalizedName(), -1)
                         .setType(TextTexture.TextType.ROLL)
@@ -111,6 +115,10 @@ public class RecipePage extends PageWidget{
         return progress * 1. / recipe.duration;
     }
 
+    private double getFuelProgress() {
+        return Math.min(fuelTime, controller.getDefinition().getRecipeMap().fuelThreshold) * 1d / controller.getDefinition().getRecipeMap().fuelThreshold;
+    }
+
     @Override
     public void writeInitialData(PacketBuffer buffer) {
         super.writeInitialData(buffer);
@@ -135,9 +143,10 @@ public class RecipePage extends PageWidget{
                 recipe = recipeLogic.lastRecipe;
                 writeUpdateInfo(-1, this::writeRecipe);
             }
-            if (status != recipeLogic.getStatus() || progress != recipeLogic.progress) {
+            if (status != recipeLogic.getStatus() || progress != recipeLogic.progress || fuelTime != recipeLogic.fuelTime) {
                 status = recipeLogic.getStatus();
                 progress = recipeLogic.progress;
+                fuelTime = recipeLogic.fuelTime;
                 writeUpdateInfo(-2, this::writeStatus);
             }
         } else if (recipe != null) {
@@ -149,11 +158,13 @@ public class RecipePage extends PageWidget{
     private void writeStatus(PacketBuffer buffer) {
         buffer.writeEnum(status);
         buffer.writeVarInt(progress);
+        buffer.writeVarInt(fuelTime);
     }
 
     private void readStatus(PacketBuffer buffer) {
         status = buffer.readEnum(RecipeLogic.Status.class);
         progress = buffer.readVarInt();
+        fuelTime = buffer.readVarInt();
     }
 
     private void writeRecipe(PacketBuffer buffer) {
@@ -168,11 +179,16 @@ public class RecipePage extends PageWidget{
 
     private void readRecipe(PacketBuffer buffer) {
         if (buffer.readBoolean()) {
-            recipe = controller.getDefinition().getRecipeMap().recipes.get(buffer.readUtf());
+            RecipeMap recipeMap = controller.getDefinition().getRecipeMap();
+            recipe = recipeMap.recipes.get(buffer.readUtf());
             if (recipeWidget != null) {
                 removeWidget(recipeWidget);
             }
-            recipeWidget = new RecipeWidget(recipe, controller.getDefinition().getRecipeMap().progressTexture, null);
+            recipeWidget = new RecipeWidget(
+                    recipeMap,
+                    recipe,
+                    ProgressWidget.JEIProgress,
+                    this::getFuelProgress);
             if (Multiblocked.isKubeJSLoaded()) {
                 new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, controller.getDefinition().getRecipeMap().name);
             }
@@ -184,8 +200,19 @@ public class RecipePage extends PageWidget{
             if (recipeWidget != null) {
                 removeWidget(recipeWidget);
             }
+            RecipeMap recipeMap = controller.getDefinition().getRecipeMap();
+            recipeWidget = new RecipeWidget(
+                    recipeMap,
+                    null,
+                    () -> 0,
+                    this::getFuelProgress);
+            addWidget(recipeWidget);
+            recipeWidget.inputs.addSelfPosition(5, 0);
+            recipeWidget.outputs.addSelfPosition(-5, 0);
+            recipeWidget.setSelfPosition(new Position(0, 167));
             status = RecipeLogic.Status.IDLE;
             progress = 0;
+            fuelTime = 0;
         }
     }
 

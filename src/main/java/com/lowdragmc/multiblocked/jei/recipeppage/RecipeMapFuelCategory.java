@@ -32,33 +32,33 @@ import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
+public class RecipeMapFuelCategory extends ModularUIRecipeCategory<FuelWrapper> {
     private final RecipeMap recipeMap;
     private final IDrawable background;
     private IDrawable icon;
 
-    public RecipeMapCategory(IJeiHelpers helpers, RecipeMap recipeMap) {
+    public RecipeMapFuelCategory(IJeiHelpers helpers, RecipeMap recipeMap) {
         IGuiHelper guiHelper = helpers.getGuiHelper();
-        this.background = guiHelper.createBlankDrawable(176, 84);
+        this.background = guiHelper.createBlankDrawable(176, 44);
         this.recipeMap = recipeMap;
     }
 
     @Nonnull
     @Override
     public ResourceLocation getUid() {
-        return new ResourceLocation(Multiblocked.MODID, recipeMap.name);
+        return new ResourceLocation(Multiblocked.MODID, recipeMap.name + ".fuel");
     }
 
     @Nonnull
     @Override
-    public Class<? extends RecipeWrapper> getRecipeClass() {
-        return RecipeWrapper.class;
+    public Class<? extends FuelWrapper> getRecipeClass() {
+        return FuelWrapper.class;
     }
 
     @Nonnull
     @Override
     public String getTitle() {
-        return I18n.get(recipeMap.getUnlocalizedName());
+        return I18n.get(recipeMap.getUnlocalizedName()) + " " + I18n.get("multiblocked.gui.dialogs.recipe_map.fuel_recipe");
     }
 
     @Nonnull
@@ -70,11 +70,11 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
     @Nonnull
     @Override
     public IDrawable getIcon() {
-        return icon == null ? (icon = IGui2IDrawable.toDrawable(recipeMap.categoryTexture, 18, 18)) : icon;
+        return icon == null ? (icon = IGui2IDrawable.toDrawable(recipeMap.fuelTexture.getSubTexture(0.0, 0.5, 1.0, 0.5), 18, 18)) : icon;
     }
 
     @Override
-    public void setIngredients(@Nonnull RecipeWrapper wrapper, @Nonnull IIngredients ingredients) {
+    public void setIngredients(@Nonnull FuelWrapper wrapper, @Nonnull IIngredients ingredients) {
         Recipe recipe = wrapper.recipe;
         if (recipe.inputs.containsKey(ItemMultiblockCapability.CAP)) {
             ingredients.setInputs(VanillaTypes.ITEM, recipe.inputs.get(ItemMultiblockCapability.CAP).stream()

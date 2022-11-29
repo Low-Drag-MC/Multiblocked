@@ -331,7 +331,15 @@ public class RecipeBuilder {
         return new Recipe(fixedName == null ? UUID.randomUUID().toString() : fixedName, inputBuilder.build(), outputBuilder.build(), tickInputBuilder.build(), tickOutputBuilder.build(), ImmutableList.copyOf(conditions), data.isEmpty() ? Recipe.EMPTY : ImmutableMap.copyOf(data), text, duration);
     }
 
-    public void buildAndRegister(){
-        recipeMap.addRecipe(build());
+    public void buildAndRegister() {
+        buildAndRegister(false);
+    }
+
+    public void buildAndRegister(boolean isFuel) {
+        if (isFuel) {
+            recipeMap.addFuelRecipe(build());
+        } else {
+            recipeMap.addRecipe(build());
+        }
     }
 }

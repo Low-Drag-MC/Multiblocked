@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import net.minecraft.util.JSONUtils;
 
 import java.lang.reflect.Type;
 
@@ -24,8 +25,15 @@ public class RecipeMapTypeAdapter implements JsonSerializer<RecipeMap>,
         JsonObject json = (JsonObject) jsonElement;
         RecipeMap recipeMap = new RecipeMap(json.get("name").getAsString());
         recipeMap.progressTexture = new ResourceTexture(json.get("progressTexture").getAsString());
+        recipeMap.fuelTexture = new ResourceTexture(JSONUtils.getAsString(json, "fuelTexture", recipeMap.fuelTexture.imageLocation.toString()));
+        recipeMap.fuelThreshold = JSONUtils.getAsInt(json, "fuelThreshold", recipeMap.fuelThreshold);
         for (JsonElement recipe : json.get("recipes").getAsJsonArray()) {
             recipeMap.addRecipe(Multiblocked.GSON.fromJson(recipe, Recipe.class));
+        }
+        if (json.has("fuelRecipes")) {
+            for (JsonElement recipe : json.get("fuelRecipes").getAsJsonArray()) {
+                recipeMap.addFuelRecipe(Multiblocked.GSON.fromJson(recipe, Recipe.class));
+            }
         }
         return recipeMap;
     }
@@ -35,9 +43,14 @@ public class RecipeMapTypeAdapter implements JsonSerializer<RecipeMap>,
         JsonObject json = new JsonObject();
         json.addProperty("name", recipeMap.name);
         json.addProperty("progressTexture", recipeMap.progressTexture.imageLocation.toString());
+        json.addProperty("fuelTexture", recipeMap.fuelTexture.imageLocation.toString());
+        json.addProperty("fuelThreshold", recipeMap.fuelThreshold);
         JsonArray recipes = new JsonArray();
         recipeMap.recipes.values().forEach(v -> recipes.add(Multiblocked.GSON.toJsonTree(v)));
         json.add("recipes", recipes);
+        if (recipeMap.isFuelRecipeMap()) {
+            json.add("fuelRecipes", Multiblocked.GSON.toJsonTree(recipeMap.fuelRecipes));
+        }
         return json;
     }
 }

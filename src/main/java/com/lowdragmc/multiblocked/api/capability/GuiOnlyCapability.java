@@ -1,28 +1,26 @@
-package com.lowdragmc.multiblocked.common.capability;
+package com.lowdragmc.multiblocked.api.capability;
 
 import com.google.gson.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
-import com.lowdragmc.multiblocked.api.capability.IO;
-import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
-import com.lowdragmc.multiblocked.common.capability.trait.RecipeProgressTrait;
 import net.minecraft.tileentity.TileEntity;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
+import java.util.function.Supplier;
 
 /**
  * @author KilaBash
- * @date 2022/11/15
- * @implNote RecipeProgressCapability
+ * @date 2022/11/29
+ * @implNote GuiOnlyCapability
  */
-public class RecipeProgressCapability extends MultiblockCapability<Double> {
+public class GuiOnlyCapability extends MultiblockCapability<Double> {
+    Supplier<CapabilityTrait> supplier;
 
-    public static final RecipeProgressCapability CAP = new RecipeProgressCapability();
-
-    private RecipeProgressCapability() {
-        super("recipe_progress", 0xffafafaf);
+    public GuiOnlyCapability(String name, Supplier<CapabilityTrait> supplier) {
+        super(name, 0xffafafaf);
+        this.supplier = supplier;
     }
 
     @Override
@@ -56,23 +54,22 @@ public class RecipeProgressCapability extends MultiblockCapability<Double> {
     }
 
     @Override
-    public Double deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        return 0d;
-    }
-
-    @Override
-    public JsonElement serialize(Double src, Type typeOfSrc, JsonSerializationContext context) {
-        return new JsonPrimitive(src);
-    }
-
-    @Override
     public boolean hasTrait() {
         return true;
     }
 
     @Override
     public CapabilityTrait createTrait() {
-        return new RecipeProgressTrait();
+        return supplier.get();
     }
 
+    @Override
+    public Double deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        return 0d;
+    }
+
+    @Override
+    public JsonElement serialize(Double src, Type typeOfSrc, JsonSerializationContext context) {
+        return new JsonPrimitive(0d);
+    }
 }

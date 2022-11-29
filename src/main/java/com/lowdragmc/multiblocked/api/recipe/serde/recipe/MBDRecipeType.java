@@ -30,8 +30,12 @@ public class MBDRecipeType {
             if (recipe instanceof MultiBlockRecipe multiBlockRecipe) {
                 com.lowdragmc.multiblocked.api.recipe.Recipe mbdRecipe = multiBlockRecipe.getMBDRecipe();
                 addedRecipes.computeIfAbsent(multiBlockRecipe.getMachineType(), s -> new HashSet<>()).add(mbdRecipe.uid);
-                RecipeMap.RECIPE_MAP_REGISTRY.computeIfAbsent(multiBlockRecipe.getMachineType(), RecipeMap::new)
-                        .addRecipe(mbdRecipe);
+                var recipeMap = RecipeMap.RECIPE_MAP_REGISTRY.computeIfAbsent(multiBlockRecipe.getMachineType(), RecipeMap::new);
+                if (multiBlockRecipe.isFuel()) {
+                    recipeMap.addFuelRecipe(mbdRecipe);
+                } else {
+                    recipeMap.addRecipe(mbdRecipe);
+                }
             }
         }
     }

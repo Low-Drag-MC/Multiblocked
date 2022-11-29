@@ -1,5 +1,6 @@
-package com.lowdragmc.multiblocked.jei.recipeppage;
+package com.lowdragmc.multiblocked.jei.recipepage;
 
+import com.lowdragmc.lowdraglib.gui.widget.ProgressWidget;
 import com.lowdragmc.lowdraglib.jei.IGui2IDrawable;
 import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
 import com.lowdragmc.multiblocked.Multiblocked;
@@ -25,7 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
-    public static final Function<ResourceLocation, RecipeType<RecipeWrapper>> TYPES = Util.memoize(location -> new RecipeType<>(location, RecipeWrapper.class));
+    public static final Function<RecipeMap, RecipeType<RecipeWrapper>> TYPES = Util.memoize(recipeMap -> new RecipeType<>(new ResourceLocation(Multiblocked.MODID, recipeMap.name), RecipeWrapper.class));
 
     private final RecipeMap recipeMap;
     private final IDrawable background;
@@ -40,7 +41,7 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
     @Override
     @Nonnull
     public RecipeType<RecipeWrapper> getRecipeType() {
-        return TYPES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name));
+        return TYPES.apply(recipeMap);
     }
 
     @Nonnull
@@ -76,10 +77,14 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
     public static void registerRecipes(IRecipeRegistration registration) {
         for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
             if (recipeMap == RecipeMap.EMPTY || recipeMap.recipes.isEmpty()) continue;
-            registration.addRecipes(RecipeMapCategory.TYPES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name)), recipeMap.recipes.values()
+            registration.addRecipes(RecipeMapCategory.TYPES.apply(recipeMap), recipeMap.recipes.values()
                     .stream()
                     .map(recipe -> {
-                        RecipeWidget recipeWidget = new RecipeWidget(recipe, recipeMap.progressTexture);
+                        RecipeWidget recipeWidget = new RecipeWidget(
+                                recipeMap,
+                                recipe,
+                                ProgressWidget.JEIProgress,
+                                ProgressWidget.JEIProgress);
                         if (Multiblocked.isKubeJSLoaded()) {
                             new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, recipeMap.name);
                         }
@@ -94,7 +99,7 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
         for (ControllerDefinition definition : MultiblockInfoCategory.REGISTER) {
             for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
                 if (recipeMap == definition.getRecipeMap()) {
-                    registration.addRecipeCatalyst(definition.getStackForm(), RecipeMapCategory.TYPES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name)));
+                    registration.addRecipeCatalyst(definition.getStackForm(), RecipeMapCategory.TYPES.apply(recipeMap));
                 }
             }
         }

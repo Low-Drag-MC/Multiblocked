@@ -12,13 +12,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,10 +21,13 @@ public class RecipeMap {
     public static final RecipeMap EMPTY = new RecipeMap("empty");
     public static final Map<String, RecipeMap> RECIPE_MAP_REGISTRY = new HashMap<>();
     public String name;
+    public List<Recipe> fuelRecipes;
     public Set<MultiblockCapability<?>> inputCapabilities = new ObjectOpenHashSet<>();
     public Set<MultiblockCapability<?>> outputCapabilities = new ObjectOpenHashSet<>();
     public RecipeBuilder recipeBuilder = new RecipeBuilder(this);
     public ResourceTexture progressTexture = new ResourceTexture("multiblocked:textures/gui/progress_bar_arrow.png");
+    public ResourceTexture fuelTexture = new ResourceTexture("multiblocked:textures/gui/progress_bar_fuel.png");
+    public int fuelThreshold = 100;
     public IGuiTexture categoryTexture;
     
     static {
@@ -48,6 +45,9 @@ public class RecipeMap {
         copy.inputCapabilities.addAll(inputCapabilities);
         copy.outputCapabilities.addAll(outputCapabilities);
         copy.progressTexture = progressTexture;
+        copy.fuelTexture = fuelTexture;
+        copy.fuelThreshold = fuelThreshold;
+        copy.fuelRecipes = fuelRecipes == null ? null : new ArrayList<>(fuelRecipes);
         copy.categoryTexture = categoryTexture;
         copy.recipes.putAll(recipes);
         return copy;
@@ -96,10 +96,34 @@ public class RecipeMap {
         outputCapabilities.addAll(recipe.tickOutputs.keySet());
     }
 
+    public void addFuelRecipe(Recipe recipe) {
+        if (fuelRecipes == null) {
+            fuelRecipes = new ArrayList<>();
+        }
+        fuelRecipes.add(recipe);
+        inputCapabilities.addAll(recipe.inputs.keySet());
+    }
+
     public List<Recipe> searchRecipe(ICapabilityProxyHolder holder) {
         if (!holder.hasProxies()) return Collections.emptyList();
         List<Recipe> matches = new ArrayList<>();
         for (Recipe recipe : recipes.values()) {
+            if (recipe.matchRecipe(holder) && recipe.matchTickRecipe(holder)) {
+                matches.add(recipe);
+            }
+        }
+        return matches;
+    }
+
+    public boolean isFuelRecipeMap() {
+        return fuelRecipes != null && !fuelRecipes.isEmpty();
+    }
+
+
+    public List<Recipe> searchFuelRecipe(ICapabilityProxyHolder holder) {
+        if (!holder.hasProxies() || !isFuelRecipeMap()) return Collections.emptyList();
+        List<Recipe> matches = new ArrayList<>();
+        for (Recipe recipe : fuelRecipes) {
             if (recipe.matchRecipe(holder) && recipe.matchTickRecipe(holder)) {
                 matches.add(recipe);
             }

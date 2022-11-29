@@ -3,10 +3,13 @@ package com.lowdragmc.multiblocked.api.registry;
 import com.google.common.collect.Maps;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.CustomProperties;
+import com.lowdragmc.multiblocked.api.capability.GuiOnlyCapability;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.PartDefinition;
 import com.lowdragmc.multiblocked.common.capability.*;
+import com.lowdragmc.multiblocked.common.capability.trait.FuelProgressTrait;
+import com.lowdragmc.multiblocked.common.capability.trait.RecipeProgressTrait;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -32,7 +35,8 @@ public class MbdCapabilities {
     }
 
     public static void registerCapabilities() {
-        registerTraitOnlyCapability(RecipeProgressCapability.CAP);
+        registerTraitOnlyCapability(new GuiOnlyCapability("recipe_progress", RecipeProgressTrait::new));
+        registerTraitOnlyCapability(new GuiOnlyCapability("fuel_progress", FuelProgressTrait::new));
         registerCapability(FEMultiblockCapability.CAP);
         registerCapability(ItemMultiblockCapability.CAP);
         registerCapability(FluidMultiblockCapability.CAP);

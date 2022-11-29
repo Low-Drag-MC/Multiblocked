@@ -379,6 +379,14 @@ public class RecipeBuilder {
     }
 
     public void buildAndRegister() {
-        recipeMap.addRecipe(build());
+        buildAndRegister(false);
+    }
+
+    public void buildAndRegister(boolean isFuel) {
+        if (isFuel) {
+            recipeMap.addFuelRecipe(build());
+        } else {
+            recipeMap.addRecipe(build());
+        }
     }
 }

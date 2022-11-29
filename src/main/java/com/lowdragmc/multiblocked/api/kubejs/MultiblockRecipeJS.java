@@ -27,11 +27,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.text.html.parser.Entity;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +47,7 @@ public class MultiblockRecipeJS extends RecipeJS {
     private List<RecipeCondition> conditions = new ArrayList<>();
     private CompoundTag data = new CompoundTag();
     private String text;
+    private boolean isFuel;
     private int duration = 200;
     private float chance = 1;
     private boolean perTick = false;
@@ -72,6 +71,11 @@ public class MultiblockRecipeJS extends RecipeJS {
     //TODO: Figure a way to (de)serialize components
     public MultiblockRecipeJS text(String text) {
         this.text = text;
+        return this;
+    }
+
+    public MultiblockRecipeJS fuel() {
+        this.isFuel = true;
         return this;
     }
 
@@ -526,6 +530,8 @@ public class MultiblockRecipeJS extends RecipeJS {
             e.printStackTrace();
         }
 
+        if (json.has("isFuel"))
+            isFuel = GsonHelper.getAsBoolean(json, "isFuel");
         if (json.has("duration"))
             duration = GsonHelper.getAsInt(json, "duration");
         if (json.has("text"))
@@ -582,7 +588,7 @@ public class MultiblockRecipeJS extends RecipeJS {
             json.addProperty("text", text);
         json.addProperty("data", data.getAsString());
         json.addProperty("duration", duration);
-
+        json.addProperty("isFuel", isFuel);
     }
 
     @Override

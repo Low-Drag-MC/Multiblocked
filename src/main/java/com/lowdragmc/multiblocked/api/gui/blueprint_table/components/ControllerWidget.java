@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.gui.GuiUtils;
@@ -41,6 +42,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
     protected JsonBlockPattern pattern;
@@ -62,7 +65,7 @@ public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
         }
 
         Widget consumeCatalystWidget;
-        S1.addWidget(consumeCatalystWidget = GuiUtils.createBoolSwitch(x + 140, 165, "consumeCatalyst", "multiblocked.gui.widget.controller.consume", definition.consumeCatalyst, r -> definition.consumeCatalyst = r));
+        S1.addWidget(consumeCatalystWidget = GuiUtils.createSelector(x + 140, 165, "consumeCatalyst", "multiblocked.gui.widget.controller.consume", definition.consumeCatalyst.name(), Arrays.stream(ControllerDefinition.CatalystState.values()).map(Enum::name).collect(Collectors.toList()), r -> definition.consumeCatalyst = ControllerDefinition.CatalystState.valueOf(r)));
         consumeCatalystWidget.setVisible(definition.getCatalyst() != null);
 
         Widget noNeedControllerWidget;
@@ -70,7 +73,7 @@ public class ControllerWidget extends ComponentWidget<ControllerDefinition>{
         noNeedControllerWidget.setVisible(definition.getCatalyst() != null && !definition.getCatalyst().isEmpty());
 
         IItemHandlerModifiable handler;
-        PhantomSlotWidget phantomSlotWidget = new PhantomSlotWidget(handler = new ItemStackHandler(1), 0, x + 250, 154);
+        PhantomSlotWidget phantomSlotWidget = new PhantomSlotWidget(handler = new ItemStackHandler(1), 0, x + 250, 145);
         S1.addWidget(phantomSlotWidget);
         phantomSlotWidget.setClearSlotOnRightClick(true)
                 .setChangeListener(() -> {

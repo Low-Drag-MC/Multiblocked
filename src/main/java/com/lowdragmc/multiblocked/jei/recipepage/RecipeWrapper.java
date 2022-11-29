@@ -1,4 +1,4 @@
-package com.lowdragmc.multiblocked.jei.recipeppage;
+package com.lowdragmc.multiblocked.jei.recipepage;
 
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;

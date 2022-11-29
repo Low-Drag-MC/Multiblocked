@@ -32,7 +32,7 @@ description='''Multiblocked, a mod for custom multiblock.'''
 [[dependencies.multiblocked]]
     modId="ldlib"
     mandatory=true
-    versionRange="[0.7.6,)"
+    versionRange="[0.8,)"
     ordering="AFTER"
     side="BOTH"
 [[dependencies.multiblocked]]

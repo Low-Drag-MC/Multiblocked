@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.api.definition;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.utils.JsonUtil;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
@@ -9,6 +10,7 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.ControllerTileEntity;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
+import net.minecraft.core.Direction;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -26,7 +31,7 @@ public class ControllerDefinition extends ComponentDefinition {
     protected Supplier<BlockPattern> basePattern;
     protected Supplier<RecipeMap> recipeMap;
     protected Supplier<ItemStack> catalyst; // if null, checking pattern per second
-    public boolean consumeCatalyst;
+    public CatalystState consumeCatalyst;
     public boolean noNeedController;
     public List<MultiblockShapeInfo> designs; // TODO
 
@@ -36,6 +41,7 @@ public class ControllerDefinition extends ComponentDefinition {
 
     public ControllerDefinition(ResourceLocation location, Class<? extends IControllerComponent> clazz) {
         super(location, clazz);
+        this.consumeCatalyst = CatalystState.NOT_CONSUMED;
         this.recipeMap = () -> RecipeMap.EMPTY;
     }
 
@@ -118,6 +124,8 @@ public class ControllerDefinition extends ComponentDefinition {
     @Override
     public void fromJson(JsonObject json) {
         super.fromJson(json);
+        int version = GsonHelper.getAsInt(json, "version", 0);
+
         if (json.has("basePattern")) {
             basePattern = Suppliers.memoize(()-> Multiblocked.GSON.fromJson(json.get("basePattern"), JsonBlockPattern.class).build());
         }
@@ -128,7 +136,11 @@ public class ControllerDefinition extends ComponentDefinition {
         }
         if (json.has("catalyst")) {
             catalyst = Suppliers.memoize(()-> Multiblocked.GSON.fromJson(json.get("catalyst"), ItemStack.class));
-            consumeCatalyst = GsonHelper.getAsBoolean(json, "consumeCatalyst", consumeCatalyst);
+            if (version > 1) {
+                consumeCatalyst = JsonUtil.getEnumOr(json, "consumeCatalyst", CatalystState.class, consumeCatalyst);
+            } else {
+                consumeCatalyst = GsonHelper.getAsBoolean(json, "consumeCatalyst", false) ? CatalystState.CONSUMED : CatalystState.NOT_CONSUMED;
+            }
             noNeedController = GsonHelper.getAsBoolean(json, "noNeedController", noNeedController);
         }
     }
@@ -141,9 +153,38 @@ public class ControllerDefinition extends ComponentDefinition {
         }
         if (getCatalyst() != null) {
             json.add("catalyst", Multiblocked.GSON.toJsonTree(getCatalyst()));
-            json.addProperty("consumeCatalyst", consumeCatalyst);
+            json.addProperty("consumeCatalyst", consumeCatalyst.name());
             json.addProperty("noNeedController", noNeedController);
         }
         return json;
+    }
+
+    public enum CatalystState implements Predicate<ItemStack> {
+        NOT_CONSUMED(itemStack -> true),
+        CONSUMED(itemStack -> {
+            if (itemStack.getCount() > 0) {
+                itemStack.shrink(1);
+                return true;
+            }
+            return false;
+        }),
+        CONSUME_DURABILITY(itemStack -> {
+            if (itemStack.isDamageableItem() && itemStack.getDamageValue() < itemStack.getMaxDamage()) {
+                itemStack.setDamageValue(itemStack.getDamageValue() + 1);
+                return true;
+            }
+            return itemStack.getDamageValue() < itemStack.getMaxDamage();
+        });
+
+        final Function<ItemStack, Boolean> predicate;
+
+        CatalystState(Function<ItemStack, Boolean> predicate){
+            this.predicate = predicate;
+        }
+
+        @Override
+        public boolean test(ItemStack itemStack) {
+            return predicate.apply(itemStack);
+        }
     }
 }

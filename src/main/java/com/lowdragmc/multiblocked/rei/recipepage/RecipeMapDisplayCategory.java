@@ -1,4 +1,4 @@
-package com.lowdragmc.multiblocked.rei.recipeppage;
+package com.lowdragmc.multiblocked.rei.recipepage;
 
 import com.lowdragmc.lowdraglib.rei.IGui2Renderer;
 import com.lowdragmc.lowdraglib.rei.ModularUIDisplayCategory;
@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 import java.util.function.Function;
 
 public class RecipeMapDisplayCategory extends ModularUIDisplayCategory<RecipeDisplay> {
-    public static final Function<ResourceLocation, CategoryIdentifier<RecipeDisplay>> CATEGORIES = Util.memoize(location -> CategoryIdentifier.of(location));
+    public static final Function<RecipeMap, CategoryIdentifier<RecipeDisplay>> CATEGORIES = Util.memoize(recipeMap -> CategoryIdentifier.of(new ResourceLocation(Multiblocked.MODID, recipeMap.name)));
 
     private final RecipeMap recipeMap;
     private Renderer icon;
@@ -31,7 +31,7 @@ public class RecipeMapDisplayCategory extends ModularUIDisplayCategory<RecipeDis
 
     @Override
     public CategoryIdentifier<? extends RecipeDisplay> getCategoryIdentifier() {
-        return CATEGORIES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name));
+        return CATEGORIES.apply(recipeMap);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class RecipeMapDisplayCategory extends ModularUIDisplayCategory<RecipeDis
         for (ControllerDefinition definition : MultiblockInfoDisplayCategory.REGISTER) {
             for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
                 if (recipeMap == definition.getRecipeMap()) {
-                    registry.addWorkstations(RecipeMapDisplayCategory.CATEGORIES.apply(new ResourceLocation(Multiblocked.MODID, recipeMap.name)), EntryStacks.of(definition.getStackForm()));
+                    registry.addWorkstations(RecipeMapDisplayCategory.CATEGORIES.apply(recipeMap), EntryStacks.of(definition.getStackForm()));
                 }
             }
         }

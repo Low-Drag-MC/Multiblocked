@@ -1,13 +1,10 @@
 package com.lowdragmc.multiblocked.jei;
 
 import com.lowdragmc.multiblocked.Multiblocked;
-import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
-import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
-import com.lowdragmc.multiblocked.jei.recipeppage.RecipeMapCategory;
-import com.lowdragmc.multiblocked.jei.recipeppage.RecipeWrapper;
-import dev.latvian.mods.kubejs.script.ScriptType;
+import com.lowdragmc.multiblocked.jei.recipepage.RecipeMapCategory;
+import com.lowdragmc.multiblocked.jei.recipepage.RecipeMapFuelCategory;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.helpers.IJeiHelpers;
@@ -18,7 +15,6 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
-import java.util.stream.Collectors;
 
 /**
  * @author KilaBash
@@ -40,6 +36,7 @@ public class JEIPlugin implements IModPlugin {
         for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
             if (recipeMap == RecipeMap.EMPTY) continue;
             registry.addRecipeCategories(new RecipeMapCategory(jeiHelpers, recipeMap));
+            registry.addRecipeCategories(new RecipeMapFuelCategory(jeiHelpers, recipeMap));
         }
     }
 
@@ -47,12 +44,14 @@ public class JEIPlugin implements IModPlugin {
     public void registerRecipeCatalysts(@Nonnull IRecipeCatalystRegistration registration) {
         MultiblockInfoCategory.registerRecipeCatalysts(registration);
         RecipeMapCategory.registerRecipeCatalysts(registration);
+        RecipeMapFuelCategory.registerRecipeCatalysts(registration);
     }
 
     @Override
     public void registerRecipes(@Nonnull IRecipeRegistration registration) {
         Multiblocked.LOGGER.info("JEI register");
         RecipeMapCategory.registerRecipes(registration);
+        RecipeMapFuelCategory.registerRecipes(registration);
         MultiblockInfoCategory.registerRecipes(registration);
     }
 

@@ -150,7 +150,7 @@ public class ComponentDefinition {
 
     // ******* serialize ******* //
 
-    public final static int VERSION = 1;
+    public final static int VERSION = 2;
 
     public void fromJson(JsonObject json) {
         int version = GsonHelper.getAsInt(json, "version", 0);

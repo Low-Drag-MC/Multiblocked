@@ -17,7 +17,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
-import org.checkerframework.checker.units.qual.K;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

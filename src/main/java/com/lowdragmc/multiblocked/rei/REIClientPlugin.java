@@ -2,7 +2,8 @@ package com.lowdragmc.multiblocked.rei;
 
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.rei.multipage.MultiblockInfoDisplayCategory;
-import com.lowdragmc.multiblocked.rei.recipeppage.RecipeMapDisplayCategory;
+import com.lowdragmc.multiblocked.rei.recipepage.RecipeMapDisplayCategory;
+import com.lowdragmc.multiblocked.rei.recipepage.RecipeMapFuelDisplayCategory;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.forge.REIPluginClient;
@@ -20,16 +21,21 @@ public class REIClientPlugin implements me.shedaniel.rei.api.client.plugins.REIC
         for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
             if (recipeMap == RecipeMap.EMPTY) continue;
             registry.add(new RecipeMapDisplayCategory(recipeMap));
+            if (recipeMap.isFuelRecipeMap()) {
+                registry.add(new RecipeMapFuelDisplayCategory(recipeMap));
+            }
         }
         // workstations
         MultiblockInfoDisplayCategory.registerWorkStations(registry);
         RecipeMapDisplayCategory.registerWorkStations(registry);
+        RecipeMapFuelDisplayCategory.registerWorkStations(registry);
     }
 
     @Override
     public void registerDisplays(DisplayRegistry registry) {
         MultiblockInfoDisplayCategory.registerDisplays(registry);
         RecipeMapDisplayCategory.registerDisplays(registry);
+        RecipeMapFuelDisplayCategory.registerDisplays(registry);
     }
 
 }

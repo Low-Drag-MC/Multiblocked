@@ -131,7 +131,7 @@ public class PatternWidget extends WidgetGroup {
             addWidget(new SlotWidget(itemStackHandler = new ItemStackHandler(), 0, 149, 151 - 20, false, false)
                     .setIngredientIO(IngredientIO.INPUT)
                     .setBackgroundTexture(ResourceBorderTexture.BUTTON_COMMON)
-                    .setOnAddedTooltips((slot, list)-> list.add(new TranslatableComponent(controllerDefinition.consumeCatalyst ? "multiblocked.gui.catalyst.0" : "multiblocked.gui.catalyst.1"))));
+                    .setOnAddedTooltips((slot, list)-> list.add(new TranslatableComponent("multiblocked.gui.catalyst." + controllerDefinition.consumeCatalyst.ordinal()))));
             itemStackHandler.setStackInSlot(0, controllerDefinition.getCatalyst());
         }
     }

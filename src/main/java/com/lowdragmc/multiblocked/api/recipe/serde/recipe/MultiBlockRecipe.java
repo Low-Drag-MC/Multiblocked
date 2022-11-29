@@ -12,6 +12,7 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
@@ -46,8 +47,10 @@ public class MultiBlockRecipe implements Recipe<Container> {
     private final CompoundTag data;
     private final Component text;
     private final int duration;
+    @Getter
+    private final boolean isFuel;
 
-    public MultiBlockRecipe(ResourceLocation id, String machineType, Map<MultiblockCapability<?>, List<Content>> inputs, Map<MultiblockCapability<?>, List<Content>> outputs, Map<MultiblockCapability<?>, List<Content>> tickInputs, Map<MultiblockCapability<?>, List<Content>> tickOutputs, List<RecipeCondition> conditions, CompoundTag data, Component text, int duration) {
+    public MultiBlockRecipe(ResourceLocation id, String machineType, Map<MultiblockCapability<?>, List<Content>> inputs, Map<MultiblockCapability<?>, List<Content>> outputs, Map<MultiblockCapability<?>, List<Content>> tickInputs, Map<MultiblockCapability<?>, List<Content>> tickOutputs, List<RecipeCondition> conditions, CompoundTag data, Component text, int duration, boolean isFuel) {
         this.id = id;
         this.machineType = machineType;
         this.inputs = inputs;
@@ -58,6 +61,7 @@ public class MultiBlockRecipe implements Recipe<Container> {
         this.data = data;
         this.text = text;
         this.duration = duration;
+        this.isFuel = isFuel;
     }
 
     @Override
@@ -145,8 +149,8 @@ public class MultiBlockRecipe implements Recipe<Container> {
                 condition.deserialize(conditionsJson.getAsJsonObject(conditionKey));
                 conditions.add(condition);
             }
-
-            return new MultiBlockRecipe(id, machineType, inputs, outputs, tickInputs, tickOutputs, conditions, data, component, duration);
+            boolean isFuel = GsonHelper.getAsBoolean(json, "isFuel");
+            return new MultiBlockRecipe(id, machineType, inputs, outputs, tickInputs, tickOutputs, conditions, data, component, duration, isFuel);
         }
 
         private static Tuple<MultiblockCapability<?>, List<Content>> entryReader(FriendlyByteBuf buf) {
@@ -190,7 +194,8 @@ public class MultiBlockRecipe implements Recipe<Container> {
             List<RecipeCondition> conditions = buf.readCollection(c -> new ArrayList<>(), Serializer::conditionReader);
             CompoundTag data = buf.readNbt();
             Component component = buf.readComponent();
-            return new MultiBlockRecipe(id, machineType, inputs, outputs, tickInputs, tickOutputs, conditions, data, component, duration);
+            boolean isFuel = buf.readBoolean();
+            return new MultiBlockRecipe(id, machineType, inputs, outputs, tickInputs, tickOutputs, conditions, data, component, duration, isFuel);
         }
 
         @Override
@@ -204,6 +209,7 @@ public class MultiBlockRecipe implements Recipe<Container> {
             buf.writeCollection(recipe.conditions, Serializer::conditionWriter);
             buf.writeNbt(recipe.data);
             buf.writeComponent(recipe.text);
+            buf.writeBoolean(recipe.isFuel);
         }
 
         @Nullable

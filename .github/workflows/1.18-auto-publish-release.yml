@@ -1,4 +1,4 @@
-name: Auto Build Release Publish
+name: 1.18 Auto Build Release Publish
 
 on:
   push:

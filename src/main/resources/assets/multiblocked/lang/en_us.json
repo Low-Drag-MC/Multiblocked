@@ -238,6 +238,7 @@
   "multiblocked.gui.label.light": "Light",
   "multiblocked.gui.label.render_range": "Render Range",
   "multiblocked.gui.label.tank_capability": "Tank Capability (mB):",
+  "multiblocked.gui.label.durability": "Damage:",
   "multiblocked.gui.label.amount": "Amount:",
   "multiblocked.gui.label.number": "Number:",
   "multiblocked.gui.label.energy": "Energy:",

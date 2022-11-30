@@ -86,7 +86,7 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
         super.openConfigurator(dialog);
         int x = 5;
         int y = 25;
-        dialog.addWidget(new LabelWidget(5, y + 3, "multiblocked.gui.label.amount"));
+        dialog.addWidget(new LabelWidget(5, y + 3, isDurability ? "multiblocked.gui.label.durability" : "multiblocked.gui.label.amount"));
         dialog.addWidget(new TextFieldWidget(125 - 60, y, 60, 15,  null, number -> {
             content = content.isTag() ? new ItemsIngredient(content.getTag(), Integer.parseInt(number)) : new ItemsIngredient(content.getIngredient(), Integer.parseInt(number));
             onContentUpdate();

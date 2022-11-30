@@ -2,6 +2,8 @@ name: 1.18 Auto Build Release Publish
 
 on:
   push:
+    branches:
+      - 'exp-1.18'
     paths:
       - 'gradle.properties'
 

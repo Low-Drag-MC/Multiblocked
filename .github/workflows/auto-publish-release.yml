@@ -27,7 +27,7 @@ jobs:
     - name: Run the Gradle package task
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: build publish
+        arguments: build
 
     - name: Get file name
       run: echo "file_path=$(ls build/libs/*)" >> $GITHUB_OUTPUT

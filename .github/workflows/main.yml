@@ -1,0 +1,47 @@
+name: Java CI
+
+on:
+  push:
+    paths:
+      - 'gradle.properties'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 17
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+
+    - name: Cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('build.gradle') }}
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build publish
+
+    - name: Get file name
+      run: echo "::set-output name=file_path::$(ls build/libs/*)"
+      id: var
+
+    - name: Upload to CurseForge
+      uses: itsmeow/curseforge-upload@v3
+      with:
+        token: ${{ secrets.CURSEFORGE_TOKEN }}
+        project_id: 604054
+        game_endpoint: minecraft
+        file_path: ${{ steps.var.outputs.file_path }}
+        changelog: See recent commits [here](https://github.com/Low-Drag-MC/Multiblocked/commits/${{ github.sha }}). This is only marked as a beta release so CurseForge shows it on the front page.
+        changelog_type: markdown
+        # 1.12.2, Java 8
+        game_versions: "Minecraft 1.18:1.18.2,Java 17,Forge"
+        release_type: beta
+        relations: ldlibl:requiredDependency,geckolib:optionalDependency,jei:optionalDependency,roughly-enough-items:optionalDependency

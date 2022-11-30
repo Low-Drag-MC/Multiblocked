@@ -5,14 +5,7 @@ import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.PhantomSlotWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
@@ -37,6 +30,15 @@ import java.util.stream.Collectors;
 
 public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
     protected CycleItemStackHandler itemHandler;
+    protected boolean isDurability;
+
+    public ItemsContentWidget(boolean isDurability) {
+        this.isDurability = isDurability;
+    }
+
+    public ItemsContentWidget() {
+        this(false);
+    }
 
     @Override
     protected void onContentUpdate() {
@@ -56,7 +58,13 @@ public class ItemsContentWidget extends ContentWidget<ItemsIngredient> {
                 if (perTick) {
                     l.add(new TranslationTextComponent("multiblocked.gui.content.per_tick"));
                 }
+                if (isDurability) {
+                    l.add(new TranslationTextComponent("multiblocked.gui.content.durability"));
+                }
             }));
+        }
+        if (isDurability) {
+            addWidget(new ImageWidget(1, 5, 18, 9, new TextTexture("D", 0xFFff5555)));
         }
     }
 

@@ -149,6 +149,14 @@ public class RecipeBuilder {
         return output(ItemMultiblockCapability.CAP, Arrays.stream(outputs).map(ItemsIngredient::new).toArray(ItemsIngredient[]::new));
     }
 
+    public RecipeBuilder inputDurabilityItems(ItemsIngredient... inputs) {
+        return input(ItemDurabilityMultiblockCapability.CAP, inputs);
+    }
+
+    public RecipeBuilder outputDurabilityItems(ItemStack... outputs) {
+        return output(ItemDurabilityMultiblockCapability.CAP, Arrays.stream(outputs).map(ItemsIngredient::new).toArray(ItemsIngredient[]::new));
+    }
+
     public RecipeBuilder inputFluids(FluidStack... inputs) {
         return input(FluidMultiblockCapability.CAP, inputs);
     }

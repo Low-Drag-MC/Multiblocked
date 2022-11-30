@@ -26,7 +26,6 @@ public class RecipeMapTypeAdapter implements JsonSerializer<RecipeMap>,
         RecipeMap recipeMap = new RecipeMap(json.get("name").getAsString());
         recipeMap.progressTexture = new ResourceTexture(json.get("progressTexture").getAsString());
         recipeMap.fuelTexture = new ResourceTexture(JSONUtils.getAsString(json, "fuelTexture", recipeMap.fuelTexture.imageLocation.toString()));
-        recipeMap.fuelThreshold = JSONUtils.getAsInt(json, "fuelThreshold", recipeMap.fuelThreshold);
         for (JsonElement recipe : json.get("recipes").getAsJsonArray()) {
             recipeMap.addRecipe(Multiblocked.GSON.fromJson(recipe, Recipe.class));
         }
@@ -44,7 +43,6 @@ public class RecipeMapTypeAdapter implements JsonSerializer<RecipeMap>,
         json.addProperty("name", recipeMap.name);
         json.addProperty("progressTexture", recipeMap.progressTexture.imageLocation.toString());
         json.addProperty("fuelTexture", recipeMap.fuelTexture.imageLocation.toString());
-        json.addProperty("fuelThreshold", recipeMap.fuelThreshold);
         JsonArray recipes = new JsonArray();
         recipeMap.recipes.values().forEach(v -> recipes.add(Multiblocked.GSON.toJsonTree(v)));
         json.add("recipes", recipes);

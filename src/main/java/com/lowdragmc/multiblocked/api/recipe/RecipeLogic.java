@@ -23,6 +23,7 @@ public class RecipeLogic {
     public int progress;
     public int duration;
     public int fuelTime;
+    public int fuelMaxTime;
     public int timer;
     private Status status = Status.IDLE;
     private long lastPeriod;
@@ -41,7 +42,6 @@ public class RecipeLogic {
 
     public void update() {
         timer++;
-        if (fuelTime > 0) fuelTime--;
         if (getStatus() != Status.IDLE && lastRecipe != null) {
             if (getStatus() == Status.SUSPEND && timer % 5 == 0) {
                 checkAsyncRecipeSearching(this::handleRecipeWorking);
@@ -62,11 +62,12 @@ public class RecipeLogic {
                     }
                     if (lastRecipe != null && getStatus() == Status.WORKING) {
                         lastFailedMatches = null;
-                        return;
+                        break;
                     }
                 }
             }
         }
+        if (fuelTime > 0) fuelTime--;
     }
 
     public void handleRecipeWorking() {
@@ -150,7 +151,8 @@ public class RecipeLogic {
         if (!needFuel() || fuelTime > 0) return true;
         for (Recipe recipe : controller.getDefinition().getRecipeMap().searchFuelRecipe(controller)) {
             if (recipe.checkConditions(this) && recipe.handleRecipeIO(IO.IN, this.controller)) {
-                fuelTime += recipe.duration;
+                fuelMaxTime = recipe.duration;
+                fuelTime = fuelMaxTime;
                 markDirty();
             }
             if (fuelTime > 0) return true;
@@ -241,6 +243,7 @@ public class RecipeLogic {
             duration = lastRecipe.duration;
             progress = compound.contains("progress") ? compound.getInt("progress") : 0;
             fuelTime = compound.contains("fuelTime") ? compound.getInt("fuelTime") : 0;
+            fuelMaxTime = compound.contains("fuelMaxTime") ? compound.getInt("fuelMaxTime") : fuelTime;
         }
     }
 
@@ -250,6 +253,7 @@ public class RecipeLogic {
             compound.putInt("status", status.ordinal());
             compound.putInt("progress", progress);
             compound.putInt("fuelTime", fuelTime);
+            compound.putInt("fuelMaxTime", fuelMaxTime);
         }
         return compound;
     }

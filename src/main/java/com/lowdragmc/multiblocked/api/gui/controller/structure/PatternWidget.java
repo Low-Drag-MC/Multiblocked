@@ -26,6 +26,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -358,7 +359,7 @@ public class PatternWidget extends WidgetGroup {
     }
 
     private Map<ItemStackKey, PartInfo> gatherBlockDrops(Map<BlockPos, BlockInfo> blocks) {
-        Map<ItemStackKey, PartInfo> partsMap = new HashMap<>();
+        Map<ItemStackKey, PartInfo> partsMap = new Object2ObjectOpenHashMap<>();
         for (Map.Entry<BlockPos, BlockInfo> entry : blocks.entrySet()) {
             BlockPos pos = entry.getKey();
             BlockState blockState = ((World) PatternWidget.world).getBlockState(pos);
@@ -374,12 +375,7 @@ public class PatternWidget extends WidgetGroup {
             }
 
             ItemStackKey itemStackKey = new ItemStackKey(itemStack);
-            PartInfo partInfo = partsMap.get(itemStackKey);
-            if (partInfo == null) {
-                partInfo = new PartInfo(itemStackKey, entry.getValue());
-                partsMap.put(itemStackKey, partInfo);
-            }
-            ++partInfo.amount;
+            partsMap.computeIfAbsent(itemStackKey, key -> new PartInfo(key, entry.getValue())).amount++;
         }
         return partsMap;
     }

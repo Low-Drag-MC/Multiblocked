@@ -95,7 +95,7 @@ public class JEIPlugin implements IModPlugin {
                             .collect(Collectors.toList()), 
                     new ResourceLocation(Multiblocked.MODID, recipeMap.name));
             if (recipeMap.isFuelRecipeMap()) {
-                registration.addRecipes(recipeMap.recipes.values()
+                registration.addRecipes(recipeMap.fuelRecipes
                                 .stream()
                                 .map(recipe -> new FuelWidget(recipeMap, recipe))
                                 .map(FuelWrapper::new)

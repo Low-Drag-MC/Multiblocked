@@ -74,7 +74,7 @@ public class RecipeMapFuelCategory extends ModularUIRecipeCategory<FuelWrapper> 
     public static void registerRecipes(IRecipeRegistration registration) {
         for (RecipeMap recipeMap : RecipeMap.RECIPE_MAP_REGISTRY.values()) {
             if (recipeMap.isFuelRecipeMap()) {
-                registration.addRecipes(RecipeMapFuelCategory.TYPES.apply(recipeMap), recipeMap.recipes.values()
+                registration.addRecipes(RecipeMapFuelCategory.TYPES.apply(recipeMap), recipeMap.fuelRecipes
                         .stream()
                         .map(recipe -> new FuelWidget(recipeMap, recipe))
                         .map(FuelWrapper::new)

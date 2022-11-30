@@ -1,4 +1,4 @@
-name: Java CI
+name: Auto Build Release Publish
 
 on:
   push:
@@ -23,11 +23,14 @@ jobs:
 
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v1
+      
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
     - name: Run the Gradle package task
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: build
+        arguments: build publish
 
     - name: Get file name
       run: echo "file_path=$(ls build/libs/*)" >> $GITHUB_OUTPUT

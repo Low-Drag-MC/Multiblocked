@@ -50,4 +50,4 @@ jobs:
         # 1.12.2, Java 8
         game_versions: "Minecraft 1.18:1.18.2,Java 17,Forge"
         release_type: beta
-        relations: ldlibl:requiredDependency,geckolib:optionalDependency,jei:optionalDependency,roughly-enough-items:optionalDependency
+        relations: ldlib:requiredDependency,geckolib:optionalDependency,jei:optionalDependency,roughly-enough-items:optionalDependency

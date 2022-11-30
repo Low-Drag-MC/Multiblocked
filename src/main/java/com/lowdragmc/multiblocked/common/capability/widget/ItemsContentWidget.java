@@ -30,6 +30,15 @@ import java.util.stream.Collectors;
 
 public class ItemsContentWidget extends ContentWidget<Ingredient> {
     protected CycleItemStackHandler itemHandler;
+    protected boolean isDurability;
+
+    public ItemsContentWidget(boolean isDurability) {
+        this.isDurability = isDurability;
+    }
+
+    public ItemsContentWidget() {
+        this(false);
+    }
 
     @Override
     protected void onContentUpdate() {
@@ -45,7 +54,13 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
                 if (perTick) {
                     l.add(new TranslatableComponent("multiblocked.gui.content.per_tick"));
                 }
+                if (isDurability) {
+                    l.add(new TranslatableComponent("multiblocked.gui.content.durability"));
+                }
             }));
+            if (isDurability) {
+                addWidget(new ImageWidget(1, 5, 18, 9, new TextTexture("D", 0xFFff5555)));
+            }
         }
     }
 

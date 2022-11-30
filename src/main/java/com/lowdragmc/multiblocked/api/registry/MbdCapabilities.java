@@ -39,6 +39,7 @@ public class MbdCapabilities {
         registerTraitOnlyCapability(new GuiOnlyCapability("fuel_progress", FuelProgressTrait::new));
         registerCapability(FEMultiblockCapability.CAP);
         registerCapability(ItemMultiblockCapability.CAP);
+        registerCapability(ItemDurabilityMultiblockCapability.CAP);
         registerCapability(FluidMultiblockCapability.CAP);
         registerCapability(EntityMultiblockCapability.CAP);
         if (Multiblocked.isMekLoaded()) {

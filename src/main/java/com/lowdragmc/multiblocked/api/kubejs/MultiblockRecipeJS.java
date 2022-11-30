@@ -206,6 +206,61 @@ public class MultiblockRecipeJS extends RecipeJS {
         return this;
     }
 
+    public MultiblockRecipeJS inputDurabilityItems(IngredientJS... ingredients) {
+        for (IngredientJS ingredient : ingredients)
+            inputDurabilityItem(ingredient);
+        return this;
+    }
+
+    public MultiblockRecipeJS inputDurabilityItem(IngredientJS ingredient) {
+        return inputDurabilityItem(ingredient, null);
+    }
+
+    public MultiblockRecipeJS inputDurabilityItem(IngredientJS ingredient, String slotName) {
+        JsonObject contentJson = new JsonObject();
+        inputItems.add(ingredient);
+        if (ingredient instanceof ItemStackJS itemStackJS) {
+            ItemStackJS stackJS = itemStackJS.copy();
+            stackJS.removeChance();
+            contentJson.add("content", stackJS.toJson());
+        } else
+            contentJson.add("content", ingredient.toJson());
+        contentJson.addProperty("chance", chance);
+        if (slotName != null)
+            contentJson.addProperty("slotName", slotName);
+        (perTick ? tickInputs : inputs).computeIfAbsent(ItemDurabilityMultiblockCapability.CAP, c -> new ArrayList<>())
+                .add(contentJson);
+        return this;
+    }
+
+    public MultiblockRecipeJS outputDurabilityItems(IngredientJS... ingredients) {
+        for (IngredientJS ingredient : ingredients) {
+            outputDurabilityItem(ingredient);
+        }
+        return this;
+    }
+
+    public MultiblockRecipeJS outputDurabilityItem(IngredientJS ingredient) {
+        return outputDurabilityItem(ingredient, null);
+    }
+
+    public MultiblockRecipeJS outputDurabilityItem(IngredientJS ingredient, String slotName) {
+        JsonObject contentJson = new JsonObject();
+        if (ingredient instanceof ItemStackJS itemStackJS) {
+            ItemStackJS stackJS = itemStackJS.copy();
+            stackJS.removeChance();
+            contentJson.add("content", stackJS.toJson());
+            outputItems.add(itemStackJS);
+        } else
+            contentJson.add("content", ingredient.toJson());
+        contentJson.addProperty("chance", chance);
+        if (slotName != null)
+            contentJson.addProperty("slotName", slotName);
+        (perTick ? tickOutputs : outputs).computeIfAbsent(ItemDurabilityMultiblockCapability.CAP, c -> new ArrayList<>())
+                .add(contentJson);
+        return this;
+    }
+
     public MultiblockRecipeJS inputEntity(EntityIngredient entityIngredient) {
         return inputEntity(entityIngredient, null);
     }

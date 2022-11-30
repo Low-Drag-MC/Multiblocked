@@ -21,20 +21,16 @@ jobs:
         java-version: '17'
         distribution: 'adopt'
 
-    - name: Cache
-      uses: actions/cache@v1
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1
+
+    - name: Run the Gradle package task
+      uses: gradle/gradle-build-action@v2
       with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('build.gradle') }}
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Build with Gradle
-      run: ./gradlew build publish
+        arguments: build publish
 
     - name: Get file name
-      run: echo "{file_path}={$(ls build/libs/*)}" >> $GITHUB_STATE
+      run: echo "file_path=$(ls build/libs/*)" >> $GITHUB_OUTPUT
       id: var
 
     - name: Upload to CurseForge

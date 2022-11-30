@@ -33,8 +33,10 @@ jobs:
         arguments: build publish
 
     - name: Get file name
-      run: echo "file_path=$(ls build/libs/*)" >> $GITHUB_OUTPUT
       id: var
+      run: |
+        MESSAGE=$(ls build/libs/*)
+        echo file_path=$MESSAGE >> $GITHUB_OUTPUT
 
     - name: Upload to CurseForge
       uses: itsmeow/curseforge-upload@v3

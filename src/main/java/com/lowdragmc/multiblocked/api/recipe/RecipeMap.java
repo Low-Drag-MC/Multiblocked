@@ -27,7 +27,6 @@ public class RecipeMap {
     public RecipeBuilder recipeBuilder = new RecipeBuilder(this);
     public ResourceTexture progressTexture = new ResourceTexture("multiblocked:textures/gui/progress_bar_arrow.png");
     public ResourceTexture fuelTexture = new ResourceTexture("multiblocked:textures/gui/progress_bar_fuel.png");
-    public int fuelThreshold = 100;
     public IGuiTexture categoryTexture;
     
     static {
@@ -46,7 +45,6 @@ public class RecipeMap {
         copy.outputCapabilities.addAll(outputCapabilities);
         copy.progressTexture = progressTexture;
         copy.fuelTexture = fuelTexture;
-        copy.fuelThreshold = fuelThreshold;
         copy.fuelRecipes = fuelRecipes == null ? null : new ArrayList<>(fuelRecipes);
         copy.categoryTexture = categoryTexture;
         copy.recipes.putAll(recipes);

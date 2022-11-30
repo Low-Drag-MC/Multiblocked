@@ -3,7 +3,6 @@ package com.lowdragmc.multiblocked.common.capability.trait;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.capability.trait.ProgressCapabilityTrait;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
-import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 
 /**
@@ -26,8 +25,7 @@ public class FuelProgressTrait extends ProgressCapabilityTrait {
     protected double getProgress() {
         if (component instanceof IControllerComponent controller) {
             RecipeLogic recipeLogic = controller.getRecipeLogic();
-            RecipeMap recipeMap = controller.getDefinition().getRecipeMap();
-            return recipeLogic == null ? 0 : Math.min(recipeLogic.fuelTime, recipeMap.fuelThreshold) * 1d / recipeMap.fuelThreshold;
+            return recipeLogic == null ? 0 : Math.min(recipeLogic.fuelTime, recipeLogic.fuelMaxTime) * 1d / Math.max(recipeLogic.fuelMaxTime, 1);
         }
         return 0;
     }

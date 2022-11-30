@@ -35,7 +35,7 @@ jobs:
     - name: Get file name
       id: var
       run: |
-        MESSAGE=$(ls build/libs/*)
+        MESSAGE=$(ls build/libs/* | grep sources.jar -v)
         echo file_path=$MESSAGE >> $GITHUB_OUTPUT
 
     - name: Upload to CurseForge

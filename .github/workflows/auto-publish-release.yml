@@ -34,7 +34,7 @@ jobs:
       run: ./gradlew build publish
 
     - name: Get file name
-      run: echo "::set-output name=file_path::$(ls build/libs/*)"
+      run: echo "{file_path}={$(ls build/libs/*)}" >> $GITHUB_STATE
       id: var
 
     - name: Upload to CurseForge

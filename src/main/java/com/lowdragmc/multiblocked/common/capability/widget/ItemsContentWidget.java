@@ -94,7 +94,7 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
         int y = 25;
         if (content instanceof SizedIngredient) {
             TextFieldWidget count;
-            dialog.addWidget(new LabelWidget(5, y + 3, "multiblocked.gui.label.amount"));
+            dialog.addWidget(new LabelWidget(5, y + 3, isDurability ? "multiblocked.gui.label.durability" : "multiblocked.gui.label.amount"));
             dialog.addWidget(count = new TextFieldWidget(125 - 60, y, 60, 15,  null, number -> {
                 content = getAsContent().isTag() ? new SizedIngredient(getAsContent().getTag(), Integer.parseInt(number)) : new SizedIngredient(getAsContent().getInner(), Integer.parseInt(number));
                 onContentUpdate();

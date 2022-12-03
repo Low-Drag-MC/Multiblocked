@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.jei;
 
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
@@ -30,6 +31,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(@Nonnull IRecipeCategoryRegistration registry) {
+        if (LDLMod.isReiLoaded()) return;
         Multiblocked.LOGGER.info("JEI register categories");
         IJeiHelpers jeiHelpers = registry.getJeiHelpers();
         registry.addRecipeCategories(new MultiblockInfoCategory(jeiHelpers));
@@ -42,6 +44,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(@Nonnull IRecipeCatalystRegistration registration) {
+        if (LDLMod.isReiLoaded()) return;
         MultiblockInfoCategory.registerRecipeCatalysts(registration);
         RecipeMapCategory.registerRecipeCatalysts(registration);
         RecipeMapFuelCategory.registerRecipeCatalysts(registration);
@@ -49,6 +52,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(@Nonnull IRecipeRegistration registration) {
+        if (LDLMod.isReiLoaded()) return;
         Multiblocked.LOGGER.info("JEI register");
         RecipeMapCategory.registerRecipes(registration);
         RecipeMapFuelCategory.registerRecipes(registration);
@@ -57,6 +61,7 @@ public class JEIPlugin implements IModPlugin {
 
     @Override
     public void registerIngredients(@Nonnull IModIngredientRegistration registry) {
+        if (LDLMod.isReiLoaded()) return;
         Multiblocked.LOGGER.info("JEI register ingredients");
     }
 

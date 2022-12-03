@@ -17,6 +17,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -125,6 +127,7 @@ public class NumberContentWidget extends ContentWidget<Number> {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void updateScreen() {
         super.updateScreen();
         if (contentTexture != null) {

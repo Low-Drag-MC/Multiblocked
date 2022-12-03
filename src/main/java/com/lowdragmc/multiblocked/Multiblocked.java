@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 import com.lowdragmc.lowdraglib.ItemGroup.LDItemGroup;
+import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.lowdraglib.json.BlockTypeAdapterFactory;
 import com.lowdragmc.lowdraglib.json.FluidStackTypeAdapter;
 import com.lowdragmc.lowdraglib.json.BlockStateTypeAdapterFactory;
@@ -101,7 +102,7 @@ public class Multiblocked {
         return isModLoaded(MODID_BOT);
     }
     public static boolean isJeiLoaded() {
-        return isModLoaded(MODID_JEI);
+        return LDLMod.isJeiLoaded();
     }
 
     public static boolean isCreateLoaded() {

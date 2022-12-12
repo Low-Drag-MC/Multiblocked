@@ -1,18 +1,18 @@
 package com.lowdragmc.multiblocked.api.kubejs.events;
 
-import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import dev.latvian.mods.kubejs.event.EventJS;
 
 public class RecipeUIEvent extends EventJS {
     public static final String ID = "mbd.recipe_ui";
 
-    private final RecipeWidget recipeWidget;
+    private final WidgetGroup recipeWidget;
 
-    public RecipeUIEvent(RecipeWidget recipeWidget) {
+    public RecipeUIEvent(WidgetGroup recipeWidget) {
         this.recipeWidget = recipeWidget;
     }
 
-    public RecipeWidget getRecipeWidget() {
+    public WidgetGroup getRecipeWidget() {
         return recipeWidget;
     }
 }

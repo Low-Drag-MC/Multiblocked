@@ -28,14 +28,28 @@ public interface IContentSerializer<T> {
         T inner = (T) content.getContent();
         toNetwork(buf, inner);
         buf.writeFloat(content.chance);
-        buf.writeUtf(content.slotName);
+        buf.writeBoolean(content.slotName != null);
+        if (content.slotName != null) {
+            buf.writeUtf(content.slotName);
+        }
+        buf.writeBoolean(content.uiName != null);
+        if (content.uiName != null) {
+            buf.writeUtf(content.uiName);
+        }
     }
 
     default Content fromNetworkContent(FriendlyByteBuf buf) {
         T inner = fromNetwork(buf);
         float chance = buf.readFloat();
-        String slotName = buf.readUtf();
-        return new Content(inner, chance, slotName);
+        String slotName = null;
+        if (buf.readBoolean()) {
+            slotName = buf.readUtf();
+        }
+        String uiName = null;
+        if (buf.readBoolean()) {
+            uiName = buf.readUtf();
+        }
+        return new Content(inner, chance, slotName, uiName);
     }
 
     @SuppressWarnings("unchecked")
@@ -45,6 +59,8 @@ public interface IContentSerializer<T> {
         json.addProperty("chance", content.chance);
         if (content.slotName != null)
             json.addProperty("slotName", content.slotName);
+        if (content.uiName != null)
+            json.addProperty("uiName", content.uiName);
         return json;
     }
 
@@ -53,6 +69,7 @@ public interface IContentSerializer<T> {
         T inner = fromJson(jsonObject.get("content"));
         float chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsFloat() : 1;
         String slotName = jsonObject.has("slotName") ? jsonObject.get("slotName").getAsString() : null;
-        return new Content(inner, chance, slotName);
+        String uiName = jsonObject.has("uiName") ? jsonObject.get("uiName").getAsString() : null;
+        return new Content(inner, chance, slotName, uiName);
     }
 }

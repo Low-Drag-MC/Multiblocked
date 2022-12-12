@@ -3,11 +3,8 @@ package com.lowdragmc.multiblocked.common.capability.trait;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.lowdragmc.lowdraglib.gui.widget.DialogWidget;
-import com.lowdragmc.lowdraglib.gui.widget.DraggableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.trait.MultiCapabilityTrait;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
@@ -172,11 +169,25 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
     }
 
     @Override
+    public void handleMbdUI(ModularUI modularUI) {
+        for (int i = 0; i < slotName.length; i++) {
+            String name = slotName[i];
+            if (name != null && !name.isEmpty()) {
+                for (Widget widget : modularUI.getWidgetsById("^%s$".formatted(name))) {
+                    if (widget instanceof ChemicalStackWidget chemicalStackWidget) {
+                        chemicalStackWidget.setCapacity(tankCapability[i]).setHandler(getCap(), new ProxyChemicalHandler(guiIO, this.slotName, null), i);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
         super.createUI(component, group, player);
         if (handlers != null) {
             for (int i = 0; i < handlers.size(); i++) {
-                group.addWidget(new ChemicalStackWidget<>(getCap(), new ProxyChemicalHandler(guiIO, this.slotName, null), i, x[i], y[i]));
+                group.addWidget(new ChemicalStackWidget<>(getCap(), new ProxyChemicalHandler(guiIO, this.slotName, null), i, x[i], y[i]).setCapacity(tankCapability[i]));
             }
         }
     }

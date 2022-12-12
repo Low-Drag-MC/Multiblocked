@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ProgressTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -19,7 +20,6 @@ import com.lowdragmc.multiblocked.jei.recipepage.RecipeMapFuelCategory;
 import com.lowdragmc.multiblocked.rei.recipepage.RecipeMapDisplayCategory;
 import com.lowdragmc.multiblocked.rei.recipepage.RecipeMapFuelDisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -65,9 +65,9 @@ public class RecipeWidget extends WidgetGroup {
         }
 
         if (recipe == null) return;
-        this.addWidget(new LabelWidget(5, 73, I18n.get("multiblocked.recipe.duration", recipe.duration / 20.)).setTextColor(0xff000000).setDrop(false));
+        this.addWidget(new LabelWidget(5, 73, LocalizationUtils.format("multiblocked.recipe.duration", recipe.duration / 20.)).setTextColor(0xff000000).setDropShadow(false));
         if (recipe.text != null) {
-            this.addWidget(new LabelWidget(80, 73, recipe.text.getString()).setTextColor(0xff000000).setDrop(false));
+            this.addWidget(new LabelWidget(80, 73, recipe.text.getString()).setTextColor(0xff000000).setDropShadow(false));
         }
         int index = 0;
         for (Map.Entry<MultiblockCapability<?>, ImmutableList<Content>> entry : recipe.inputs.entrySet()) {

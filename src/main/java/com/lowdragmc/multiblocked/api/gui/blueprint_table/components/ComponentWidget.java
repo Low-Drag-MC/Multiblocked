@@ -2,11 +2,9 @@ package com.lowdragmc.multiblocked.api.gui.blueprint_table.components;
 
 import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.client.scene.WorldSceneRenderer;
-import com.lowdragmc.lowdraglib.gui.texture.ColorBorderTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceBorderTexture;
-import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
-import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.editor.Icons;
+import com.lowdragmc.lowdraglib.gui.editor.runtime.UIDetector;
+import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
@@ -130,6 +128,18 @@ public class ComponentWidget<T extends ComponentDefinition> extends DialogWidget
                         .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/switch_common.png").getSubTexture(0, 0, 1, 0.5), new TextTexture("S3"))
                         .setHoverTooltips("multiblocked.gui.widget.component.s2"),
                 S3 = new WidgetGroup(0, 0, getSize().width, getSize().height));
+        WidgetGroup uiGroup;
+        S3.addWidget(uiGroup = GuiUtils.createStringField(x + 160, 75, "ldlib ui", "multiblocked.gui.widget.component.ui", definition.uiLocation, r -> definition.uiLocation = r));
+        S3.addWidget(new ButtonWidget(x + 140, 75, 15, 15, new GuiTextureGroup(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("F")), cd -> {
+            DialogWidget.showFileDialog(group, "multiblocked.gui.select_mbd_project", Multiblocked.location, true, DialogWidget.suffixFilter(".mbdui"), file -> {
+                        if (file != null && file.isFile()) {
+                            definition.uiLocation = file.getAbsolutePath().replace(Multiblocked.location.getAbsolutePath(), "").replace("\\", "/").substring(1);
+                            if (uiGroup.widgets.get(0) instanceof TextFieldWidget textFieldWidget) {
+                                textFieldWidget.setCurrentString(definition.uiLocation);
+                            }
+                        }
+                    });
+        }).setHoverTooltips("multiblocked.gui.select_mbd_project"));
         int y = 55;
         for (MultiblockCapability<?> capability : MbdCapabilities.getTraitCaps()) {
             WidgetGroup widgetGroup = new WidgetGroup(47, y, 100, 15);

@@ -1,12 +1,18 @@
 package com.lowdragmc.multiblocked.common.capability;
 
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerIngredient;
@@ -28,6 +34,7 @@ import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,6 +85,16 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
     }
 
     @Override
+    public void handleRecipeUI(Widget widget, Content in, IngredientIO ingredientIO) {
+        if (widget instanceof SlotWidget slotWidget && in.content instanceof Ingredient ingredient) {
+            slotWidget.setHandlerSlot(new CycleItemStackHandler(List.of(Arrays.stream(ingredient.getItems()).toList())), 0)
+                    .setIngredientIO(ingredientIO)
+                    .setCanTakeItems(false)
+                    .setCanPutItems(false);
+        }
+    }
+
+    @Override
     public BlockInfo[] getCandidates() {
         return new BlockInfo[]{
                 BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState()),
@@ -92,6 +109,23 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
 
         public ItemCapabilityProxy(BlockEntity tileEntity) {
             super(ItemMultiblockCapability.CAP, tileEntity, CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+        }
+
+        @Override
+        public void handleProxyMbdUI(ModularUI modularUI) {
+            if (slots != null && !slots.isEmpty()) {
+                for (String slotName : slots) {
+                    for (Widget widget : modularUI.getWidgetsById("^%s_[0-9]+$".formatted(slotName))) {
+                        if (widget instanceof SlotWidget slotWidget) {
+                            int index = Integer.parseInt(slotWidget.getId().split(slotName + "_")[1]);
+                            IItemHandler capability = getCapability(slotName);
+                            if (capability.getSlots() > index) {
+                                slotWidget.setHandlerSlot(capability, index);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         @Override

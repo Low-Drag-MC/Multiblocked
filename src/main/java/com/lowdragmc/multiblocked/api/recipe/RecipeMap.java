@@ -1,18 +1,29 @@
 package com.lowdragmc.multiblocked.api.recipe;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.widget.*;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
+import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.ICapabilityProxyHolder;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 
+import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,6 +39,8 @@ public class RecipeMap {
     public ResourceTexture progressTexture = new ResourceTexture("multiblocked:textures/gui/progress_bar_arrow.png");
     public ResourceTexture fuelTexture = new ResourceTexture("multiblocked:textures/gui/progress_bar_fuel.png");
     public IGuiTexture categoryTexture;
+    public String uiLocation = "";
+    private CompoundTag ui;
     
     static {
         register(EMPTY);
@@ -48,7 +61,32 @@ public class RecipeMap {
         copy.fuelRecipes = fuelRecipes == null ? null : new ArrayList<>(fuelRecipes);
         copy.categoryTexture = categoryTexture;
         copy.recipes.putAll(recipes);
+        copy.uiLocation = uiLocation;
+        copy.ui = ui;
         return copy;
+    }
+
+    @Nullable
+    public WidgetGroup createLDLibUI(@Nullable Recipe recipe) {
+        if (ui == null) {
+            if (uiLocation == null || uiLocation.isEmpty()) return null;
+            File file = new File(Multiblocked.location, uiLocation);
+            if (file.isFile()) {
+                try {
+                    this.ui = NbtIo.read(file).getCompound("root");
+                } catch (IOException ignored) {}
+            }
+        }
+        if (this.ui != null) {
+            WidgetGroup root = new WidgetGroup();
+            root.deserializeNBT(ui);
+            root.setSelfPosition(new Position(0, 0));
+            if (recipe != null) {
+                handleUI(recipe, root);
+            }
+            return root;
+        }
+        return null;
     }
 
     public static void register(RecipeMap recipeMap) {
@@ -137,4 +175,51 @@ public class RecipeMap {
         return new ArrayList<>(recipes.values());
     }
 
+    public void handleUI(Recipe recipe, WidgetGroup recipeWidget) {
+        // recipe progress
+        for (Widget widget : recipeWidget.getWidgetsById(Pattern.compile("^recipe_progress$"))) {
+            if (widget instanceof ProgressWidget progressWidget) {
+                progressWidget.setProgressSupplier(ProgressWidget.JEIProgress);
+            }
+        }
+        // fuel progress
+        for (Widget widget : recipeWidget.getWidgetsById(Pattern.compile("^recipe_fuel_progress$"))) {
+            if (widget instanceof ProgressWidget progressWidget) {
+                progressWidget.setProgressSupplier(ProgressWidget.JEIProgress);
+            }
+        }
+        // duration
+        for (Widget widget : recipeWidget.getWidgetsById(Pattern.compile("^recipe_duration$"))) {
+            if (widget instanceof LabelWidget labelWidget) {
+                labelWidget.setText((recipe.duration / 20.) + "s");
+            } else if (widget instanceof ImageWidget imageWidget && imageWidget.getImage() instanceof TextTexture texture) {
+                texture.updateText((recipe.duration / 20.) + "s");
+            }
+        }
+        // custom data
+        for (Widget widget : recipeWidget.getWidgetsById(Pattern.compile("^recipe_data$"))) {
+            if (widget instanceof LabelWidget labelWidget) {
+                labelWidget.setText(recipe.text.getString());
+            } else if (widget instanceof ImageWidget imageWidget && imageWidget.getImage() instanceof TextTexture texture) {
+                texture.updateText(recipe.text.getString());
+            }
+        }
+        handleIngredientsUI(recipeWidget, recipe.inputs, IngredientIO.INPUT);
+        handleIngredientsUI(recipeWidget, recipe.tickInputs, IngredientIO.INPUT);
+        handleIngredientsUI(recipeWidget, recipe.outputs, IngredientIO.OUTPUT);
+        handleIngredientsUI(recipeWidget, recipe.tickOutputs, IngredientIO.OUTPUT);
+    }
+
+    private static void handleIngredientsUI(WidgetGroup recipeWidget, ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> ingredients, IngredientIO ingredientIO) {
+        for (Map.Entry<MultiblockCapability<?>, ImmutableList<Content>> entry : ingredients.entrySet()) {
+            MultiblockCapability<?> capability = entry.getKey();
+            for (Content in : entry.getValue()) {
+                if (in.uiName != null) {
+                    for (Widget widget : recipeWidget.getWidgetsById(Pattern.compile("^%s$".formatted(in.uiName)))) {
+                        capability.handleRecipeUI(widget, in, ingredientIO);
+                    }
+                }
+            }
+        }
+    }
 }

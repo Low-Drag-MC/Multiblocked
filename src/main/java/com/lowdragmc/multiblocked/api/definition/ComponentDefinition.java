@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.api.definition;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.CustomProperties;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -14,6 +15,8 @@ import com.lowdragmc.multiblocked.api.tile.IComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.core.core.DynamicTileEntityGenerator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -25,6 +28,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.IForgeRegistry;
 
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
@@ -36,10 +42,11 @@ public class ComponentDefinition {
     private final Class<? extends IComponent> clazz;
     public final ResourceLocation location;
     public JsonObject traits;
+    public String uiLocation;
+    private CompoundTag ui;
 
     // ******* status properties ******* //
     public final Map<String, StatusProperties> status;
-
     // ******* block item properties ******* //
     public CustomProperties properties;
 
@@ -52,6 +59,7 @@ public class ComponentDefinition {
         this.status.put(StatusProperties.WORKING, new StatusProperties(StatusProperties.WORKING, getIdleStatus(), true));
         this.status.put(StatusProperties.SUSPEND, new StatusProperties(StatusProperties.SUSPEND, getWorkingStatus(), true));
         this.traits = new JsonObject();
+        this.uiLocation = "";
         this.properties = new CustomProperties();
     }
 
@@ -148,9 +156,29 @@ public class ComponentDefinition {
         return this.properties.createItem();
     }
 
+    // ******* ldlib ui ******* //
+    @Nullable
+    public WidgetGroup createLDLibUI() {
+        if (ui == null) {
+            if (uiLocation == null || uiLocation.isEmpty()) return null;
+            File file = new File(Multiblocked.location, uiLocation);
+            if (file.isFile()) {
+                try {
+                    this.ui = NbtIo.read(file).getCompound("root");
+                } catch (IOException ignored) {}
+            }
+        }
+        if (this.ui != null) {
+            WidgetGroup root = new WidgetGroup();
+            root.deserializeNBT(ui);
+            return root;
+        }
+        return null;
+    }
+
     // ******* serialize ******* //
 
-    public final static int VERSION = 2;
+    public final static int VERSION = 3;
 
     public void fromJson(JsonObject json) {
         int version = GsonHelper.getAsInt(json, "version", 0);
@@ -158,6 +186,8 @@ public class ComponentDefinition {
         if (version > VERSION) {
             throw new IllegalArgumentException(String.format("using outdated version of mbd. script is {%d}, mbd supports {%d}", version, VERSION));
         }
+
+        uiLocation = GsonHelper.getAsString(json, "ui", "");
 
         if (json.has("traits")) {
             traits = json.get("traits").getAsJsonObject();
@@ -228,6 +258,9 @@ public class ComponentDefinition {
     public JsonObject toJson(JsonObject json) {
         json.addProperty("version", VERSION);
         json.addProperty("location", location.toString());
+        if (uiLocation != null && !uiLocation.isEmpty()) {
+            json.addProperty("ui", uiLocation);
+        }
         json.add("traits", traits);
         json.add("properties", Multiblocked.GSON.toJsonTree(properties));
         JsonObject statusJson = new JsonObject();

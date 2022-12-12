@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.api.pattern.error;
 
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +34,6 @@ public class SinglePredicateError extends PatternError {
         if (type == 1) {
             number = predicate.minCount;
         }
-        return I18n.get("multiblocked.pattern.error.limited." + type, number);
+        return LocalizationUtils.format("multiblocked.pattern.error.limited." + type, number);
     }
 }

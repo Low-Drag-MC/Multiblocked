@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.api.item;
 ;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.pattern.BlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.JsonBlockPattern;
@@ -89,7 +90,7 @@ public class ItemMultiblockBuilder extends Item {
             } else {
                 ResourceLocation location = new ResourceLocation(stack.getOrCreateTagElement("pattern").getString("controller"));
                 tooltip.add(new TextComponent("pattern build"));
-                tooltip.add(new TextComponent(String.format("Controller: %s", I18n.get(location.getPath() + ".name"))));
+                tooltip.add(new TextComponent(String.format("Controller: %s", LocalizationUtils.format(location.getPath() + ".name"))));
             }
         }
     }

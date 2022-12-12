@@ -5,7 +5,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.widget.ProgressWidget;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -13,6 +17,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerInteger;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -25,6 +30,10 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,6 +75,13 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     @Override
     public ContentWidget<? super Integer> createContentWidget() {
         return new NumberContentWidget().setContentTexture(new TextTexture("FE", color)).setUnit("FE");
+    }
+
+    @Override
+    public void handleRecipeUI(Widget widget, Content in, IngredientIO ingredientIO) {
+        if (widget instanceof ProgressWidget progressWidget && in.content instanceof Integer fe) {
+            progressWidget.setProgressSupplier(() -> 1).setHoverTooltips(fe + " FE");
+        }
     }
 
     @Override
@@ -117,6 +133,20 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
 
         public FECapabilityProxy(BlockEntity tileEntity) {
             super(FEMultiblockCapability.CAP, tileEntity, CapabilityEnergy.ENERGY);
+        }
+
+        @Override
+        public void handleProxyMbdUI(ModularUI modularUI) {
+            if (slots != null && !slots.isEmpty()) {
+                for (String slotName : slots) {
+                    for (Widget widget : modularUI.getWidgetsById("^%s$".formatted(slotName))) {
+                        if (widget instanceof ProgressWidget progressWidget) {
+                            IEnergyStorage capability = getCapability(slotName);
+                            progressWidget.setProgressSupplier(() -> capability.getEnergyStored() * 1d / capability.getMaxEnergyStored());
+                        }
+                    }
+                }
+            }
         }
 
         @Override

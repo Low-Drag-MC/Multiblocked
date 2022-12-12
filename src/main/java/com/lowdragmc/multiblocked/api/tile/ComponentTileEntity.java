@@ -6,12 +6,9 @@ import com.lowdragmc.lowdraglib.gui.factory.BlockEntityUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.IUIHolder;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
-import com.lowdragmc.lowdraglib.gui.widget.TabButton;
-import com.lowdragmc.lowdraglib.gui.widget.TabContainer;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.DummyWorld;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -53,6 +50,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.checkerframework.checker.units.qual.K;
 
 import javax.annotation.Nonnull;
@@ -137,7 +135,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     @OnlyIn(Dist.CLIENT)
     public String getLocalizedName() {
-        return I18n.get(getUnlocalizedName());
+        return LocalizationUtils.format(getUnlocalizedName());
     }
 
     public int getOffset() {
@@ -321,7 +319,14 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     @Override
     public ModularUI createUI(Player entityPlayer) {
-        ModularUI modularUI = createComponentUI(entityPlayer);
+        ModularUI modularUI;
+        var ui = getDefinition().createLDLibUI();
+        if (ui == null) {
+            modularUI = createComponentUI(entityPlayer);
+        } else {
+            modularUI = new ModularUI(ui, this, entityPlayer);
+            handleMbdUI(modularUI);
+        }
         if (Multiblocked.isKubeJSLoaded() && level != null) {
             CreateUIEvent event = new CreateUIEvent(this, modularUI);
             if (event.post(ScriptType.of(level), CreateUIEvent.ID, getSubID())) {
@@ -330,6 +335,24 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
             modularUI = event.getModularUI();
         }
         return modularUI;
+    }
+
+    public void handleMbdUI(ModularUI modularUI) {
+        var slots = modularUI.getWidgetsById("^player_inv_[0-9]+$");
+        for (Widget slot : slots) {
+            if (slot instanceof SlotWidget slotWidget) {
+                try {
+                    int index = Integer.parseInt(slotWidget.getId().split("player_inv_")[1]);
+                    if (index >= 0 && index < 36) {
+                        slotWidget.setContainerSlot(modularUI.entityPlayer.getInventory(), index);
+                        slotWidget.setLocationInfo(true, index < 9);
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        for (CapabilityTrait trait : traits.values()) {
+            trait.handleMbdUI(modularUI);
+        }
     }
 
     public ModularUI createComponentUI(Player PlayerEntity) {

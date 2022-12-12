@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SelectableWidgetGroup;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import com.lowdragmc.lowdraglib.utils.FileUtility;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.TrackedDummyWorld;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
@@ -185,7 +186,7 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
             int offset = Math.max(pattern.length, Math.max(pattern[0].length, pattern[0][0].length()));
             int sum = jsonPattern.pattern.length * jsonPattern.pattern[0].length * jsonPattern.pattern[0][0].length();
             AtomicDouble progress = new AtomicDouble(0);
-            imageWidget.setImage(new TextTexture("multiblocked.gui.tips.building_scene").setSupplier(()-> I18n.get("multiblocked.gui.tips.building_scene") + String.format(" %.1f", progress.get()) + "%%").setWidth(sceneWidget.getSize().width));
+            imageWidget.setImage(new TextTexture("multiblocked.gui.tips.building_scene").setSupplier(()-> LocalizationUtils.format("multiblocked.gui.tips.building_scene") + String.format(" %.1f", progress.get()) + "%%").setWidth(sceneWidget.getSize().width));
             int count = 0;
             for (int i = 0; i < pattern.length; i++) {
                 for (int j = 0; j < pattern[0].length; j++) {

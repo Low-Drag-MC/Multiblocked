@@ -136,6 +136,7 @@ public class NumberContentWidget extends ContentWidget<Number> {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void drawHookBackground(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         Position position = getPosition();
         Size size = getSize();

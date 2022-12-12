@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.common.capability.trait;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.JsonUtil;
@@ -315,6 +316,20 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
     public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
         compound.put("_", handler.serializeNBT());
+    }
+
+    @Override
+    public void handleMbdUI(ModularUI modularUI) {
+        for (int i = 0; i < slotName.length; i++) {
+            String name = slotName[i];
+            if (name != null && !name.isEmpty()) {
+                for (Widget widget : modularUI.getWidgetsById("^%s$".formatted(name))) {
+                    if (widget instanceof TankWidget tankWidget) {
+                        tankWidget.setFluidTank(new ProxyFluidHandler(handler.getTankAt(i), guiIO[i]));
+                    }
+                }
+            }
+        }
     }
 
     @Override

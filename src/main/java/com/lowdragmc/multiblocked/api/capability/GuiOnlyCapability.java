@@ -7,7 +7,7 @@ import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerDouble;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * @author KilaBash
@@ -15,9 +15,9 @@ import java.util.function.Supplier;
  * @implNote GuiOnlyCapability
  */
 public class GuiOnlyCapability extends MultiblockCapability<Double> {
-    Supplier<CapabilityTrait> supplier;
+    Function<MultiblockCapability<?>, CapabilityTrait> supplier;
 
-    public GuiOnlyCapability(String name, Supplier<CapabilityTrait> supplier) {
+    public GuiOnlyCapability(String name, Function<MultiblockCapability<?>, CapabilityTrait> supplier) {
         super(name, 0xffafafaf, SerializerDouble.INSTANCE);
         this.supplier = supplier;
     }
@@ -54,6 +54,6 @@ public class GuiOnlyCapability extends MultiblockCapability<Double> {
 
     @Override
     public CapabilityTrait createTrait() {
-        return supplier.get();
+        return supplier.apply(this);
     }
 }

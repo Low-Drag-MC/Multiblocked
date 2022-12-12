@@ -1,9 +1,9 @@
 package com.lowdragmc.multiblocked.api.pattern.error;
 
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockState;
 import com.lowdragmc.multiblocked.api.pattern.TraceabilityPredicate;
 import com.lowdragmc.multiblocked.api.pattern.predicates.SimplePredicate;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -52,6 +52,6 @@ public class PatternError {
             }
         }
         builder.append("...");
-        return I18n.get("gregtech.multiblock.pattern.error", builder.toString(), worldState.pos);
+        return LocalizationUtils.format("gregtech.multiblock.pattern.error", builder.toString(), worldState.pos);
     }
 }

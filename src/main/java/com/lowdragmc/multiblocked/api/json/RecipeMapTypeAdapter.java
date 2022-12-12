@@ -12,8 +12,11 @@ import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.util.GsonHelper;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
 
 public class RecipeMapTypeAdapter implements JsonSerializer<RecipeMap>,
@@ -34,6 +37,7 @@ public class RecipeMapTypeAdapter implements JsonSerializer<RecipeMap>,
                 recipeMap.addFuelRecipe(Multiblocked.GSON.fromJson(recipe, Recipe.class));
             }
         }
+        recipeMap.uiLocation = GsonHelper.getAsString(json, "ui", "");
         return recipeMap;
     }
 
@@ -48,6 +52,9 @@ public class RecipeMapTypeAdapter implements JsonSerializer<RecipeMap>,
         json.add("recipes", recipes);
         if (recipeMap.isFuelRecipeMap()) {
             json.add("fuelRecipes", Multiblocked.GSON.toJsonTree(recipeMap.fuelRecipes));
+        }
+        if (recipeMap.uiLocation != null && !recipeMap.uiLocation.isEmpty()) {
+            json.addProperty("ui", recipeMap.uiLocation);
         }
         return json;
     }

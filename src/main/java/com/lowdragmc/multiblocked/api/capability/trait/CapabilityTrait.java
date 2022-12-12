@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.api.capability.trait;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -96,5 +97,8 @@ public abstract class CapabilityTrait implements IInnerCapabilityProvider {
 
     public void onDrops(NonNullList<ItemStack> drops, Player player) {
 
+    }
+
+    public void handleMbdUI(ModularUI modularUI) {
     }
 }

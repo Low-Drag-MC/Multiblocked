@@ -205,6 +205,7 @@
   "multiblocked.gui.content.more_option": "more options",
   "multiblocked.gui.content.back": "back",
   "multiblocked.gui.content.slot_name": "IO slot name",
+  "multiblocked.gui.content.ui_slot_name": "UI slot name",
   "multiblocked.gui.content.tips.per_tick_short": "§a/tick§r",
   "multiblocked.gui.content.chance_0": "§cNot Consumed§r",
   "multiblocked.gui.content.chance_0_short": "§cNC§r",
@@ -331,5 +332,16 @@
   "multiblocked.gui.shape.add": "add a box",
   "multiblocked.gui.catalyst.0": "catalyst (not consumed)",
   "multiblocked.gui.catalyst.1": "catalyst (consumed)",
-  "multiblocked.gui.catalyst.2": "catalyst (consume durability)"
+  "multiblocked.gui.catalyst.2": "catalyst (consume durability)",
+  "ldlib.gui.editor.menu.project.mbdui": "MBD UI Project",
+  "ldlib.gui.editor.register.widget.chemical_slot": "Chemical Slot",
+  "multiblocked.gui.blueprint_table.ui_editor" : "UI Editor",
+  "multiblocked.gui.editor.group.trait": "trait",
+  "multiblocked.gui.editor.group.recipe": "recipe",
+  "multiblocked.gui.editor.menu.trait_config": "Trait Config",
+  "multiblocked.gui.editor.tips.citation": "Number of citations",
+  "multiblocked.gui.widget.component.ui": "LDLib UI",
+  "multiblocked.gui.editor.menu.add_trait": "Import traits slots from a definition",
+  "multiblocked.gui.editor.menu.add_recipe": "Import recipe slots from a recipemap",
+  "multiblocked.gui.select_mbd_project": "Select a MBD UI project"
 }

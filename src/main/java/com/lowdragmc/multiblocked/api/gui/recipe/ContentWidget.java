@@ -1,6 +1,8 @@
 package com.lowdragmc.multiblocked.api.gui.recipe;
 
 import com.google.common.collect.Lists;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.ConfiguratorGroup;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
 import com.lowdragmc.lowdraglib.gui.ingredient.IRecipeIngredientSlot;
 import com.lowdragmc.lowdraglib.gui.ingredient.Target;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
@@ -17,6 +19,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Rect2i;
@@ -31,10 +34,16 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class ContentWidget<T> extends SelectableWidgetGroup implements IRecipeIngredientSlot {
+    @Getter
     protected T content;
+    @Getter
     protected float chance;
+    @Getter
     protected IO io;
+    @Getter
     protected String slotName;
+    @Getter
+    protected String uiName;
     protected boolean perTick;
     protected IGuiTexture background;
     protected Consumer<ContentWidget<T>> onPhantomUpdate;
@@ -69,6 +78,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
         this.chance = content.chance;
         this.perTick = perTick;
         this.slotName = content.slotName;
+        this.uiName = content.uiName;
         onContentUpdate();
         return this;
     }
@@ -139,22 +149,6 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
         return content;
     }
 
-    public IO getIo() {
-        return io;
-    }
-
-    public T getContent() {
-        return content;
-    }
-
-    public float getChance() {
-        return chance;
-    }
-
-    public String getSlotName() {
-        return slotName;
-    }
-
     public boolean getPerTick() {
         return perTick;
     }
@@ -198,9 +192,12 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
                             .setHoverBorderTexture(1, -1)
                             .setPressed(perTick)
                             .setHoverTooltips("multiblocked.gui.content.per_tick"))
-                    .addWidget(new TextFieldWidget(5, 25, dialog.getSize().width - 10, 15, null, s -> setContent(io, new Content(content, chance, s != null && !s.isEmpty() ? s : null), perTick))
+                    .addWidget(new TextFieldWidget(5, 25, dialog.getSize().width - 10, 15, null, s -> setContent(io, new Content(content, chance, s != null && !s.isEmpty() ? s : null, uiName), perTick))
                             .setCurrentString(slotName == null ? "" : slotName)
                             .setHoverTooltips("multiblocked.gui.content.slot_name"))
+                    .addWidget(new TextFieldWidget(5, 45, dialog.getSize().width - 10, 15, null, s -> setContent(io, new Content(content, chance, slotName, s != null && !s.isEmpty() ? s : null), perTick))
+                            .setCurrentString(uiName == null ? "" : uiName)
+                            .setHoverTooltips("multiblocked.gui.content.ui_slot_name"))
                     .addWidget(new ButtonWidget(5, dialog.getSize().height - 20, dialog.getSize().width - 10, 15, null, c -> dialogWidget.close()).setButtonTexture(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("multiblocked.gui.content.back")));
         }).setHoverTooltips("multiblocked.gui.content.more_option"));
     }
@@ -261,6 +258,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void drawHookBackground(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 
     }
@@ -305,6 +303,16 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
             DrawerHelper.drawSolidRect(matrixStack, getPosition().x + 1, getPosition().y + 1, 18, 18, -2130706433);
             RenderSystem.colorMask(true, true, true, true);
         }
+    }
+
+
+    @Override
+    protected void addWidgetsConfigurator(ConfiguratorGroup father) {
+    }
+
+    @Override
+    public boolean canWidgetAccepted(IConfigurableWidget widget) {
+        return false;
     }
 
 }

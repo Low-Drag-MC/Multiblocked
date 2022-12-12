@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.Size;
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
@@ -47,8 +48,20 @@ public class RecipeMapWidget extends DialogWidget {
         this.onSave = onSave;
         this.recipes = new ArrayList<>();
         this.addWidget(new ImageWidget(0, 0, getSize().width, getSize().height, new ResourceTexture("multiblocked:textures/gui/blueprint_page.png")));
-        this.addWidget(new LabelWidget(20, 25, "ID:"));
-        this.addWidget(new TextFieldWidget(40, 20, 130, 15,  null, s -> recipeMap.name = s).setResourceLocationOnly().setCurrentString(recipeMap.name));
+
+        this.addWidget(new LabelWidget(20, 5, "ID:"));
+        this.addWidget(new TextFieldWidget(40, 0, 130, 15,  null, s -> recipeMap.name = s).setResourceLocationOnly().setCurrentString(recipeMap.name));
+
+        this.addWidget(new LabelWidget(20, 25, "UI:"));
+        this.addWidget(new TextFieldWidget(40, 20, 50, 15,  () -> recipeMap.uiLocation, s -> recipeMap.uiLocation = s).setCurrentString(recipeMap.uiLocation));
+        this.addWidget(new ButtonWidget(110, 20, 15, 15, new GuiTextureGroup(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("F")), cd -> {
+            DialogWidget.showFileDialog(parent, "multiblocked.gui.select_mbd_project", Multiblocked.location, true, DialogWidget.suffixFilter(".mbdui"), file -> {
+                if (file != null && file.isFile()) {
+                    recipeMap.uiLocation = file.getAbsolutePath().replace(Multiblocked.location.getAbsolutePath(), "").replace("\\", "/").substring(1);
+                }
+            });
+        }).setHoverTooltips("multiblocked.gui.select_mbd_project"));
+
         this.addWidget(new ButtonWidget(180, 17, 40, 20, this::onSave).setButtonTexture(
                 ResourceBorderTexture.BUTTON_COMMON, new TextTexture("multiblocked.gui.tips.save_1", -1).setDropShadow(true)).setHoverBorderTexture(1, -1));
         this.addWidget(new ImageWidget(250, 3, 130, 128, ResourceBorderTexture.BORDERED_BACKGROUND_BLUE));
@@ -240,7 +253,7 @@ public class RecipeMapWidget extends DialogWidget {
                     ImmutableList.Builder<Content> listBuilder = new ImmutableList.Builder<>();
                     for (ContentWidget<?> content : entry.getValue()) {
                         if (content.getPerTick() == perTick) {
-                            listBuilder.add(new Content(content.getContent(), content.getChance(), content.getSlotName()));
+                            listBuilder.add(new Content(content.getContent(), content.getChance(), content.getSlotName(), content.getUiName()));
                         }
                     }
                     ImmutableList<Content> list = listBuilder.build();

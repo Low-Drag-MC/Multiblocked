@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ProgressTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
@@ -11,7 +12,6 @@ import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -34,13 +34,13 @@ public class FuelWidget extends WidgetGroup {
         super(0, 0, 176, 44);
         this.recipeMap = recipeMap;
         this.recipe = recipe;
-        String duration = I18n.get("multiblocked.recipe.duration", recipe.duration / 20.);
+        String duration = LocalizationUtils.format("multiblocked.recipe.duration", recipe.duration / 20.);
         setClientSideWidget();
         inputs = new DraggableScrollableWidgetGroup(5, 5, 64, 24).setBackground(new ColorRectTexture(0x1f000000));
         this.addWidget(inputs);
         this.addWidget(new ImageWidget(176 - 64 - 5 + 22, 7, 20, 20, recipeMap.categoryTexture));
         this.addWidget(new ProgressWidget(ProgressWidget.JEIProgress, 78, 7, 20, 20, recipeMap.fuelTexture).setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP).setHoverTooltips(duration));
-        this.addWidget(new LabelWidget(5, 33, duration).setTextColor(0xff000000).setDrop(false));
+        this.addWidget(new LabelWidget(5, 33, duration).setTextColor(0xff000000).setDropShadow(false));
 
         int index = 0;
         for (Map.Entry<MultiblockCapability<?>, ImmutableList<Content>> entry : recipe.inputs.entrySet()) {

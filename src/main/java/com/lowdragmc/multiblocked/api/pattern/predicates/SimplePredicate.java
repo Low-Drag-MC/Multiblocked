@@ -23,7 +23,6 @@ import com.lowdragmc.multiblocked.api.pattern.error.PatternStringError;
 import com.lowdragmc.multiblocked.api.pattern.error.SinglePredicateError;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -35,7 +34,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,29 +91,29 @@ public class SimplePredicate {
     public List<String> getToolTips(TraceabilityPredicate predicates) {
         List<String> result = new ArrayList<>();
         if (toolTips != null) {
-            toolTips.forEach(tip->result.add(I18n.get(tip)));
+            toolTips.forEach(tip->result.add(LocalizationUtils.format(tip)));
         }
         if (customTips != null) {
-            result.addAll(Arrays.stream(I18n.get(customTips).split("\n")).collect(Collectors.toList()));
+            result.addAll(Arrays.stream(LocalizationUtils.format(customTips).split("\n")).collect(Collectors.toList()));
         }
         if (minCount == maxCount && maxCount != -1) {
-            result.add(I18n.get("multiblocked.pattern.limited_exact", minCount));
+            result.add(LocalizationUtils.format("multiblocked.pattern.limited_exact", minCount));
         } else if (minCount != maxCount && minCount != -1 && maxCount != -1) {
-            result.add(I18n.get("multiblocked.pattern.limited_within", minCount, maxCount));
+            result.add(LocalizationUtils.format("multiblocked.pattern.limited_within", minCount, maxCount));
         } else {
             if (minCount != -1) {
-                result.add(I18n.get("multiblocked.pattern.error.limited.1", minCount));
+                result.add(LocalizationUtils.format("multiblocked.pattern.error.limited.1", minCount));
             }
             if (maxCount != -1) {
-                result.add(I18n.get("multiblocked.pattern.error.limited.0", maxCount));
+                result.add(LocalizationUtils.format("multiblocked.pattern.error.limited.0", maxCount));
             }
         }
         if (predicates == null) return result;
         if (predicates.isSingle()) {
-            result.add(I18n.get("multiblocked.pattern.single"));
+            result.add(LocalizationUtils.format("multiblocked.pattern.single"));
         }
         if (predicates.hasAir()) {
-            result.add(I18n.get("multiblocked.pattern.replaceable_air"));
+            result.add(LocalizationUtils.format("multiblocked.pattern.replaceable_air"));
         }
         return result;
     }
@@ -183,7 +181,7 @@ public class SimplePredicate {
         WidgetGroup group = new WidgetGroup(0, 0, 300, 90);
         groups.add(group);
         group.setClientSideWidget();
-        group.addWidget(new LabelWidget(0, 0, () -> LocalizationUtils.format("multiblocked.gui.label.type") + " " + type).setTextColor(-1).setDrop(true));
+        group.addWidget(new LabelWidget(0, 0, () -> LocalizationUtils.format("multiblocked.gui.label.type") + " " + type).setTextColor(-1).setDropShadow(true));
         TextFieldWidget min, max, preview, nbt, tooltips, slot;
 
         group.addWidget(min = new TextFieldWidget(55, 15, 30, 15, () -> minCount + "", s -> {
@@ -228,7 +226,7 @@ public class SimplePredicate {
                         .setPressed(disableRenderFormed)
                         .setHoverTooltips("multiblocked.gui.predicate.disabled"))
                 .addWidget(new ImageWidget(2, 2, 11, 11, new ColorBorderTexture(1, -1)))
-                .addWidget(new LabelWidget(20, 3, "disableRenderFormed").setTextColor(-1).setDrop(true));
+                .addWidget(new LabelWidget(20, 3, "disableRenderFormed").setTextColor(-1).setDropShadow(true));
         group.addWidget(widgetGroup);
 
         group.addWidget(nbt = new TextFieldWidget(155, 15, 100, 15, null, s -> nbtParser = s));

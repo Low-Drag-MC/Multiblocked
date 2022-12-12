@@ -11,7 +11,6 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -47,7 +46,7 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
             itemHandler.updateStacks(stacks);
         } else {
             itemHandler = new CycleItemStackHandler(stacks);
-            addWidget(new SlotWidget(itemHandler, 0, 1, 1, false, false).setDrawOverlay(false).setOnAddedTooltips((s, l) -> {
+            addWidget(new SlotWidget(itemHandler, 0, 1, 1, false, false).setDrawHoverOverlay(false).setOnAddedTooltips((s, l) -> {
                 if (chance < 1) {
                     l.add(chance == 0 ? new TranslatableComponent("multiblocked.gui.content.chance_0") : new TranslatableComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100) + "%"));
                 }

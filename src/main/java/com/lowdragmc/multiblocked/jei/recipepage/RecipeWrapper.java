@@ -1,15 +1,11 @@
 package com.lowdragmc.multiblocked.jei.recipepage;
 
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.jei.ModularWrapper;
-import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
-import com.lowdragmc.multiblocked.api.recipe.Recipe;
 
-public class RecipeWrapper extends ModularWrapper<RecipeWidget> {
+public class RecipeWrapper extends ModularWrapper<Widget> {
 
-    public final Recipe recipe;
-
-    public RecipeWrapper(RecipeWidget widget) {
+    public RecipeWrapper(Widget widget) {
         super(widget);
-        recipe = widget.recipe;
     }
 }

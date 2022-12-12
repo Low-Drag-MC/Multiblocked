@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.api.pattern.error;
 
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import net.minecraft.client.resources.language.I18n;
 
 public class PatternStringError extends PatternError{
@@ -11,6 +12,6 @@ public class PatternStringError extends PatternError{
 
     @Override
     public String getErrorInfo() {
-        return I18n.get(translateKey);
+        return LocalizationUtils.format(translateKey);
     }
 }

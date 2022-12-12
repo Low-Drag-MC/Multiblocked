@@ -195,7 +195,6 @@ public class PatternWidget extends WidgetGroup {
         }
         leftButton.setVisible(index > 0);
         rightButton.setVisible(index < patterns.length - 1);
-        updateClientSlots();
         switchWidget.setPressed(pattern.controllerBase.isFormed());
     }
 
@@ -245,7 +244,6 @@ public class PatternWidget extends WidgetGroup {
                         .setOnAddedTooltips((slot, list) -> predicateTips.get(finalI).forEach(tip -> list.add(new TextComponent(tip))));
                 addWidget(candidates[i]);
             }
-            updateClientSlots();
         }
     }
 
@@ -260,14 +258,6 @@ public class PatternWidget extends WidgetGroup {
             }
         }
         return itemStack;
-    }
-
-    private void updateClientSlots() {
-        if (gui == null || gui.getModularUIGui() == null) return;
-        gui.getModularUIGui().getMenu().slots.clear();
-        for (SlotWidget slotWidget : getNativeWidgets()) {
-            gui.getModularUIGui().getMenu().slots.add(slotWidget.getHandle());
-        }
     }
 
     public static BlockPos locateNextRegion(int range) {

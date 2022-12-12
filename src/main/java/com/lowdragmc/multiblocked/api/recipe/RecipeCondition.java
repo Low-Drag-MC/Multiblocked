@@ -9,7 +9,6 @@ import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -88,7 +87,7 @@ public abstract class RecipeCondition {
                 .setHoverBorderTexture(1, -1)
                 .setPressed(isReverse)
                 .setHoverTooltips("multiblocked.gui.condition.reverse"));
-        group.addWidget(new LabelWidget(20, 3, "multiblocked.gui.condition.reverse.label").setTextColor(-1).setDrop(true));
+        group.addWidget(new LabelWidget(20, 3, "multiblocked.gui.condition.reverse.label").setTextColor(-1).setDropShadow(true));
     }
 
 }

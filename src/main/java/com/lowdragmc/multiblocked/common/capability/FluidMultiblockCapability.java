@@ -1,14 +1,19 @@
 package com.lowdragmc.multiblocked.common.capability;
 
 
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.widget.TankWidget;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.CycleItemStackHandler;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
-import com.lowdragmc.multiblocked.api.kubejs.MultiblockedJSPlugin;
+import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerFluidStack;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -16,18 +21,23 @@ import com.lowdragmc.multiblocked.common.capability.trait.FluidCapabilityTrait;
 import com.lowdragmc.multiblocked.common.capability.widget.FluidContentWidget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -64,6 +74,18 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
     @Override
     public ContentWidget<? super FluidStack> createContentWidget() {
         return new FluidContentWidget();
+    }
+
+    @Override
+    public void handleRecipeUI(Widget widget, Content in, IngredientIO ingredientIO) {
+        if (widget instanceof TankWidget tankWidget && in.content instanceof FluidStack fluidStack) {
+            var fluidTank = new FluidTank(fluidStack.getAmount());
+            fluidTank.fill(fluidStack.copy(), IFluidHandler.FluidAction.EXECUTE);
+            tankWidget.setFluidTank(fluidTank)
+                    .setIngredientIO(ingredientIO)
+                    .setAllowClickDrained(false)
+                    .setAllowClickFilled(false);
+        }
     }
 
     @Override
@@ -104,6 +126,61 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
 
         public FluidCapabilityProxy(BlockEntity tileEntity) {
             super(FluidMultiblockCapability.CAP, tileEntity, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
+        }
+
+        @Override
+        public void handleProxyMbdUI(ModularUI modularUI) {
+            if (slots != null && !slots.isEmpty()) {
+                for (String slotName : slots) {
+                    for (Widget widget : modularUI.getWidgetsById("^%s_[0-9]+$".formatted(slotName))) {
+                        if (widget instanceof TankWidget tankWidget) {
+                            int index = Integer.parseInt(tankWidget.getId().split(slotName + "_")[1]);
+                            var capability = getCapability(slotName);
+                            if (capability.getTanks() > index) {
+                                tankWidget.setFluidTank(new IFluidTank() {
+                                    @NotNull
+                                    @Override
+                                    public FluidStack getFluid() {
+                                        return capability.getFluidInTank(index);
+                                    }
+
+                                    @Override
+                                    public int getFluidAmount() {
+                                        return getFluid().getAmount();
+                                    }
+
+                                    @Override
+                                    public int getCapacity() {
+                                        return capability.getTankCapacity(index);
+                                    }
+
+                                    @Override
+                                    public boolean isFluidValid(FluidStack stack) {
+                                        return capability.isFluidValid(index, stack);
+                                    }
+
+                                    @Override
+                                    public int fill(FluidStack resource, IFluidHandler.FluidAction action) {
+                                        return capability.fill(resource, action);
+                                    }
+
+                                    @NotNull
+                                    @Override
+                                    public FluidStack drain(int maxDrain, IFluidHandler.FluidAction action) {
+                                        return capability.drain(maxDrain, action);
+                                    }
+
+                                    @NotNull
+                                    @Override
+                                    public FluidStack drain(FluidStack resource, IFluidHandler.FluidAction action) {
+                                        return capability.drain(resource, action);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         @Override

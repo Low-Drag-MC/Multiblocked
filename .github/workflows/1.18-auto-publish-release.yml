@@ -5,7 +5,7 @@ on:
     branches:
       - 'exp-1.18'
     paths:
-      - 'gradle.properties'
+      - 'version.gradle'
 
 jobs:
   build:

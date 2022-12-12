@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.common.capability.trait;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -115,6 +116,20 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
     public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
         compound.put("_", handler.serializeNBT());
+    }
+
+    @Override
+    public void handleMbdUI(ModularUI modularUI) {
+        for (int i = 0; i < slotName.length; i++) {
+            String name = slotName[i];
+            if (name != null && !name.isEmpty()) {
+                for (Widget widget : modularUI.getWidgetsById("^%s$".formatted(name))) {
+                    if (widget instanceof SlotWidget slotWidget) {
+                        slotWidget.setHandlerSlot(new ProxyItemHandler(handler, guiIO, this.slotName, null), i);
+                    }
+                }
+            }
+        }
     }
 
     @Override

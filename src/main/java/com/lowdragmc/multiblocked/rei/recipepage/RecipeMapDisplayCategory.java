@@ -2,6 +2,7 @@ package com.lowdragmc.multiblocked.rei.recipepage;
 
 import com.lowdragmc.lowdraglib.rei.IGui2Renderer;
 import com.lowdragmc.lowdraglib.rei.ModularUIDisplayCategory;
+import com.lowdragmc.lowdraglib.utils.Size;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.definition.ControllerDefinition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
@@ -24,6 +25,7 @@ public class RecipeMapDisplayCategory extends ModularUIDisplayCategory<RecipeDis
 
     private final RecipeMap recipeMap;
     private Renderer icon;
+    private Size size;
 
     public RecipeMapDisplayCategory(RecipeMap recipeMap) {
         this.recipeMap = recipeMap;
@@ -34,14 +36,26 @@ public class RecipeMapDisplayCategory extends ModularUIDisplayCategory<RecipeDis
         return CATEGORIES.apply(recipeMap);
     }
 
+    public Size getSize() {
+        if (size == null) {
+            var ui = recipeMap.createLDLibUI(null);
+            if (ui == null) {
+                this.size = new Size(176 + 8, 84 + 8);
+            } else {
+                this.size = new Size(ui.getSize().width + 8, ui.getSize().height + 8);
+            }
+        }
+        return size;
+    }
+
     @Override
     public int getDisplayHeight() {
-        return 84 + 8;
+        return getSize().height;
     }
 
     @Override
     public int getDisplayWidth(RecipeDisplay display) {
-        return 176 + 8;
+        return getSize().width;
     }
 
     @Nonnull

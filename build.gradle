@@ -41,6 +41,7 @@ repositories {
     }
 }
 
+apply from: 'version.gradle'
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.

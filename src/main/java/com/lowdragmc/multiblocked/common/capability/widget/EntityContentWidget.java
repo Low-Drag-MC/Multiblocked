@@ -25,7 +25,7 @@ public class EntityContentWidget extends ContentWidget<EntityIngredient> {
     protected void onContentUpdate() {
         if (itemHandler == null) {
             itemHandler = new ItemStackHandler();
-            addWidget(new SlotWidget(itemHandler, 0, 1, 1, false, false).setDrawOverlay(false).setOnAddedTooltips((s, l) -> {
+            addWidget(new SlotWidget(itemHandler, 0, 1, 1, false, false).setDrawHoverOverlay(false).setOnAddedTooltips((s, l) -> {
                 if (chance < 1) {
                     l.add(chance == 0 ? new TranslatableComponent("multiblocked.gui.content.chance_0") : new TranslatableComponent("multiblocked.gui.content.chance_1", String.format("%.1f", chance * 100)));
                 }

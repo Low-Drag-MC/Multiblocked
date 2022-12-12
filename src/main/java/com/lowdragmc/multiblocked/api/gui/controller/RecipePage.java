@@ -4,6 +4,7 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.widget.*;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
@@ -41,10 +42,10 @@ public class RecipePage extends PageWidget{
         this.controller = controller;
         this.status = RecipeLogic.Status.IDLE;
         this.addWidget(tips = new DraggableScrollableWidgetGroup(8, 34, 160, 112));
-        tips.addWidget(new LabelWidget(5, 5, () -> I18n.get("multiblocked.recipe.status." + status.name)).setTextColor(-1));
-        tips.addWidget(new LabelWidget(5, 20, () -> I18n.get("multiblocked.recipe.remaining", recipe == null ? 0 : (recipe.duration - progress) / 20)).setTextColor(-1));
+        tips.addWidget(new LabelWidget(5, 5, () -> LocalizationUtils.format("multiblocked.recipe.status." + status.name)).setTextColor(-1));
+        tips.addWidget(new LabelWidget(5, 20, () -> LocalizationUtils.format("multiblocked.recipe.remaining", recipe == null ? 0 : (recipe.duration - progress) / 20)).setTextColor(-1));
         if (controller.getDefinition().getRecipeMap().isFuelRecipeMap()) {
-            tips.addWidget(new LabelWidget(5, 35, () -> (status == RecipeLogic.Status.SUSPEND && fuelTime == 0) ? I18n.get("multiblocked.recipe.lack_fuel") : I18n.get("multiblocked.recipe.remaining_fuel", fuelTime / 20)).setTextColor(-1));
+            tips.addWidget(new LabelWidget(5, 35, () -> (status == RecipeLogic.Status.SUSPEND && fuelTime == 0) ? LocalizationUtils.format("multiblocked.recipe.lack_fuel") : LocalizationUtils.format("multiblocked.recipe.remaining_fuel", fuelTime / 20)).setTextColor(-1));
         }
         this.addWidget(new ImageWidget(7, 7, 162, 16,
                 new TextTexture(controller.getUnlocalizedName(), -1)

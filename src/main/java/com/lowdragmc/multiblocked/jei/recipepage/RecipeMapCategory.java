@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.jei.recipepage;
 
 import com.lowdragmc.lowdraglib.gui.widget.ProgressWidget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.jei.IGui2IDrawable;
 import com.lowdragmc.lowdraglib.jei.ModularUIRecipeCategory;
 import com.lowdragmc.multiblocked.Multiblocked;
@@ -33,9 +34,14 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
     private IDrawable icon;
 
     public RecipeMapCategory(IJeiHelpers helpers, RecipeMap recipeMap) {
-        IGuiHelper guiHelper = helpers.getGuiHelper();
-        this.background = guiHelper.createBlankDrawable(176, 84);
         this.recipeMap = recipeMap;
+        IGuiHelper guiHelper = helpers.getGuiHelper();
+        var ui = recipeMap.createLDLibUI(null);
+        if (ui == null) {
+            this.background = guiHelper.createBlankDrawable(176, 84);
+        } else {
+            this.background = guiHelper.createBlankDrawable(ui.getSize().width, ui.getSize().height);
+        }
     }
 
     @Override
@@ -80,11 +86,14 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
             registration.addRecipes(RecipeMapCategory.TYPES.apply(recipeMap), recipeMap.recipes.values()
                     .stream()
                     .map(recipe -> {
-                        RecipeWidget recipeWidget = new RecipeWidget(
-                                recipeMap,
-                                recipe,
-                                ProgressWidget.JEIProgress,
-                                ProgressWidget.JEIProgress);
+                        WidgetGroup recipeWidget = recipeMap.createLDLibUI(recipe);
+                        if (recipeWidget == null) {
+                            recipeWidget = new RecipeWidget(
+                                    recipeMap,
+                                    recipe,
+                                    ProgressWidget.JEIProgress,
+                                    ProgressWidget.JEIProgress);
+                        }
                         if (Multiblocked.isKubeJSLoaded()) {
                             new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, recipeMap.name);
                         }

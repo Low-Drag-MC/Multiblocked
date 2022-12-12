@@ -3,16 +3,19 @@ package com.lowdragmc.multiblocked.api.capability;
 import com.google.gson.*;
 import com.lowdragmc.lowdraglib.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.jei.IngredientIO;
 import com.lowdragmc.lowdraglib.utils.BlockInfo;
+import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.IContentSerializer;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.ResourceLocation;
@@ -95,7 +98,7 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
             @Override
             protected void onContentUpdate() {
                 if (Multiblocked.isClient()) {
-                    setHoverTooltips(I18n.get("multiblocked.content.miss", io, I18n.get(MultiblockCapability.this.getUnlocalizedName())));
+                    setHoverTooltips(LocalizationUtils.format("multiblocked.content.miss", io, LocalizationUtils.format(MultiblockCapability.this.getUnlocalizedName())));
                 }
             }
 
@@ -106,6 +109,13 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
             }
 
         }.setBackground(new ColorRectTexture(color));
+    }
+
+
+    /**
+     * create ui for jei recipes
+     */
+    public void handleRecipeUI(Widget widget, Content in, IngredientIO ingredientIO) {
     }
 
     public boolean hasTrait() {
@@ -164,4 +174,5 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
     public T of(Object o) {
         return serializer.of(o);
     }
+
 }

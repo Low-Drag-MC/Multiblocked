@@ -9,7 +9,6 @@ import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SwitchWidget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.IComponent;
 
 import java.util.function.Consumer;
@@ -72,7 +71,7 @@ public interface IMultiblockedRenderer extends IRenderer {
                 .setHoverTexture(new ColorBorderTexture(1, 0xff545757))
                 .setPressed(init)
                 .setHoverTooltips(tips));
-        widgetGroup.addWidget(new LabelWidget(20, 3, ()->text).setTextColor(-1).setDrop(true));
+        widgetGroup.addWidget(new LabelWidget(20, 3, ()->text).setTextColor(-1).setDropShadow(true));
         return widgetGroup;
     }
 }

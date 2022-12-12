@@ -81,21 +81,21 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
 
     @Override
     protected void initSettingDialog(DialogWidget dialog, DraggableWidgetGroup slot) {
-        super.initSettingDialog(dialog, slot);
-        dialog.addWidget(new TextFieldWidget(60, 5, 100, 15, null, s -> capacity = Integer.parseInt(s))
+        dialog.addWidget(new TextFieldWidget(60, 50, 100, 15, null, s -> capacity = Integer.parseInt(s))
                 .setNumbersOnly(1, Integer.MAX_VALUE)
                 .setCurrentString(capacity + "")
                 .setHoverTooltips("multiblocked.gui.trait.fe.tips.0"));
 
-        dialog.addWidget(new TextFieldWidget(60, 25, 100, 15, null, s -> maxReceive = Integer.parseInt(s))
+        dialog.addWidget(new TextFieldWidget(60, 70, 100, 15, null, s -> maxReceive = Integer.parseInt(s))
                 .setNumbersOnly(1, Integer.MAX_VALUE)
                 .setCurrentString(maxReceive + "")
                 .setHoverTooltips("multiblocked.gui.trait.fe.tips.1"));
 
-        dialog.addWidget(new TextFieldWidget(60, 45, 100, 15, null, s -> maxExtract = Integer.parseInt(s))
+        dialog.addWidget(new TextFieldWidget(60, 90, 100, 15, null, s -> maxExtract = Integer.parseInt(s))
                 .setNumbersOnly(1, Integer.MAX_VALUE)
                 .setCurrentString(maxExtract + "")
                 .setHoverTooltips("multiblocked.gui.trait.fe.tips.2"));
+        super.initSettingDialog(dialog, slot);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     @Override
     @Nonnull
     public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, guiIO)));
+        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, getRealMbdIO())));
     }
 
     @Override

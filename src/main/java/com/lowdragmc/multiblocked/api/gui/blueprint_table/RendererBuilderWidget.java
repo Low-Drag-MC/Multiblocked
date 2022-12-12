@@ -42,6 +42,9 @@ public class RendererBuilderWidget extends WidgetGroup {
     @Override
     public void setGui(ModularUI gui) {
         super.setGui(gui);
+        if (gui == null && shaderTexture != null) {
+            shaderTexture.dispose();
+        }
         if (gui != null && shaderTexture != null) {
             gui.registerCloseListener(shaderTexture::dispose);
         }

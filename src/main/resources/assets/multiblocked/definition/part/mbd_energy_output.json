@@ -23,6 +23,7 @@
     "forge_energy": {
       "cIO": 1,
       "gIO": 2,
+      "mIO": 1,
       "x": 28,
       "y": 106,
       "width": 120,

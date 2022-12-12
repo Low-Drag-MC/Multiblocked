@@ -38,6 +38,7 @@ public class RecipeBuilder {
     protected boolean perTick;
     protected String fixedName;
     protected String slotName;
+    protected String uiName;
     protected float chance = 1;
 
 
@@ -108,27 +109,32 @@ public class RecipeBuilder {
         return this;
     }
 
+    public RecipeBuilder uiName(String uiName) {
+        this.uiName = uiName != null && !uiName.isEmpty() ? uiName : null;
+        return this;
+    }
+
     public <T> RecipeBuilder input(MultiblockCapability<T> capability, T... obj) {
-        (perTick ? tickInputBuilder : inputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o -> new Content(o, chance, slotName)).iterator());
+        (perTick ? tickInputBuilder : inputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o -> new Content(o, chance, slotName, uiName)).iterator());
         return this;
     }
 
     public <T> RecipeBuilder output(MultiblockCapability<T> capability, T... obj) {
-        (perTick ? tickOutputBuilder : outputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o -> new Content(o, chance, slotName)).iterator());
+        (perTick ? tickOutputBuilder : outputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj).map(o -> new Content(o, chance, slotName, uiName)).iterator());
         return this;
     }
 
     public <T> RecipeBuilder inputs(MultiblockCapability<T> capability, Object... obj) {
         (perTick ? tickInputBuilder : inputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o -> new Content(o, chance, slotName)).iterator());
+                .map(o -> new Content(o, chance, slotName, uiName)).iterator());
         return this;
     }
 
     public <T> RecipeBuilder outputs(MultiblockCapability<T> capability, Object... obj) {
         (perTick ? tickOutputBuilder : outputBuilder).computeIfAbsent(capability, c -> ImmutableList.builder()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o -> new Content(o, chance, slotName)).iterator());
+                .map(o -> new Content(o, chance, slotName, uiName)).iterator());
         return this;
     }
 

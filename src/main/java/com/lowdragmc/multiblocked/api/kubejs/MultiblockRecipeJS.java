@@ -51,6 +51,7 @@ public class MultiblockRecipeJS extends RecipeJS {
     private int duration = 200;
     private float chance = 1;
     private boolean perTick = false;
+    private String uiName;
 
     public MultiblockRecipeJS setChance(float chance) {
         this.chance = chance;
@@ -59,6 +60,11 @@ public class MultiblockRecipeJS extends RecipeJS {
 
     public MultiblockRecipeJS setPerTick(boolean perTick) {
         this.perTick = perTick;
+        return this;
+    }
+
+    public MultiblockRecipeJS setUIName(String uiName) {
+        this.uiName = uiName;
         return this;
     }
 
@@ -90,12 +96,12 @@ public class MultiblockRecipeJS extends RecipeJS {
     }
 
     public <T> MultiblockRecipeJS input(MultiblockCapability<T> capability, T input, String slotName) {
-        (perTick ? tickInputs : inputs).computeIfAbsent(capability, c -> new ArrayList<>()).add((JsonObject) capability.serializer.toJsonContent(new Content(input, chance, slotName)));
+        (perTick ? tickInputs : inputs).computeIfAbsent(capability, c -> new ArrayList<>()).add((JsonObject) capability.serializer.toJsonContent(new Content(input, chance, slotName, uiName)));
         return this;
     }
 
     public <T> MultiblockRecipeJS output(MultiblockCapability<T> capability, T output, String slotName) {
-        (perTick ? tickOutputs : outputs).computeIfAbsent(capability, c -> new ArrayList<>()).add((JsonObject) capability.serializer.toJsonContent(new Content(output, chance, slotName)));
+        (perTick ? tickOutputs : outputs).computeIfAbsent(capability, c -> new ArrayList<>()).add((JsonObject) capability.serializer.toJsonContent(new Content(output, chance, slotName, uiName)));
         return this;
     }
 

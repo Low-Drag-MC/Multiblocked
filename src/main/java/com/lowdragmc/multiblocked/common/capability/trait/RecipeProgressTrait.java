@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.common.capability.trait;
 
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
+import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.trait.ProgressCapabilityTrait;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
@@ -12,8 +13,8 @@ import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
  */
 public class RecipeProgressTrait extends ProgressCapabilityTrait {
 
-    public RecipeProgressTrait() {
-        super(null);
+    public RecipeProgressTrait(MultiblockCapability<?> capability) {
+        super(capability);
     }
 
     @Override

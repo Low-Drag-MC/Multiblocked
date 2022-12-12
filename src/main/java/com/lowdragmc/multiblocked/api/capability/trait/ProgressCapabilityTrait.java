@@ -2,12 +2,12 @@ package com.lowdragmc.multiblocked.api.capability.trait;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.JsonUtil;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
-import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.gui.dialogs.ResourceTextureWidget;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
@@ -55,7 +55,18 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
     protected abstract String dynamicHoverTips(double progress);
 
     protected abstract double getProgress();
-    
+
+    @Override
+    public void handleMbdUI(ModularUI modularUI) {
+        if (slotName != null && !slotName.isEmpty()) {
+            for (Widget widget : modularUI.getWidgetsById("^%s$".formatted(slotName))) {
+                if (widget instanceof ProgressWidget progressWidget) {
+                    progressWidget.setProgressSupplier(this::getProgress).setDynamicHoverTips(this::dynamicHoverTips);
+                }
+            }
+        }
+    }
+
     @Override
     public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
         super.createUI(component, group, player);
@@ -94,9 +105,10 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
     protected void initSettingDialog(DialogWidget dialog, DraggableWidgetGroup slot) {
         ImageWidget imageWidget = (ImageWidget) slot.widgets.get(0);
         ButtonWidget setting = (ButtonWidget) slot.widgets.get(1);
-        ButtonWidget imageSelector = (ButtonWidget) new ButtonWidget(5, 85, width, height, new GuiTextureGroup(new ColorBorderTexture(1, -1), createAutoProgressTexture()), null)
+        ButtonWidget imageSelector = (ButtonWidget) new ButtonWidget(5, 85 + 45, width, height, new GuiTextureGroup(new ColorBorderTexture(1, -1), createAutoProgressTexture()), null)
                 .setHoverTooltips("multiblocked.gui.tips.select_image");
-        dialog.addWidget(new TextFieldWidget(5, 25, 50, 15, null, s -> {
+
+        dialog.addWidget(new TextFieldWidget(5, 75, 50, 15, null, s -> {
             width = Integer.parseInt(s);
             Size size = new Size(width, height);
             slot.setSize(size);
@@ -104,7 +116,7 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
             imageSelector.setSize(size);
             setting.setSelfPosition(new Position(width - 8, 0));
         }).setCurrentString(width + "").setNumbersOnly(1, 180).setHoverTooltips("multiblocked.gui.trait.set_width"));
-        dialog.addWidget(new TextFieldWidget(5, 45, 50, 15, null, s -> {
+        dialog.addWidget(new TextFieldWidget(5, 90, 50, 15, null, s -> {
             height = Integer.parseInt(s);
             Size size = new Size(width, height);
             slot.setSize(size);
@@ -112,19 +124,9 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
             imageSelector.setSize(size);
             setting.setSelfPosition(new Position(width - 8, 0));
         }).setCurrentString(height + "").setNumbersOnly(1, 180).setHoverTooltips("multiblocked.gui.trait.set_height"));
-        dialog.addWidget(new SelectorWidget(5, 5, 50, 15, Arrays.stream(IO.VALUES).map(Enum::name).collect(
-                Collectors.toList()), -1)
-                .setValue(capabilityIO.name())
-                .setOnChanged(io-> {
-                    capabilityIO = IO.valueOf(io);
-                    imageWidget.setImage(new GuiTextureGroup(createAutoProgressTexture(), new ColorBorderTexture(1, getColorByIO(capabilityIO))));
-                })
-                .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
-                .setBackground(new ColorRectTexture(0xffaaaaaa))
-                .setHoverTooltips("multiblocked.gui.trait.capability_io"));
 
         dialog.addWidget(imageSelector);
-        dialog.addWidget(new SelectorWidget(5, 65, 60, 15, Arrays.stream(ProgressTexture.FillDirection.values()).map(Enum::name).collect(Collectors.toList()), -1)
+        dialog.addWidget(new SelectorWidget(5, 110, 60, 15, Arrays.stream(ProgressTexture.FillDirection.values()).map(Enum::name).collect(Collectors.toList()), -1)
                 .setValue(fillDirection.name())
                 .setOnChanged(io -> {
                     fillDirection = ProgressTexture.FillDirection.valueOf(io);
@@ -135,6 +137,7 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
                 .setButtonBackground(ResourceBorderTexture.BUTTON_COMMON)
                 .setBackground(new ColorRectTexture(0xffaaaaaa))
                 .setHoverTooltips("multiblocked.gui.trait.fill_direction"));
+
         imageSelector.setOnPressCallback(cd -> new ResourceTextureWidget(dialog.getParent().getGui().mainGroup, texture1 -> {
             if (texture1 != null) {
                 texture = texture1.imageLocation.toString();
@@ -143,6 +146,7 @@ public abstract class ProgressCapabilityTrait extends SingleCapabilityTrait {
                 imageWidget.setImage(new GuiTextureGroup(autoProgressTexture, new ColorBorderTexture(1, getColorByIO(capabilityIO))));
             }
         }));
+        super.initSettingDialog(dialog, slot);
     }
 
     private ProgressTexture createAutoProgressTexture() {

@@ -16,6 +16,7 @@
     "forge_energy": {
       "cIO": 0,
       "gIO": 2,
+      "mIO": 0,
       "x": 30,
       "y": 98,
       "width": 120,

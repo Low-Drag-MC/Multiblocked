@@ -423,6 +423,19 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         return new ModularUI(196, 256, this, entityPlayer).widget(tabContainer);
     }
 
+    @Override
+    public void handleMbdUI(ModularUI modularUI) {
+        var capabilitiesProxy = getCapabilitiesProxy();
+        if (capabilitiesProxy != null) {
+            for (Long2ObjectOpenHashMap<CapabilityProxy<?>> map : capabilitiesProxy.values()) {
+                for (CapabilityProxy<?> proxy : map.values()) {
+                    proxy.handleProxyMbdUI(modularUI);
+                }
+            }
+        }
+        super.handleMbdUI(modularUI);
+    }
+
     @NotNull
     @Override
     public AABB getRenderBoundingBox() {

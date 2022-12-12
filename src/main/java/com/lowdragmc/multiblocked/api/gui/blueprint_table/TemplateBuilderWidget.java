@@ -66,9 +66,9 @@ public class TemplateBuilderWidget extends WidgetGroup {
         this.table = table;
         this.addWidget(0, new ImageWidget(0, 0, getSize().width, getSize().height, new ResourceTexture("multiblocked:textures/gui/blueprint_page.png")));
         this.addWidget(new ImageWidget(30, 34, 160, 180, new GuiTextureGroup(new ColorBorderTexture(3, -1), new ColorRectTexture(0xaf444444))));
-        this.addWidget(new LabelWidget(200, 34, this::status).setTextColor(-1).setDrop(true));
-        this.addWidget(new LabelWidget(200, 49, this::size).setTextColor(-1).setDrop(true));
-        this.addWidget(new LabelWidget(200, 64, this::description).setTextColor(-1).setDrop(true));
+        this.addWidget(new LabelWidget(200, 34, this::status).setTextColor(-1).setDropShadow(true));
+        this.addWidget(new LabelWidget(200, 49, this::size).setTextColor(-1).setDropShadow(true));
+        this.addWidget(new LabelWidget(200, 64, this::description).setTextColor(-1).setDropShadow(true));
         this.addWidget(templateButton = new ButtonWidget(200, 100, 20, 20, new ItemStackTexture(
                 MbdItems.BUILDER), this::onBuildTemplate));
         this.addWidget(sceneWidget = (SceneWidget) new SceneWidget(30, 34, 160, 180, null)

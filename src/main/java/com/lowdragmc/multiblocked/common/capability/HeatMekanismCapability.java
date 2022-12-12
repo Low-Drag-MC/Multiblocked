@@ -98,7 +98,7 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
             return null;
         }
 
-        double lastTemp = Double.MIN_VALUE;
+        double lastTemp = -Double.MAX_VALUE;
 
         @Override
         protected boolean hasInnerChanged() {

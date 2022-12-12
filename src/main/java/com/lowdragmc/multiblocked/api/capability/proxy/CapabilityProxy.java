@@ -1,6 +1,7 @@
 package com.lowdragmc.multiblocked.api.capability.proxy;
 
 
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.multiblocked.api.capability.ICapabilityProxyHolder;
 import com.lowdragmc.multiblocked.api.capability.IInnerCapabilityProvider;
 import com.lowdragmc.multiblocked.api.capability.IO;
@@ -103,5 +104,8 @@ public abstract class CapabilityProxy<K> {
     }
 
     public void postWorking(ICapabilityProxyHolder holder, IO io, Recipe recipe) {
+    }
+
+    public void handleProxyMbdUI(ModularUI modularUI) {
     }
 }

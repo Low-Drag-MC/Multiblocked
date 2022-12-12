@@ -81,6 +81,7 @@ public class RecipeMap {
             WidgetGroup root = new WidgetGroup();
             root.deserializeNBT(ui);
             root.setSelfPosition(new Position(0, 0));
+            root.setClientSideWidget();
             if (recipe != null) {
                 handleUI(recipe, root);
             }

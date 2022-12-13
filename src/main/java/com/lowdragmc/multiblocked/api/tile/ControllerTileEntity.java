@@ -32,9 +32,7 @@ import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -43,7 +41,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
@@ -53,10 +50,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A TileEntity that defies all controller machines.
@@ -280,6 +274,29 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             }
             buffer.writeBlockPos(new BlockPos(minX, minY, minZ));
             buffer.writeBlockPos(new BlockPos(maxX + 1, maxY + 1, maxZ + 1));
+
+            var tag = new CompoundTag();
+
+            // ser capabilities
+            var list = saveCapabilities();
+            if (list != null && state != null) {
+                tag.put("capabilities", list);
+                //ser slotsMap
+                Map<Long, Set<String>> slotsMap = state.getMatchContext().get("slots");
+                if (slotsMap != null) {
+                    var slotList = new ListTag();
+                    slotsMap.forEach((l, set) -> {
+                        var slot = new CompoundTag();
+                        ListTag names = new ListTag();
+                        set.forEach(n -> names.add(StringTag.valueOf(n)));
+                        slot.put("names", names);
+                        slot.putLong("pos", l);
+                        slotList.add(slot);
+                    });
+                    tag.put("slotList", slotList);
+                }
+            }
+            buffer.writeNbt(tag);
         }
     }
 
@@ -296,12 +313,54 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                 MultiblockWorldSavedData.addDisableModel(state.controllerPos, listBuilder.build());
             }
             renderBox = new AABB(buffer.readBlockPos(), buffer.readBlockPos());
+            var tag = buffer.readNbt();
+            if (tag != null && tag.contains("capabilities")) {
+                var tagList = tag.getList("capabilities", Tag.TAG_COMPOUND);
+                loadCapabilities(tagList);
+
+                Map<Long, Set<String>> slotsMap = new HashMap<>();
+                var slotList = tag.getList("slotList", Tag.TAG_COMPOUND);
+                for (Tag t : slotList) {
+                    var slot = (CompoundTag)t;
+                    var pos = slot.getLong("pos");
+                    ListTag names = slot.getList("names", Tag.TAG_STRING);
+                    for (Tag name : names) {
+                        slotsMap.computeIfAbsent(pos, p -> new HashSet<>()).add(name.getAsString());
+                    }
+                }
+
+                if (!settings.isEmpty()) {
+                    capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
+                    for (Map.Entry<Long, Map<MultiblockCapability<?>, Tuple<IO, Direction>>> entry : settings.entrySet()) {
+                        BlockPos pos = BlockPos.of(entry.getKey());
+                        var tileEntity = level.getBlockEntity(pos);
+                        if (tileEntity != null) {
+                            for (Map.Entry<MultiblockCapability<?>, Tuple<IO, Direction>> tupleEntry : entry.getValue().entrySet()) {
+                                var capability = tupleEntry.getKey();
+                                var io = tupleEntry.getValue().getA();
+                                var facing = tupleEntry.getValue().getB();
+
+                                if (capability.isBlockHasCapability(io, tileEntity)) {
+                                    if (!capabilities.contains(io, capability)) {
+                                        capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());
+                                    }
+                                    CapabilityProxy<?> proxy = capability.createProxy(io, tileEntity, facing, slotsMap);
+                                    capabilities.get(io, capability).put(entry.getKey().longValue(), proxy);
+                                }
+                            }
+                        }
+                    }
+                }
+                settings = null;
+            }
         } else {
             if (state != null) {
                 MultiblockWorldSavedData.removeDisableModel(state.controllerPos);
             }
+            settings = null;
             state = null;
             renderBox = null;
+            capabilities = null;
         }
     }
 
@@ -331,12 +390,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
         if (compound.contains("capabilities")) {
             ListTag tagList = compound.getList("capabilities", Tag.TAG_COMPOUND);
-            settings = new HashMap<>();
-            for (Tag base : tagList) {
-                CompoundTag tag = (CompoundTag) base;
-                settings.computeIfAbsent(tag.getLong("pos"), l->new HashMap<>())
-                        .put(MbdCapabilities.get(tag.getString("cap")), new Tuple<>(IO.VALUES[tag.getInt("io")], Direction.values()[tag.getInt("facing")]));
-            }
+            loadCapabilities(tagList);
         }
         if (getDefinition().noNeedController && compound.contains("oldState")) {
             this.oldState = NbtUtils.readBlockState(compound.getCompound("oldState"));
@@ -346,10 +400,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         }
     }
 
-    @Override
-    public void saveAdditional(@Nonnull CompoundTag compound) {
-        super.saveAdditional(compound);
-        if (recipeLogic != null) compound.put("recipeLogic", recipeLogic.writeToNBT(new CompoundTag()));
+    @Nullable
+    private ListTag saveCapabilities() {
         if (capabilities != null) {
             ListTag tagList = new ListTag();
             for (Table.Cell<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> cell : capabilities.cellSet()) {
@@ -367,7 +419,27 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                     }
                 }
             }
-            compound.put("capabilities", tagList);
+            return tagList;
+        }
+        return null;
+    }
+
+    private void loadCapabilities(ListTag tagList) {
+        settings = new HashMap<>();
+        for (Tag base : tagList) {
+            CompoundTag nbt = (CompoundTag) base;
+            settings.computeIfAbsent(nbt.getLong("pos"), l->new HashMap<>())
+                    .put(MbdCapabilities.get(nbt.getString("cap")), new Tuple<>(IO.VALUES[nbt.getInt("io")], Direction.values()[nbt.getInt("facing")]));
+        }
+    }
+
+    @Override
+    public void saveAdditional(@Nonnull CompoundTag compound) {
+        super.saveAdditional(compound);
+        if (recipeLogic != null) compound.put("recipeLogic", recipeLogic.writeToNBT(new CompoundTag()));
+        var list = saveCapabilities();
+        if (list != null) {
+            compound.put("capabilities", list);
         }
         if (getDefinition().noNeedController && oldState != null) {
             compound.put("oldState", NbtUtils.writeBlockState(oldState));

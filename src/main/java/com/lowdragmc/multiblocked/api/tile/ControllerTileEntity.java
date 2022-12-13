@@ -45,6 +45,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,6 +63,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     public MultiblockState state;
     protected Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> capabilities;
     private Map<Long, Map<MultiblockCapability<?>, Tuple<IO, Direction>>> settings;
+    @OnlyIn(Dist.CLIENT)
+    private Map<Long, Set<String>> slotsMap;
     protected LongOpenHashSet parts;
     protected RecipeLogic recipeLogic;
     protected AABB renderBox;
@@ -108,6 +112,30 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     }
 
     public Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> getCapabilitiesProxy() {
+        if (capabilities == null && isRemote() && settings != null && slotsMap != null) {
+            if (!settings.isEmpty()) {
+                capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
+                for (Map.Entry<Long, Map<MultiblockCapability<?>, Tuple<IO, Direction>>> entry : settings.entrySet()) {
+                    BlockPos pos = BlockPos.of(entry.getKey());
+                    var tileEntity = level.getBlockEntity(pos);
+                    if (tileEntity != null) {
+                        for (Map.Entry<MultiblockCapability<?>, Tuple<IO, Direction>> tupleEntry : entry.getValue().entrySet()) {
+                            var capability = tupleEntry.getKey();
+                            var io = tupleEntry.getValue().getA();
+                            var facing = tupleEntry.getValue().getB();
+
+                            if (capability.isBlockHasCapability(io, tileEntity)) {
+                                if (!capabilities.contains(io, capability)) {
+                                    capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());
+                                }
+                                CapabilityProxy<?> proxy = capability.createProxy(io, tileEntity, facing, slotsMap);
+                                capabilities.get(io, capability).put(entry.getKey().longValue(), proxy);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return capabilities;
     }
 
@@ -318,7 +346,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                 var tagList = tag.getList("capabilities", Tag.TAG_COMPOUND);
                 loadCapabilities(tagList);
 
-                Map<Long, Set<String>> slotsMap = new HashMap<>();
+                slotsMap = new HashMap<>();
                 var slotList = tag.getList("slotList", Tag.TAG_COMPOUND);
                 for (Tag t : slotList) {
                     var slot = (CompoundTag)t;
@@ -328,31 +356,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                         slotsMap.computeIfAbsent(pos, p -> new HashSet<>()).add(name.getAsString());
                     }
                 }
-
-                if (!settings.isEmpty()) {
-                    capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
-                    for (Map.Entry<Long, Map<MultiblockCapability<?>, Tuple<IO, Direction>>> entry : settings.entrySet()) {
-                        BlockPos pos = BlockPos.of(entry.getKey());
-                        var tileEntity = level.getBlockEntity(pos);
-                        if (tileEntity != null) {
-                            for (Map.Entry<MultiblockCapability<?>, Tuple<IO, Direction>> tupleEntry : entry.getValue().entrySet()) {
-                                var capability = tupleEntry.getKey();
-                                var io = tupleEntry.getValue().getA();
-                                var facing = tupleEntry.getValue().getB();
-
-                                if (capability.isBlockHasCapability(io, tileEntity)) {
-                                    if (!capabilities.contains(io, capability)) {
-                                        capabilities.put(io, capability, new Long2ObjectOpenHashMap<>());
-                                    }
-                                    CapabilityProxy<?> proxy = capability.createProxy(io, tileEntity, facing, slotsMap);
-                                    capabilities.get(io, capability).put(entry.getKey().longValue(), proxy);
-                                }
-                            }
-                        }
-                    }
-                }
-                settings = null;
             }
+            capabilities = null;
         } else {
             if (state != null) {
                 MultiblockWorldSavedData.removeDisableModel(state.controllerPos);

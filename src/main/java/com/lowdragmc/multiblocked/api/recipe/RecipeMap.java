@@ -211,9 +211,9 @@ public class RecipeMap {
         handleIngredientsUI(recipeWidget, recipe.outputs, IngredientIO.OUTPUT);
         handleIngredientsUI(recipeWidget, recipe.tickOutputs, IngredientIO.OUTPUT);
 
-        for (Recipe fuelRecipe : this.recipes.values()) {
-            handleIngredientsUI(recipeWidget, fuelRecipe.inputs, IngredientIO.INPUT);
-        }
+//        for (Recipe fuelRecipe : this.recipes.values()) {
+//            handleIngredientsUI(recipeWidget, fuelRecipe.inputs, IngredientIO.INPUT);
+//        }
         
     }
 

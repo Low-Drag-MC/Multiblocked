@@ -205,10 +205,16 @@ public class RecipeMap {
                 texture.updateText(recipe.text.getString());
             }
         }
+
         handleIngredientsUI(recipeWidget, recipe.inputs, IngredientIO.INPUT);
         handleIngredientsUI(recipeWidget, recipe.tickInputs, IngredientIO.INPUT);
         handleIngredientsUI(recipeWidget, recipe.outputs, IngredientIO.OUTPUT);
         handleIngredientsUI(recipeWidget, recipe.tickOutputs, IngredientIO.OUTPUT);
+
+        for (Recipe fuelRecipe : this.recipes.values()) {
+            handleIngredientsUI(recipeWidget, fuelRecipe.inputs, IngredientIO.INPUT);
+        }
+        
     }
 
     private static void handleIngredientsUI(WidgetGroup recipeWidget, ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> ingredients, IngredientIO ingredientIO) {

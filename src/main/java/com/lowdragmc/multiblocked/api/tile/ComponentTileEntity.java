@@ -343,7 +343,7 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
             if (slot instanceof SlotWidget slotWidget) {
                 try {
                     int index = Integer.parseInt(slotWidget.getId().split("player_inv_")[1]);
-                    if (index >= 0 && index < 36) {
+                    if (index >= 0 && index < modularUI.entityPlayer.getInventory().getContainerSize()) {
                         slotWidget.setContainerSlot(modularUI.entityPlayer.getInventory(), index);
                         slotWidget.setLocationInfo(true, index < 9);
                     }

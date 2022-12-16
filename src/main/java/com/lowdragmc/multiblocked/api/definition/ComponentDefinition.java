@@ -2,6 +2,8 @@ package com.lowdragmc.multiblocked.api.definition;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
+import com.lowdragmc.lowdraglib.gui.editor.data.Resources;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.block.CustomProperties;
@@ -164,13 +166,13 @@ public class ComponentDefinition {
             File file = new File(Multiblocked.location, uiLocation);
             if (file.isFile()) {
                 try {
-                    this.ui = NbtIo.read(file).getCompound("root");
+                    this.ui = NbtIo.read(file);
                 } catch (IOException ignored) {}
             }
         }
         if (this.ui != null) {
             WidgetGroup root = new WidgetGroup();
-            root.deserializeNBT(ui);
+            IConfigurableWidget.deserializeNBT(root, ui.getCompound("root"), Resources.fromNBT(ui.getCompound("resources")), false);
             return root;
         }
         return null;

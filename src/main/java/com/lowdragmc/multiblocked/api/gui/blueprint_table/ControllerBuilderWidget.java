@@ -93,6 +93,7 @@ public class ControllerBuilderWidget extends TemplateBuilderWidget {
 
     @Override
     public void writeInitialData(FriendlyByteBuf buffer) {
+        super.writeInitialData(buffer);
         BlockEntity tileEntity = table.getLevel().getBlockEntity(table.getBlockPos().relative(Direction.UP).relative(table.getFrontFacing().getOpposite()).relative(table.getFrontFacing().getClockWise()));
         Map<Integer, ItemStack> caught = new Int2ObjectOpenHashMap<>();
         if (tileEntity != null) {

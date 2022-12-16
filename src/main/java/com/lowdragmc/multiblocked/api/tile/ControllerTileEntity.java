@@ -98,6 +98,11 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
     public void update() {
         super.update();
         if (isFormed()) {
+            if (capabilities == null) {
+                Multiblocked.LOGGER.error("unexpected state that controller is formed but capabilities is null");
+                state = null;
+                onStructureInvalid();
+            }
             updateFormed();
         }
     }
@@ -152,8 +157,9 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
         // init capabilities
         Map<Long, EnumMap<IO, Set<MultiblockCapability<?>>>> capabilityMap = state.getMatchContext().get("capabilities");
         Map<Long, Set<String>> slotsMap = state.getMatchContext().get("slots");
+        capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
+
         if (capabilityMap != null) {
-            capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
             for (Map.Entry<Long, EnumMap<IO, Set<MultiblockCapability<?>>>> entry : capabilityMap.entrySet()) {
                 BlockEntity tileEntity = level.getBlockEntity(BlockPos.of(entry.getKey()));
                 if (tileEntity != null) {

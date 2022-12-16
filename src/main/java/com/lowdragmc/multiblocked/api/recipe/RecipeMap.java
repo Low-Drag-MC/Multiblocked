@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.lowdragmc.lowdraglib.gui.editor.configurator.IConfigurableWidget;
+import com.lowdragmc.lowdraglib.gui.editor.data.Resources;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
@@ -73,13 +75,13 @@ public class RecipeMap {
             File file = new File(Multiblocked.location, uiLocation);
             if (file.isFile()) {
                 try {
-                    this.ui = NbtIo.read(file).getCompound("root");
+                    this.ui = NbtIo.read(file);
                 } catch (IOException ignored) {}
             }
         }
         if (this.ui != null) {
             WidgetGroup root = new WidgetGroup();
-            root.deserializeNBT(ui);
+            IConfigurableWidget.deserializeNBT(root, ui.getCompound("root"), Resources.fromNBT(ui.getCompound("resources")), false);
             root.setSelfPosition(new Position(0, 0));
             root.setClientSideWidget();
             if (recipe != null) {

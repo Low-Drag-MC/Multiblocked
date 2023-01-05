@@ -9,7 +9,6 @@
   "multiblocked.capability.fluid": "Fluid",
   "block.multiblocked.fluid.any": "Any Fluid Tanks",
   "multiblocked.capability.mek_gas": "Mekanism Gas",
-  "multiblocked.capability.mek_gas": "Mekanism Gas",
   "block.multiblocked.mek_gas.any": "Any Mekanism Gas Tanks",
   "multiblocked.capability.mek_slurry": "Mekanism Slurry",
   "block.multiblocked.mek_slurry.any": "Any Mekanism Slurry Tanks",
@@ -333,8 +332,10 @@
   "multiblocked.gui.catalyst.0": "catalyst (not consumed)",
   "multiblocked.gui.catalyst.1": "catalyst (consumed)",
   "multiblocked.gui.catalyst.2": "catalyst (consume durability)",
-  "ldlib.gui.editor.menu.project.mbdui": "MBD UI Project",
-  "ldlib.gui.editor.register.widget.chemical_slot": "Chemical Slot",
+
+  "ldlib.gui.editor.register.project.mbdui": "MBD UI Project",
+  "ldlib.gui.editor.register.widget.container.chemical_slot": "Chemical Slot",
+
   "multiblocked.gui.blueprint_table.ui_editor" : "UI Editor",
   "multiblocked.gui.editor.group.trait": "trait",
   "multiblocked.gui.editor.group.recipe": "recipe",

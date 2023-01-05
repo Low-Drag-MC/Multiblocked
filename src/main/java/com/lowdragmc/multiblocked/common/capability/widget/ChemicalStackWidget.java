@@ -37,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-@RegisterUI(name = "chemical_slot", group = "container", modID = Multiblocked.MODID_MEK)
+@RegisterUI(name = "chemical_slot", group = "widget.container", modID = Multiblocked.MODID_MEK)
 @Accessors(chain = true)
 public class ChemicalStackWidget<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends ContentWidget<STACK> {
     @Nullable

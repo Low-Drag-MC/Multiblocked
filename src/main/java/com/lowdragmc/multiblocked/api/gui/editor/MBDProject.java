@@ -16,7 +16,7 @@ import java.io.IOException;
  * @date 2022/12/10
  * @implNote MBDProject
  */
-@RegisterUI(name = "mbdui")
+@RegisterUI(name = "mbdui", group = "project")
 public class MBDProject extends UIProject {
 
     private MBDProject() {

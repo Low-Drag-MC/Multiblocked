@@ -41,6 +41,7 @@ public class MBDRecipeType {
                 }
             }
         }
+        RecipeConverter.converters.clear();
         new RecipeConverterRegisterEvent().post(ScriptType.getCurrent(ScriptType.SERVER), RecipeConverterRegisterEvent.ID);
         for (RecipeConverter converter : RecipeConverter.converters) {
             converter.apply();

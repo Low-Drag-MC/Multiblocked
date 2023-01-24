@@ -9,10 +9,7 @@ import com.lowdragmc.lowdraglib.client.particle.impl.TextureTrailParticle;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.*;
 import com.lowdragmc.lowdraglib.gui.widget.*;
-import com.lowdragmc.lowdraglib.utils.BlockInfo;
-import com.lowdragmc.lowdraglib.utils.Position;
-import com.lowdragmc.lowdraglib.utils.Size;
-import com.lowdragmc.lowdraglib.utils.Vector3;
+import com.lowdragmc.lowdraglib.utils.*;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.ICapabilityProxyHolder;
 import com.lowdragmc.multiblocked.api.gui.controller.IOPageWidget;
@@ -100,6 +97,8 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("Vector3", Vector3.class);
         event.add("GuiSize", Size.class);
         event.add("GuiPos", Position.class);
+        //utils
+        event.add("ArrayUtils", ArrayUtils.class);
     }
 
     @Override

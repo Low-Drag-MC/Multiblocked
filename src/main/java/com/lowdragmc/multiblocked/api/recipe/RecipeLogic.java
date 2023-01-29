@@ -132,7 +132,8 @@ public class RecipeLogic {
                 SearchRecipeEvent event = new SearchRecipeEvent(this);
                 event.post(ScriptType.of(controller.self().getLevel()), SearchRecipeEvent.ID, controller.getSubID());
                 Recipe dynamicRecipe = event.getRecipe();
-                if (dynamicRecipe != null) matches.add(dynamicRecipe);
+                if (dynamicRecipe != null && dynamicRecipe.matchRecipe(this.controller) && dynamicRecipe.matchTickRecipe(this.controller))
+                    matches.add(dynamicRecipe);
             }
 
             lastRecipe = null;

@@ -1,5 +1,6 @@
 package com.lowdragmc.multiblocked.api.recipe.serde.recipe;
 
+import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeConverterRegisterEvent;
 import com.lowdragmc.multiblocked.api.recipe.RecipeConverter;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
@@ -41,10 +42,12 @@ public class MBDRecipeType {
                 }
             }
         }
-        RecipeConverter.converters.clear();
-        new RecipeConverterRegisterEvent().post(ScriptType.getCurrent(ScriptType.SERVER), RecipeConverterRegisterEvent.ID);
-        for (RecipeConverter converter : RecipeConverter.converters) {
-            converter.apply();
+        if (Multiblocked.isKubeJSLoaded()) {
+            RecipeConverter.converters.clear();
+            new RecipeConverterRegisterEvent().post(ScriptType.getCurrent(ScriptType.SERVER), RecipeConverterRegisterEvent.ID);
+            for (RecipeConverter converter : RecipeConverter.converters) {
+                converter.apply();
+            }
         }
     }
 

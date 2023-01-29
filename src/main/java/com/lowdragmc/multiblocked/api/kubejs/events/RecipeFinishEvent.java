@@ -28,6 +28,6 @@ public class RecipeFinishEvent extends EventJS {
 
     @Override
     public boolean canCancel() {
-        return super.canCancel();
+        return true;
     }
 }

@@ -41,6 +41,10 @@ public class RainingCondition extends RecipeCondition {
         return new TranslatableComponent("multiblocked.recipe.condition.rain.tooltip", level);
     }
 
+    public float getLevel() {
+        return level;
+    }
+
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
         Level level = recipeLogic.controller.self().getLevel();

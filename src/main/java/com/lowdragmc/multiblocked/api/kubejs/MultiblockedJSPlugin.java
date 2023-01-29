@@ -19,7 +19,9 @@ import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.pattern.FactoryBlockPattern;
 import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.pattern.Predicates;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MultiBlockRecipe;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
@@ -46,6 +48,8 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdShapeInfo", MultiblockShapeInfo.class);
         event.add("MbdBlockInfo", BlockInfo.class);
         event.add("Shapes", Shapes.class);
+        event.add("MbdContentModifier", ContentModifier.class);
+        event.add("MbdEntityIngredient", EntityIngredient.class);
         event.add("ICapabilityProxyHolder", ICapabilityProxyHolder.class);
         if (Multiblocked.isClient()) {
             event.add("TextureParticle", TextureParticle.class);
@@ -99,6 +103,7 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("GuiPos", Position.class);
         //utils
         event.add("ArrayUtils", ArrayUtils.class);
+        event.add("ContentModifier", ContentModifier.class);
     }
 
     @Override

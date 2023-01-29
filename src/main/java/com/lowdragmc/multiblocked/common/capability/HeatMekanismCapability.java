@@ -11,6 +11,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerDouble;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
@@ -44,6 +45,11 @@ public class HeatMekanismCapability extends MultiblockCapability<Double> {
     @Override
     public Double copyInner(Double content) {
         return content;
+    }
+
+    @Override
+    public Double copyWithModifier(Double content, ContentModifier modifier) {
+        return modifier.apply(content).doubleValue();
     }
 
     @Override

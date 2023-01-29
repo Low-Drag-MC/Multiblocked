@@ -48,6 +48,14 @@ public class BlockCondition extends RecipeCondition {
         return blockState.getBlock().getName().append(new TranslatableComponent("multiblocked.gui.condition.block.count")).append(" (" + count + ")");
     }
 
+    public BlockState getBlockState() {
+        return blockState;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
         int amount = 0;

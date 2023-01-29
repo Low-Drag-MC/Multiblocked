@@ -1,5 +1,7 @@
 package com.lowdragmc.multiblocked.api.gui.controller;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
@@ -7,27 +9,29 @@ import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.gui.recipe.RecipeWidget;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeUIEvent;
-import com.lowdragmc.multiblocked.api.recipe.Recipe;
-import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
-import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import com.lowdragmc.multiblocked.api.recipe.*;
+import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MultiBlockRecipe;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import dev.latvian.mods.kubejs.script.ScriptType;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
+import dev.latvian.mods.kubejs.script.ScriptType;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class RecipePage extends PageWidget{
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.lowdragmc.multiblocked.api.recipe.serde.recipe.MultiBlockRecipe.Serializer.tuplesToImmutableMap;
+
+public class RecipePage extends PageWidget {
     public static ResourceTexture resourceTexture = new ResourceTexture("multiblocked:textures/gui/recipe_page.png");
     public final IControllerComponent controller;
     public final DraggableScrollableWidgetGroup tips;
@@ -94,7 +98,7 @@ public class RecipePage extends PageWidget{
                         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                         Matrix4f mat = stack.last().pose();
                         bufferbuilder.vertex(mat, x, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight).endVertex();
-                        bufferbuilder.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth,  imageV + imageHeight - drawnWidth * imageHeight).endVertex();
+                        bufferbuilder.vertex(mat, x + width, y + height, 0).uv(imageU + imageWidth, imageV + imageHeight - drawnWidth * imageHeight).endVertex();
                         bufferbuilder.vertex(mat, x + width, y, 0).uv(imageU, imageV + imageHeight - drawnWidth * imageHeight).endVertex();
                         bufferbuilder.vertex(mat, x, y, 0).uv(imageU, imageV + imageHeight).endVertex();
                         tessellator.end();
@@ -165,17 +169,27 @@ public class RecipePage extends PageWidget{
     private void writeRecipe(FriendlyByteBuf buffer) {
         if (recipe == null) {
             buffer.writeBoolean(false);
-        }
-        else {
+        } else {
             buffer.writeBoolean(true);
+            buffer.writeBoolean(recipe.dynamic);
             buffer.writeUtf(recipe.uid);
+            if (recipe.dynamic) {
+                buffer.writeInt(recipe.duration);
+                buffer.writeCollection(recipe.inputs.entrySet(), MultiBlockRecipe.Serializer::entryWriter);
+                buffer.writeCollection(recipe.tickInputs.entrySet(), MultiBlockRecipe.Serializer::entryWriter);
+                buffer.writeCollection(recipe.outputs.entrySet(), MultiBlockRecipe.Serializer::entryWriter);
+                buffer.writeCollection(recipe.tickOutputs.entrySet(), MultiBlockRecipe.Serializer::entryWriter);
+                buffer.writeCollection(recipe.conditions, MultiBlockRecipe.Serializer::conditionWriter);
+                buffer.writeNbt(recipe.data);
+                buffer.writeComponent(recipe.text);
+            }
         }
     }
 
     private void readRecipe(FriendlyByteBuf buffer) {
         if (buffer.readBoolean()) {
             RecipeMap recipeMap = controller.getDefinition().getRecipeMap();
-            recipe = recipeMap.recipes.get(buffer.readUtf());
+            recipe = buffer.readBoolean() ? readDynamicRecipe(buffer) :recipeMap.recipes.get(buffer.readUtf());
             if (recipeWidget != null) {
                 removeWidget(recipeWidget);
             }
@@ -210,6 +224,30 @@ public class RecipePage extends PageWidget{
             fuelTime = 0;
             fuelMaxTime = 1;
         }
+    }
+
+    private Recipe readDynamicRecipe(FriendlyByteBuf buffer) {
+        String uid = buffer.readUtf();
+        int duration = buffer.readInt();
+       ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> inputs = tuplesToImmutableMap(buffer.readCollection(c -> new ArrayList<>(), MultiBlockRecipe.Serializer::entryReader));
+       ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickInputs = tuplesToImmutableMap(buffer.readCollection(c -> new ArrayList<>(), MultiBlockRecipe.Serializer::entryReader));
+       ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> outputs = tuplesToImmutableMap(buffer.readCollection(c -> new ArrayList<>(), MultiBlockRecipe.Serializer::entryReader));
+       ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs = tuplesToImmutableMap(buffer.readCollection(c -> new ArrayList<>(), MultiBlockRecipe.Serializer::entryReader));
+        List<RecipeCondition> conditions = buffer.readCollection(c -> new ArrayList<>(), MultiBlockRecipe.Serializer::conditionReader);
+        CompoundTag data = buffer.readNbt();
+        Component text = buffer.readComponent();
+        return new Recipe(
+                uid,
+                inputs,
+                outputs,
+                tickInputs,
+                tickOutputs,
+                ImmutableList.copyOf(conditions),
+                data,
+                text,
+                duration,
+                true
+        );
     }
 
     @Override

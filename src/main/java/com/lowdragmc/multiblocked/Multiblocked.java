@@ -81,7 +81,7 @@ public class Multiblocked {
     }
 
     public static String prettyJson(String uglyJson) {
-        return GSON_PRETTY.toJson(new JsonParser().parse(uglyJson));
+        return GSON_PRETTY.toJson(JsonParser.parseString(uglyJson));
     }
 
     @OnlyIn(Dist.CLIENT)

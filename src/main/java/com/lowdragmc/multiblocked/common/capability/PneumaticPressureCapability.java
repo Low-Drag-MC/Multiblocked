@@ -8,6 +8,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerFloat;
 import com.lowdragmc.multiblocked.common.capability.trait.PneumaticMachineTrait;
@@ -42,6 +43,11 @@ public class PneumaticPressureCapability extends MultiblockCapability<Float> {
     }
 
     @Override
+    public Float copyWithModifier(Float content, ContentModifier modifier) {
+        return modifier.apply(content).floatValue();
+    }
+
+    @Override
     public CapabilityProxy<? extends Float> createProxy(@Nonnull IO io, @Nonnull BlockEntity blockEntity) {
         return new Proxy(blockEntity);
     }
@@ -53,7 +59,7 @@ public class PneumaticPressureCapability extends MultiblockCapability<Float> {
 
     @Override
     public BlockInfo[] getCandidates() {
-        return new BlockInfo[] {new BlockInfo(ModBlocks.PRESSURE_CHAMBER_WALL.get())};
+        return new BlockInfo[]{new BlockInfo(ModBlocks.PRESSURE_CHAMBER_WALL.get())};
     }
 
     @Override

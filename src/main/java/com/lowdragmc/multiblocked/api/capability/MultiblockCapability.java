@@ -14,6 +14,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Content;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.IContentSerializer;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
 import net.minecraft.core.Direction;
@@ -27,6 +28,8 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Used to detect whether a machine has a certain capability. And provide its capability in proxy {@link CapabilityProxy}.
@@ -61,6 +64,13 @@ public abstract class MultiblockCapability<T> implements JsonSerializer<T>, Json
      * deep copy of this content. recipe need it for searching and such things
      */
     public abstract T copyInner(T content);
+
+    /**
+     * deep copy and modify the size attribute for those Content that have the size attribute.
+     */
+    public  T copyWithModifier(T content, ContentModifier modifier){
+        return copyInner(content);
+    }
 
     @SuppressWarnings("unchecked")
     public final T copyContent(Object content) {

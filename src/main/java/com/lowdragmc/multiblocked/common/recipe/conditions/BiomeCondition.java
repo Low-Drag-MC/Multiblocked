@@ -58,6 +58,10 @@ public class BiomeCondition extends RecipeCondition {
         return new TranslatableComponent(String.format("biome.%s.%s", biome.getNamespace(), biome.getPath()));
     }
 
+    public ResourceLocation getBiome() {
+        return biome;
+    }
+
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
         Level level = recipeLogic.controller.self().getLevel();

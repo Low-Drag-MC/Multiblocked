@@ -7,6 +7,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.IContentSerializer;
 import com.lowdragmc.multiblocked.common.capability.trait.ChemicalCapabilityTrait;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 @SuppressWarnings("unchecked")
 public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends MultiblockCapability<STACK> {
@@ -187,6 +189,13 @@ public class ChemicalMekanismCapability<CHEMICAL extends Chemical<CHEMICAL>, STA
     @Override
     public STACK copyInner(STACK content) {
         return (STACK) content.copy();
+    }
+
+    @Override
+    public STACK copyWithModifier(STACK content, ContentModifier modifier) {
+        STACK copy = (STACK) content.copy();
+        copy.setAmount(modifier.apply(copy.getAmount()).longValue());
+        return copy;
     }
 
     @Override

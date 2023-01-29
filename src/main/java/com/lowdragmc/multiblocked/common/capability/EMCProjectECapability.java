@@ -12,6 +12,7 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerBigInteger;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -49,6 +50,11 @@ public class EMCProjectECapability extends MultiblockCapability<BigInteger> {
     @Override
     public BigInteger copyInner(BigInteger content) {
         return content;
+    }
+
+    @Override
+    public BigInteger copyWithModifier(BigInteger content, ContentModifier modifier) {
+        return (BigInteger) modifier.apply(content);
     }
 
     @Override

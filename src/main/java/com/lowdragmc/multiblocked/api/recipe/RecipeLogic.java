@@ -4,6 +4,7 @@ import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.kubejs.events.RecipeFinishEvent;
+import com.lowdragmc.multiblocked.api.kubejs.events.SearchRecipeEvent;
 import com.lowdragmc.multiblocked.api.kubejs.events.SetupRecipeEvent;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
@@ -124,7 +125,16 @@ public class RecipeLogic {
             lastRecipe = null;
             setupRecipe(recipe);
         } else {
-            List<Recipe> matches = controller.getDefinition().getRecipeMap().searchRecipe(this.controller);
+            RecipeMap recipeMap = controller.getDefinition().getRecipeMap();
+            List<Recipe> matches = recipeMap != null ? recipeMap.searchRecipe(this.controller) : new ArrayList<>();
+
+            if (Multiblocked.isKubeJSLoaded() && controller.self().getLevel() != null) {
+                SearchRecipeEvent event = new SearchRecipeEvent(this);
+                event.post(ScriptType.of(controller.self().getLevel()), SearchRecipeEvent.ID, controller.getSubID());
+                Recipe dynamicRecipe = event.getRecipe();
+                if (dynamicRecipe != null) matches.add(dynamicRecipe);
+            }
+
             lastRecipe = null;
             for (Recipe match : matches) {
                 if (match.checkConditions(this)) {
@@ -176,6 +186,10 @@ public class RecipeLogic {
             }
             recipe = event.getRecipe();
         }
+        if (recipe.dynamic) {
+            if (!(recipe.checkConditions(this) && recipe.matchRecipe(this.controller) && recipe.matchTickRecipe(this.controller)))
+                return;
+        }
         if (handleFuelRecipe()) {
             recipe.preWorking(this.controller);
             if (recipe.handleRecipeIO(IO.IN, this.controller)) {
@@ -199,15 +213,15 @@ public class RecipeLogic {
         return status;
     }
 
-    public boolean isWorking(){
+    public boolean isWorking() {
         return status == Status.WORKING;
     }
 
-    public boolean isIdle(){
+    public boolean isIdle() {
         return status == Status.IDLE;
     }
 
-    public boolean isSuspend(){
+    public boolean isSuspend() {
         return status == Status.SUSPEND;
     }
 
@@ -240,7 +254,12 @@ public class RecipeLogic {
 
 
     public void readFromNBT(CompoundTag compound) {
-        lastRecipe = compound.contains("recipe") ? controller.getDefinition().getRecipeMap().recipes.get(compound.getString("recipe")) : null;
+        if (compound.contains("recipe")) {
+            boolean dynamic = compound.contains("dynamic") && compound.getBoolean("dynamic");
+            lastRecipe = (dynamic ? Multiblocked.GSON.fromJson(compound.getString("recipe"), Recipe.class) :
+                    controller.getDefinition().getRecipeMap().recipes.get(compound.getString("recipe")));
+        } else lastRecipe = null;
+
         if (lastRecipe != null) {
             status = compound.contains("status") ? Status.values()[compound.getInt("status")] : Status.WORKING;
             duration = lastRecipe.duration;
@@ -252,7 +271,13 @@ public class RecipeLogic {
 
     public CompoundTag writeToNBT(CompoundTag compound) {
         if (lastRecipe != null && status != Status.IDLE) {
-            compound.putString("recipe", lastRecipe.uid);
+            if (lastRecipe.dynamic) {
+                compound.putBoolean("dynamic", true);
+                compound.putString("recipe", Multiblocked.GSON.toJson(lastRecipe));
+            } else {
+                compound.putBoolean("dynamic", false);
+                compound.putString("recipe", lastRecipe.uid);
+            }
             compound.putInt("status", status.ordinal());
             compound.putInt("progress", progress);
             compound.putInt("fuelTime", fuelTime);
@@ -273,6 +298,7 @@ public class RecipeLogic {
         SUSPEND("suspend");
 
         public final String name;
+
         Status(String name) {
             this.name = name;
         }

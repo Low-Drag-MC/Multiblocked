@@ -5,10 +5,11 @@ import com.lowdragmc.multiblocked.api.recipe.DynamicRecipeHandler;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import dev.latvian.mods.kubejs.event.EventJS;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SearchRecipeEvent extends EventJS {
     public static final String ID = "mbd.search_recipe";
@@ -28,8 +29,13 @@ public class SearchRecipeEvent extends EventJS {
         return recipeLogic.controller.getMultiblockState().matchContext;
     }
 
-    public Map<Block,Integer> getComponentData() {
-        return getMatchContext().get("components");
+    public Map<BlockState,Integer> getComponentData() {
+        Level level = recipeLogic.controller.self().getLevel();
+        return recipeLogic.controller.getMultiblockState()
+                .getCache()
+                .stream()
+                .map(pos -> level.getBlockState(pos))
+                .collect(Collectors.toMap(state -> state, state -> 1, Integer::sum));
     }
 
     public RecipeLogic getRecipeLogic() {

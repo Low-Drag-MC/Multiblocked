@@ -26,7 +26,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -147,11 +146,6 @@ public class BlockPattern {
                                 z++;//continue searching for the first aisle
                             }
                             continue loop;
-                        } else {
-                            //components statistics
-                            worldState.getMatchContext()
-                                    .getOrCreate("components", HashMap<Block, Integer>::new)
-                                    .merge(worldState.getBlockState().getBlock(), 1, Integer::sum);
                         }
                         if (tileEntity != null && !predicate.isAny()) {
                             Map<Long, EnumMap<IO, Set<MultiblockCapability<?>>>> capabilities = worldState.getMatchContext().getOrCreate("capabilities", Long2ObjectOpenHashMap::new);

@@ -6,7 +6,9 @@ import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.Content;
+import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
+import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
@@ -25,6 +27,8 @@ import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiPredicate;
 
 public class MultiblockRecipeJS extends RecipeJS {
 
@@ -570,6 +575,23 @@ public class MultiblockRecipeJS extends RecipeJS {
         return this;
     }
 
+    public MultiblockRecipeJS predicate(BiPredicate<Recipe, RecipeLogic> predicate, Component tooltip, boolean reverse) {
+        this.conditions.add(new PredicateCondition(tooltip, predicate).setReverse(reverse));
+        return this;
+    }
+
+    public MultiblockRecipeJS predicate(BiPredicate<Recipe, RecipeLogic> predicate, boolean reverse) {
+        return predicate(predicate, TextComponent.EMPTY, reverse);
+    }
+
+    public MultiblockRecipeJS predicate(BiPredicate<Recipe, RecipeLogic> predicate, Component tooltip) {
+        return predicate(predicate, tooltip, false);
+    }
+
+    public MultiblockRecipeJS predicate(BiPredicate<Recipe, RecipeLogic> predicate) {
+        return predicate(predicate, TextComponent.EMPTY, false);
+    }
+
     private static Map<MultiblockCapability<?>, List<JsonObject>> deserializeCapabilities(JsonObject json) {
         Map<MultiblockCapability<?>, List<JsonObject>> result = new HashMap<>();
         for (String key : json.keySet()) {
@@ -638,9 +660,10 @@ public class MultiblockRecipeJS extends RecipeJS {
             json.add("inputs", serializeCapabilities(inputs));
             json.add("tickInputs", serializeCapabilities(tickInputs));
         }
-
+        List<RecipeCondition> predicates = new ArrayList<>();
         JsonObject conditionsJson = new JsonObject();
         for (RecipeCondition condition : conditions) {
+            if (condition instanceof PredicateCondition) predicates.add(condition);
             conditionsJson.add(condition.getType(), condition.serialize());
         }
         json.add("recipeConditions", conditionsJson);
@@ -650,6 +673,7 @@ public class MultiblockRecipeJS extends RecipeJS {
         json.addProperty("data", data.getAsString());
         json.addProperty("duration", duration);
         json.addProperty("isFuel", isFuel);
+        PredicateCondition.PREDICATE_MAP.computeIfAbsent(getOrCreateId(), s -> new ArrayList<>()).addAll(predicates);
     }
 
     @Override

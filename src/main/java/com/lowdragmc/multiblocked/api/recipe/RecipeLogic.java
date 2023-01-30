@@ -18,6 +18,7 @@ import java.util.List;
 public class RecipeLogic {
     public final IControllerComponent controller;
     public Recipe lastRecipe;
+    public boolean dynamic;
     public List<Recipe> lastFailedMatches;
 
     public int progress;
@@ -186,8 +187,10 @@ public class RecipeLogic {
                 return;
             }
             recipe = event.getRecipe();
+            this.dynamic = ((dynamic && recipe == lastRecipe) ||
+                    !controller.getDefinition().getRecipeMap().recipes.containsValue(recipe));
         }
-        if (recipe.dynamic) {
+        if (dynamic) {
             if (!(recipe.checkConditions(this) && recipe.matchRecipe(this.controller) && recipe.matchTickRecipe(this.controller)))
                 return;
         }
@@ -210,6 +213,10 @@ public class RecipeLogic {
         }
     }
 
+    public void setDynamic(boolean dynamic) {
+        this.dynamic = dynamic;
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -228,16 +235,24 @@ public class RecipeLogic {
 
     public void onRecipeFinish() {
         Recipe recipe = lastRecipe;
+        boolean prePosted = false;
         if (Multiblocked.isKubeJSLoaded() && controller != null && controller.self().getLevel() != null) {
-            RecipeFinishEvent event = new RecipeFinishEvent(this);
-            if (event.post(ScriptType.of(controller.self().getLevel()), RecipeFinishEvent.ID, controller.getSubID())) {
+            RecipeFinishEvent event = new RecipeFinishEvent.Pre(this);
+            if (event.post(ScriptType.of(controller.self().getLevel()), RecipeFinishEvent.Pre.ID, controller.getSubID())) {
                 return;
             }
+            prePosted = true;
             recipe = event.getRecipe();
         }
         if (recipe != null) {
             recipe.postWorking(this.controller);
             recipe.handleRecipeIO(IO.OUT, this.controller);
+        }
+        if (prePosted) {
+            RecipeFinishEvent event = new RecipeFinishEvent.Post(this);
+            if (event.post(ScriptType.of(controller.self().getLevel()), RecipeFinishEvent.Post.ID, controller.getSubID())) {
+                return;
+            }
         }
         if (lastRecipe.matchRecipe(this.controller) && lastRecipe.matchTickRecipe(this.controller) && lastRecipe.checkConditions(this)) {
             setupRecipe(lastRecipe);
@@ -272,13 +287,9 @@ public class RecipeLogic {
 
     public CompoundTag writeToNBT(CompoundTag compound) {
         if (lastRecipe != null && status != Status.IDLE) {
-            if (lastRecipe.dynamic) {
-                compound.putBoolean("dynamic", true);
-                compound.putString("recipe", Multiblocked.GSON.toJson(lastRecipe));
-            } else {
-                compound.putBoolean("dynamic", false);
-                compound.putString("recipe", lastRecipe.uid);
-            }
+            compound.putBoolean("dynamic", dynamic);
+            if (dynamic) compound.putString("recipe", Multiblocked.GSON.toJson(lastRecipe));
+            else compound.putString("recipe", lastRecipe.uid);
             compound.putInt("status", status.ordinal());
             compound.putInt("progress", progress);
             compound.putInt("fuelTime", fuelTime);

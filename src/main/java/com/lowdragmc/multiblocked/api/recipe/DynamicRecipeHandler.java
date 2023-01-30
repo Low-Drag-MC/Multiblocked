@@ -14,6 +14,7 @@ import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -24,10 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.DoubleFunction;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 import static com.lowdragmc.multiblocked.Multiblocked.GSON;
@@ -585,6 +583,22 @@ public class DynamicRecipeHandler {
         return block(blockState, count, false);
     }
 
+    public DynamicRecipeHandler predicate(BiPredicate<Recipe, RecipeLogic> predicate, Component tooltip, boolean reverse) {
+        return addCondition(new PredicateCondition(tooltip, predicate).setReverse(reverse));
+    }
+
+    public DynamicRecipeHandler predicate(BiPredicate<Recipe, RecipeLogic> predicate, boolean reverse) {
+        return predicate(predicate, TextComponent.EMPTY, reverse);
+    }
+
+    public DynamicRecipeHandler predicate(BiPredicate<Recipe, RecipeLogic> predicate, Component tooltip) {
+        return predicate(predicate, tooltip, false);
+    }
+
+    public DynamicRecipeHandler predicate(BiPredicate<Recipe, RecipeLogic> predicate) {
+        return predicate(predicate, TextComponent.EMPTY, false);
+    }
+
     public Recipe apply() {
 
         Map<MultiblockCapability<?>, ImmutableList.Builder<Content>> inputBuilder = new HashMap<>();
@@ -678,15 +692,13 @@ public class DynamicRecipeHandler {
         this.additionalTickInputBuilder.forEach((key, value) -> tickInputBuilder.computeIfAbsent(key, c -> ImmutableList.builder()).addAll(value.build()));
         this.additionalTickOutputBuilder.forEach((key, value) -> tickOutputBuilder.computeIfAbsent(key, c -> ImmutableList.builder()).addAll(value.build()));
 
-
-        return new Recipe(recipe == null ? UUID.randomUUID().toString() : recipe.uid,
+        return new Recipe(UUID.randomUUID().toString(),
                 ImmutableMap.copyOf(inputBuilder.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()))),
                 ImmutableMap.copyOf(outputBuilder.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()))),
                 ImmutableMap.copyOf(tickInputBuilder.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()))),
                 ImmutableMap.copyOf(tickOutputBuilder.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()))),
                 ImmutableList.copyOf(conditions),
-                data, text,
-                duration, true);
+                data, text, duration);
     }
 
     private List<Content> copyContents(MultiblockCapability<?> capability, List<Content> contents) {

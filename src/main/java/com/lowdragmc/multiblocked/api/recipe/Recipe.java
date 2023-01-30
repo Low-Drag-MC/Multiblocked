@@ -26,7 +26,6 @@ public class Recipe {
     public final int duration;
     public final Component text;
     public final ImmutableList<RecipeCondition> conditions;
-    public final boolean dynamic;
 
     public Recipe(String uid,
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> inputs,
@@ -35,18 +34,7 @@ public class Recipe {
                   ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs,
                   ImmutableList<RecipeCondition> conditions,
                   int duration) {
-        this(uid, inputs, outputs, tickInputs, tickOutputs, conditions, new CompoundTag(), null, duration, false);
-    }
-
-    public Recipe(String uid,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> inputs,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> outputs,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickInputs,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs,
-                  ImmutableList<RecipeCondition> conditions,
-                  int duration,
-                  boolean dynamic) {
-        this(uid, inputs, outputs, tickInputs, tickOutputs, conditions, new CompoundTag(), null, duration, dynamic);
+        this(uid, inputs, outputs, tickInputs, tickOutputs, conditions, new CompoundTag(), null, duration);
     }
 
     public Recipe(String uid,
@@ -58,19 +46,6 @@ public class Recipe {
                   CompoundTag data,
                   Component text,
                   int duration) {
-        this(uid, inputs, outputs, tickInputs, tickOutputs, conditions, data, text, duration, false);
-    }
-
-    public Recipe(String uid,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> inputs,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> outputs,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickInputs,
-                  ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs,
-                  ImmutableList<RecipeCondition> conditions,
-                  CompoundTag data,
-                  Component text,
-                  int duration,
-                  boolean dynamic) {
         this.uid = uid;
         this.inputs = inputs;
         this.outputs = outputs;
@@ -80,7 +55,6 @@ public class Recipe {
         this.data = data;
         this.text = text;
         this.conditions = conditions;
-        this.dynamic = dynamic;
     }
 
     public CompoundTag getData() {

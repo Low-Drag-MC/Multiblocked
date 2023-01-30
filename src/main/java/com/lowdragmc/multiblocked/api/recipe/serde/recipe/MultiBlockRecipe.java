@@ -11,6 +11,7 @@ import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
+import com.lowdragmc.multiblocked.common.recipe.conditions.PredicateCondition;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
@@ -146,9 +147,12 @@ public class MultiBlockRecipe implements Recipe<Container> {
             JsonObject conditionsJson = json.has("recipeConditions") ? json.getAsJsonObject("recipeConditions") : new JsonObject();
             for (String conditionKey : conditionsJson.keySet()) {
                 RecipeCondition condition = MbdRecipeConditions.getCondition(conditionKey).createTemplate();
+                if (condition instanceof PredicateCondition) continue; //Don't deserialize predicate conditions
                 condition.deserialize(conditionsJson.getAsJsonObject(conditionKey));
                 conditions.add(condition);
             }
+            if (PredicateCondition.PREDICATE_MAP.containsKey(id))
+                conditions.addAll(PredicateCondition.PREDICATE_MAP.get(id));
             boolean isFuel = GsonHelper.getAsBoolean(json, "isFuel");
             return new MultiBlockRecipe(id, machineType, inputs, outputs, tickInputs, tickOutputs, conditions, data, component, duration, isFuel);
         }

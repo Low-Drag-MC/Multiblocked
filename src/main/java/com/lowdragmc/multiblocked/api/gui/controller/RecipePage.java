@@ -36,6 +36,7 @@ public class RecipePage extends PageWidget {
     public final IControllerComponent controller;
     public final DraggableScrollableWidgetGroup tips;
     private Recipe recipe;
+    private boolean dynamic;
     @OnlyIn(Dist.CLIENT)
     private RecipeWidget recipeWidget;
     private RecipeLogic.Status status;
@@ -137,6 +138,7 @@ public class RecipePage extends PageWidget {
             RecipeLogic recipeLogic = controller.getRecipeLogic();
             if (recipe != recipeLogic.lastRecipe) {
                 recipe = recipeLogic.lastRecipe;
+                dynamic = recipeLogic.dynamic;
                 writeUpdateInfo(-1, this::writeRecipe);
             }
             if (status != recipeLogic.getStatus() || progress != recipeLogic.progress || fuelTime != recipeLogic.fuelTime || fuelMaxTime != recipeLogic.fuelMaxTime) {
@@ -171,9 +173,9 @@ public class RecipePage extends PageWidget {
             buffer.writeBoolean(false);
         } else {
             buffer.writeBoolean(true);
-            buffer.writeBoolean(recipe.dynamic);
+            buffer.writeBoolean(dynamic);
             buffer.writeUtf(recipe.uid);
-            if (recipe.dynamic) {
+            if (dynamic) {
                 buffer.writeInt(recipe.duration);
                 buffer.writeCollection(recipe.inputs.entrySet(), MultiBlockRecipe.Serializer::entryWriter);
                 buffer.writeCollection(recipe.tickInputs.entrySet(), MultiBlockRecipe.Serializer::entryWriter);
@@ -245,8 +247,7 @@ public class RecipePage extends PageWidget {
                 ImmutableList.copyOf(conditions),
                 data,
                 text,
-                duration,
-                true
+                duration
         );
     }
 

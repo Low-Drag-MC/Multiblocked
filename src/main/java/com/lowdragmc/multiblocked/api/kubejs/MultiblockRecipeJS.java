@@ -28,7 +28,6 @@ import mekanism.api.chemical.ChemicalUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.state.BlockState;
@@ -581,7 +580,7 @@ public class MultiblockRecipeJS extends RecipeJS {
     }
 
     public MultiblockRecipeJS predicate(BiPredicate<Recipe, RecipeLogic> predicate, boolean reverse) {
-        return predicate(predicate, TextComponent.EMPTY, reverse);
+        return predicate(predicate, PredicateCondition.DEFAULT, reverse);
     }
 
     public MultiblockRecipeJS predicate(BiPredicate<Recipe, RecipeLogic> predicate, Component tooltip) {
@@ -589,7 +588,7 @@ public class MultiblockRecipeJS extends RecipeJS {
     }
 
     public MultiblockRecipeJS predicate(BiPredicate<Recipe, RecipeLogic> predicate) {
-        return predicate(predicate, TextComponent.EMPTY, false);
+        return predicate(predicate, PredicateCondition.DEFAULT, false);
     }
 
     private static Map<MultiblockCapability<?>, List<JsonObject>> deserializeCapabilities(JsonObject json) {

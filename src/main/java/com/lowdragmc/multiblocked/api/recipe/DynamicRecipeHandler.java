@@ -14,7 +14,6 @@ import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -588,7 +587,7 @@ public class DynamicRecipeHandler {
     }
 
     public DynamicRecipeHandler predicate(BiPredicate<Recipe, RecipeLogic> predicate, boolean reverse) {
-        return predicate(predicate, TextComponent.EMPTY, reverse);
+        return predicate(predicate, PredicateCondition.DEFAULT, reverse);
     }
 
     public DynamicRecipeHandler predicate(BiPredicate<Recipe, RecipeLogic> predicate, Component tooltip) {
@@ -596,7 +595,7 @@ public class DynamicRecipeHandler {
     }
 
     public DynamicRecipeHandler predicate(BiPredicate<Recipe, RecipeLogic> predicate) {
-        return predicate(predicate, TextComponent.EMPTY, false);
+        return predicate(predicate, PredicateCondition.DEFAULT, false);
     }
 
     public Recipe apply() {

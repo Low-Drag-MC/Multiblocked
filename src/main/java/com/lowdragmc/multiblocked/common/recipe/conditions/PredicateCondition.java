@@ -6,7 +6,7 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,11 +31,12 @@ public class PredicateCondition extends RecipeCondition {
      */
     public static final Map<ResourceLocation, List<RecipeCondition>> PREDICATE_MAP = new HashMap<>();
     public static final PredicateCondition INSTANCE = new PredicateCondition();
+    public static final Component DEFAULT = new TranslatableComponent("multiblocked.gui.condition.predicate.default");
     private Component tooltip;
     private final BiPredicate<Recipe, RecipeLogic> predicate;
 
     public PredicateCondition() {
-        this.tooltip = TextComponent.EMPTY;
+        this.tooltip = DEFAULT;
         this.predicate = (recipe, logic) -> true;
     }
 
@@ -68,7 +69,7 @@ public class PredicateCondition extends RecipeCondition {
     @Override
     public JsonObject serialize() {
         JsonObject jsonObject = super.serialize();
-        if (tooltip != TextComponent.EMPTY)
+        if (tooltip != DEFAULT)
             jsonObject.addProperty("tooltip", Component.Serializer.toJson(tooltip));
         return jsonObject;
     }
@@ -84,7 +85,7 @@ public class PredicateCondition extends RecipeCondition {
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
         super.toNetwork(buf);
-        boolean hasTooltip = tooltip != TextComponent.EMPTY;
+        boolean hasTooltip = tooltip != DEFAULT;
         buf.writeBoolean(hasTooltip);
         if (hasTooltip)
             buf.writeComponent(tooltip);

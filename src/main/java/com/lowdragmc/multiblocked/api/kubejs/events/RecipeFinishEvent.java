@@ -28,6 +28,21 @@ public class RecipeFinishEvent extends EventJS {
 
     @Override
     public boolean canCancel() {
-        return super.canCancel();
+        return true;
     }
+
+    public static class Pre extends RecipeFinishEvent {
+        public static final String ID = "mbd.recipe_finish_pre";
+        public Pre(RecipeLogic recipeLogic) {
+            super(recipeLogic);
+        }
+    }
+
+    public static class Post extends RecipeFinishEvent {
+        public static final String ID = "mbd.recipe_finish_post";
+        public Post(RecipeLogic recipeLogic) {
+            super(recipeLogic);
+        }
+    }
+
 }

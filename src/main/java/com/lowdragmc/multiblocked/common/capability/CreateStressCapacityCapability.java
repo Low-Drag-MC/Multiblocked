@@ -13,6 +13,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerFloat;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -65,6 +66,11 @@ public class CreateStressCapacityCapability extends MultiblockCapability<Float> 
     @Override
     public Float copyInner(Float content) {
         return content;
+    }
+
+    @Override
+    public Float copyWithModifier(Float content, ContentModifier modifier) {
+        return modifier.apply(content).floatValue();
     }
 
     @Override

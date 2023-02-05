@@ -40,6 +40,10 @@ public class ThunderCondition extends RecipeCondition {
         return new TranslatableComponent("multiblocked.recipe.condition.thunder.tooltip", level);
     }
 
+    public float getLevel() {
+        return level;
+    }
+
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
         Level level = recipeLogic.controller.self().getLevel();

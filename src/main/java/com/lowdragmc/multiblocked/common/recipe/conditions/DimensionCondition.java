@@ -56,6 +56,10 @@ public class DimensionCondition extends RecipeCondition {
         return new TranslatableComponent("multiblocked.recipe.condition.dimension.tooltip", dimension);
     }
 
+    public ResourceLocation getDimension() {
+        return dimension;
+    }
+
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
         Level level = recipeLogic.controller.self().getLevel();

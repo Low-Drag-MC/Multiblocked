@@ -6,6 +6,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerInteger;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
@@ -40,6 +41,11 @@ public class ManaBotaniaCapability extends MultiblockCapability<Integer> {
     @Override
     public Integer copyInner(Integer content) {
         return content;
+    }
+
+    @Override
+    public Integer copyWithModifier(Integer content, ContentModifier modifier) {
+        return modifier.apply(content).intValue();
     }
 
     @Override

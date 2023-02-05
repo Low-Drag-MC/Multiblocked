@@ -13,6 +13,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Content;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerIngredient;
@@ -62,6 +63,12 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         content.toNetwork(buf);
         return Ingredient.fromNetwork(buf);
+    }
+
+    @Override
+    public Ingredient copyWithModifier(Ingredient content, ContentModifier modifier) {
+        Ingredient copy = copyInner(content);
+        return copy instanceof SizedIngredient sizedIngredient ? new SizedIngredient(copy, modifier.apply(sizedIngredient.getAmount()).intValue()) : copy;
     }
 
     @Override

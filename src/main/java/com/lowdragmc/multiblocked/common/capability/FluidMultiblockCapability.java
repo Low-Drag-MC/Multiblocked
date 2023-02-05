@@ -14,6 +14,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Content;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerFluidStack;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -64,6 +65,12 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
         return content.copy();
     }
 
+    @Override
+    public FluidStack copyWithModifier(FluidStack content, ContentModifier modifier) {
+        FluidStack copy = content.copy();
+        copy.setAmount(modifier.apply(copy.getAmount()).intValue());
+        return copy;
+    }
 
     @Override
     public FluidCapabilityProxy createProxy(@Nonnull IO io, @Nonnull

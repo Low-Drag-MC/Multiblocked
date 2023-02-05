@@ -18,6 +18,7 @@ import com.lowdragmc.multiblocked.api.capability.proxy.CapCapabilityProxy;
 import com.lowdragmc.multiblocked.api.capability.trait.CapabilityTrait;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Content;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerInteger;
 import com.lowdragmc.multiblocked.api.registry.MbdComponents;
@@ -64,6 +65,11 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
     @Override
     public Integer copyInner(Integer content) {
         return content;
+    }
+
+    @Override
+    public Integer copyWithModifier(Integer content, ContentModifier modifier) {
+        return modifier.apply(content).intValue();
     }
 
     @Override

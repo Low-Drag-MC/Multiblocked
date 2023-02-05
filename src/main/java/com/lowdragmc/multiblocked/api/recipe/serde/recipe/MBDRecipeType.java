@@ -1,7 +1,11 @@
 package com.lowdragmc.multiblocked.api.recipe.serde.recipe;
 
+import com.lowdragmc.multiblocked.Multiblocked;
+import com.lowdragmc.multiblocked.api.kubejs.events.RecipeConverterRegisterEvent;
+import com.lowdragmc.multiblocked.api.recipe.RecipeConverter;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.core.mixins.RecipeManagerMixin;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.crafting.Recipe;
@@ -36,6 +40,13 @@ public class MBDRecipeType {
                 } else {
                     recipeMap.addRecipe(mbdRecipe);
                 }
+            }
+        }
+        if (Multiblocked.isKubeJSLoaded()) {
+            RecipeConverter.converters.clear();
+            new RecipeConverterRegisterEvent().post(ScriptType.getCurrent(ScriptType.SERVER), RecipeConverterRegisterEvent.ID);
+            for (RecipeConverter converter : RecipeConverter.converters) {
+                converter.apply();
             }
         }
     }

@@ -12,6 +12,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
+import com.lowdragmc.multiblocked.api.recipe.ContentModifier;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
 import com.lowdragmc.multiblocked.api.recipe.serde.content.SerializerInteger;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 public class AuraMultiblockCapability extends MultiblockCapability<Integer> {
 
@@ -48,6 +50,11 @@ public class AuraMultiblockCapability extends MultiblockCapability<Integer> {
     @Override
     public Integer copyInner(Integer content) {
         return content;
+    }
+
+    @Override
+    public Integer copyWithModifier(Integer content, ContentModifier modifier) {
+        return modifier.apply(content).intValue();
     }
 
     @Override

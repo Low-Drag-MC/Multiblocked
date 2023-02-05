@@ -11,14 +11,31 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SetupRecipeEvent extends EventJS {
-    public static final String ID = "mbd.setup_recipe";
+public class SearchRecipeEvent extends EventJS {
+    public static final String ID = "mbd.search_recipe";
+
     private final RecipeLogic recipeLogic;
     private Recipe recipe;
 
-    public SetupRecipeEvent(RecipeLogic recipeLogic, Recipe recipe) {
-        this.recipeLogic = recipeLogic;
-        this.recipe = recipe;
+    public SearchRecipeEvent(RecipeLogic logic) {
+        this.recipeLogic = logic;
+    }
+
+    public DynamicRecipeHandler getHandler() {
+        return DynamicRecipeHandler.create();
+    }
+
+    public PatternMatchContext getMatchContext() {
+        return recipeLogic.controller.getMultiblockState().matchContext;
+    }
+
+    public Map<BlockState,Integer> getComponentData() {
+        Level level = recipeLogic.controller.self().getLevel();
+        return recipeLogic.controller.getMultiblockState()
+                .getCache()
+                .stream()
+                .map(pos -> level.getBlockState(pos))
+                .collect(Collectors.toMap(state -> state, state -> 1, Integer::sum));
     }
 
     public RecipeLogic getRecipeLogic() {
@@ -29,29 +46,8 @@ public class SetupRecipeEvent extends EventJS {
         return recipe;
     }
 
-    public DynamicRecipeHandler getHandlerFromRecipe() {
-        return DynamicRecipeHandler.from(recipe);
-    }
-
-    public PatternMatchContext getMatchContext() {
-        return recipeLogic.controller.getMultiblockState().matchContext;
-    }
-
-    public Map<BlockState, Integer> getComponentData() {
-        Level level = recipeLogic.controller.self().getLevel();
-        return recipeLogic.controller.getMultiblockState()
-                .getCache()
-                .stream()
-                .map(pos -> level.getBlockState(pos))
-                .collect(Collectors.toMap(state -> state, state -> 1, Integer::sum));
-    }
-
     public void setRecipe(Recipe recipe) {
         this.recipe = recipe;
     }
 
-    @Override
-    public boolean canCancel() {
-        return true;
-    }
 }

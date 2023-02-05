@@ -11,6 +11,7 @@ import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
+import com.lowdragmc.multiblocked.common.recipe.conditions.PredicateCondition;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
@@ -146,20 +147,23 @@ public class MultiBlockRecipe implements Recipe<Container> {
             JsonObject conditionsJson = json.has("recipeConditions") ? json.getAsJsonObject("recipeConditions") : new JsonObject();
             for (String conditionKey : conditionsJson.keySet()) {
                 RecipeCondition condition = MbdRecipeConditions.getCondition(conditionKey).createTemplate();
+                if (condition instanceof PredicateCondition) continue; //Don't deserialize predicate conditions
                 condition.deserialize(conditionsJson.getAsJsonObject(conditionKey));
                 conditions.add(condition);
             }
+            if (PredicateCondition.PREDICATE_MAP.containsKey(id))
+                conditions.addAll(PredicateCondition.PREDICATE_MAP.get(id));
             boolean isFuel = GsonHelper.getAsBoolean(json, "isFuel");
             return new MultiBlockRecipe(id, machineType, inputs, outputs, tickInputs, tickOutputs, conditions, data, component, duration, isFuel);
         }
 
-        private static Tuple<MultiblockCapability<?>, List<Content>> entryReader(FriendlyByteBuf buf) {
+        public static Tuple<MultiblockCapability<?>, List<Content>> entryReader(FriendlyByteBuf buf) {
             MultiblockCapability<?> capability = MbdCapabilities.getByIndex(buf.readVarInt());
             List<Content> contents = buf.readList(capability.serializer::fromNetworkContent);
             return new Tuple<>(capability, contents);
         }
 
-        private static void entryWriter(FriendlyByteBuf buf, Map.Entry<MultiblockCapability<?>, List<Content>> entry) {
+        public static void entryWriter(FriendlyByteBuf buf, Map.Entry<MultiblockCapability<?>, ? extends List<Content>> entry) {
             MultiblockCapability<?> capability = entry.getKey();
             List<Content> contents = entry.getValue();
             buf.writeVarInt(MbdCapabilities.indexOf(capability));
@@ -176,10 +180,16 @@ public class MultiBlockRecipe implements Recipe<Container> {
             condition.toNetwork(buf);
         }
 
-        private static Map<MultiblockCapability<?>, List<Content>> tuplesToMap(List<Tuple<MultiblockCapability<?>, List<Content>>> entries) {
+        public static Map<MultiblockCapability<?>, List<Content>> tuplesToMap(List<Tuple<MultiblockCapability<?>, List<Content>>> entries) {
             Map<MultiblockCapability<?>, List<Content>> map = new HashMap<>();
             entries.forEach(entry -> map.put(entry.getA(), entry.getB()));
             return map;
+        }
+
+        public static ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tuplesToImmutableMap(List<Tuple<MultiblockCapability<?>, List<Content>>> entries) {
+            ImmutableMap.Builder<MultiblockCapability<?>, ImmutableList<Content>> map = ImmutableMap.builder();
+            entries.forEach(entry -> map.put(entry.getA(), ImmutableList.copyOf(entry.getB())));
+            return map.build();
         }
 
         @Nullable

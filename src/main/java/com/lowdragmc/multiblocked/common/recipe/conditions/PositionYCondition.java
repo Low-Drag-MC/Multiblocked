@@ -42,6 +42,14 @@ public class PositionYCondition extends RecipeCondition {
         return new TranslatableComponent("multiblocked.recipe.condition.pos_y.tooltip", this.min, this.max);
     }
 
+    public int getMin() {
+        return min;
+    }
+
+    public int getMax() {
+        return max;
+    }
+
     @Override
     public boolean test(@Nonnull Recipe recipe, @Nonnull RecipeLogic recipeLogic) {
         int y = recipeLogic.controller.self().getBlockPos().getY();

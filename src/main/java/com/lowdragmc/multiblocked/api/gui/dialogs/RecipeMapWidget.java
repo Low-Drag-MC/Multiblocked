@@ -13,21 +13,16 @@ import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.Content;
 import com.lowdragmc.multiblocked.api.recipe.Recipe;
-import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.recipe.RecipeCondition;
+import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.lowdragmc.multiblocked.api.registry.MbdRecipeConditions;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -50,10 +45,10 @@ public class RecipeMapWidget extends DialogWidget {
         this.addWidget(new ImageWidget(0, 0, getSize().width, getSize().height, new ResourceTexture("multiblocked:textures/gui/blueprint_page.png")));
 
         this.addWidget(new LabelWidget(20, 5, "ID:"));
-        this.addWidget(new TextFieldWidget(40, 0, 130, 15,  null, s -> recipeMap.name = s).setResourceLocationOnly().setCurrentString(recipeMap.name));
+        this.addWidget(new TextFieldWidget(40, 0, 130, 15, null, s -> recipeMap.name = s).setResourceLocationOnly().setCurrentString(recipeMap.name));
 
         this.addWidget(new LabelWidget(20, 25, "UI:"));
-        this.addWidget(new TextFieldWidget(40, 20, 50, 15,  () -> recipeMap.uiLocation, s -> recipeMap.uiLocation = s).setCurrentString(recipeMap.uiLocation));
+        this.addWidget(new TextFieldWidget(40, 20, 50, 15, () -> recipeMap.uiLocation, s -> recipeMap.uiLocation = s).setCurrentString(recipeMap.uiLocation));
         this.addWidget(new ButtonWidget(110, 20, 15, 15, new GuiTextureGroup(ResourceBorderTexture.BUTTON_COMMON, new TextTexture("F")), cd -> {
             DialogWidget.showFileDialog(parent, "multiblocked.gui.select_mbd_project", Multiblocked.location, true, DialogWidget.suffixFilter(".mbdui"), file -> {
                 if (file != null && file.isFile()) {
@@ -300,7 +295,7 @@ public class RecipeMapWidget extends DialogWidget {
             for (Map.Entry<MultiblockCapability<?>, ImmutableList<Content>> entry : recipe.outputs.entrySet()) {
                 MultiblockCapability<?> capability = entry.getKey();
                 for (Content out : entry.getValue()) {
-                    ContentWidget<?> contentWidget= (ContentWidget<?>) capability
+                    ContentWidget<?> contentWidget = (ContentWidget<?>) capability
                             .createContentWidget().setOnPhantomUpdate(w -> onContentSelectedOrUpdate(false, capability, w))
                             .setContent(IO.OUT, out, false)
                             .setOnSelected(w -> onContentSelectedOrUpdate(false, capability, (ContentWidget<?>) w));
@@ -310,7 +305,7 @@ public class RecipeMapWidget extends DialogWidget {
             for (Map.Entry<MultiblockCapability<?>, ImmutableList<Content>> entry : recipe.tickOutputs.entrySet()) {
                 MultiblockCapability<?> capability = entry.getKey();
                 for (Content out : entry.getValue()) {
-                    ContentWidget<?> contentWidget= (ContentWidget<?>) capability
+                    ContentWidget<?> contentWidget = (ContentWidget<?>) capability
                             .createContentWidget().setOnPhantomUpdate(w -> onContentSelectedOrUpdate(false, capability, w))
                             .setContent(IO.OUT, out, true)
                             .setOnSelected(w -> onContentSelectedOrUpdate(false, capability, (ContentWidget<?>) w));
@@ -327,8 +322,11 @@ public class RecipeMapWidget extends DialogWidget {
             group.clearAllWidgets();
             group.addWidget(new ImageWidget(-10, -10, group.getSize().width + 20, group.getSize().height + 20, ResourceBorderTexture.BORDERED_BACKGROUND));
             if (!isFuel) {
-                group.addWidget(new LabelWidget(5, 5,"multiblocked.gui.label.uid"));
-                group.addWidget(new TextFieldWidget(30, 5,  120, 10, () -> uid, s -> uid = s).setHoverTooltips("multiblocked.gui.tips.unique"));
+                group.addWidget(new LabelWidget(5, 5, "multiblocked.gui.label.uid"));
+                group.addWidget(new TextFieldWidget(30, 5, 120, 10, () -> uid, s -> uid = s)
+                        .setResourceLocationOnly()
+                        .setCurrentString(uid)
+                        .setHoverTooltips("multiblocked.gui.tips.unique"));
                 inputs.clear();
             } else {
                 group.addWidget(new ImageWidget(5, -3, 180, 20, new TextTexture("multiblocked.gui.dialogs.recipe_map.fuel_tip").setWidth(180).setType(TextTexture.TextType.LEFT)));
@@ -341,7 +339,7 @@ public class RecipeMapWidget extends DialogWidget {
                 group.addWidget(outputs);
                 ProgressWidget progressWidget = new ProgressWidget(ProgressWidget.JEIProgress, 78, 42, 20, 20, recipeMap.progressTexture);
                 group.addWidget(progressWidget);
-                group.addWidget(new ButtonWidget(78, 42, 20, 20, null, cd-> new ResourceTextureWidget(RecipeMapWidget.this, texture -> {
+                group.addWidget(new ButtonWidget(78, 42, 20, 20, null, cd -> new ResourceTextureWidget(RecipeMapWidget.this, texture -> {
                     if (texture != null) {
                         recipeMap.progressTexture = texture;
                         progressWidget.setProgressBar(texture.getSubTexture(0.0, 0.0, 1.0, 0.5), texture.getSubTexture(0.0, 0.5, 1.0, 0.5));
@@ -351,7 +349,7 @@ public class RecipeMapWidget extends DialogWidget {
                 ProgressWidget progressWidget = new ProgressWidget(ProgressWidget.JEIProgress, 5, 42, 20, 20, recipeMap.fuelTexture);
                 progressWidget.setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP);
                 group.addWidget(progressWidget);
-                group.addWidget(new ButtonWidget(5, 42, 20, 20, null, cd-> new ResourceTextureWidget(RecipeMapWidget.this, texture -> {
+                group.addWidget(new ButtonWidget(5, 42, 20, 20, null, cd -> new ResourceTextureWidget(RecipeMapWidget.this, texture -> {
                     if (texture != null) {
                         recipeMap.fuelTexture = texture;
                         progressWidget.setProgressBar(texture.getSubTexture(0.0, 0.0, 1.0, 0.5), texture.getSubTexture(0.0, 0.5, 1.0, 0.5));
@@ -359,7 +357,7 @@ public class RecipeMapWidget extends DialogWidget {
                 })).setHoverTexture(new ColorRectTexture(0xaf888888)).setHoverTooltips("multiblocked.gui.dialogs.recipe_map.fuel_progress"));
             }
             group.addWidget(new LabelWidget(5, 90, "multiblocked.gui.label.duration"));
-            group.addWidget(new TextFieldWidget(60, 90,  60, 10, () -> duration + "", s -> duration = Integer.parseInt(s)).setNumbersOnly(1, Integer.MAX_VALUE));
+            group.addWidget(new TextFieldWidget(60, 90, 60, 10, () -> duration + "", s -> duration = Integer.parseInt(s)).setNumbersOnly(1, Integer.MAX_VALUE));
             group.addWidget(new LabelWidget(122, 90, "multiblocked.gui.label.ticks"));
             updateIOContentWidgets();
             int index = 0;
@@ -371,7 +369,7 @@ public class RecipeMapWidget extends DialogWidget {
             }
             final int X = 2 + 20 * (index % 3);
             final int Y = 2 + 20 * (index / 3);
-            inputs.addWidget(new ButtonWidget(X + 2, Y + 2, 16 , 16,
+            inputs.addWidget(new ButtonWidget(X + 2, Y + 2, 16, 16,
                     new ResourceTexture("multiblocked:textures/gui/add.png"),
                     cd -> addContent(this.inputs,
                             X - inputs.getScrollXOffset() + group.getSelfPosition().x + 5,
@@ -391,7 +389,7 @@ public class RecipeMapWidget extends DialogWidget {
                 }
                 final int X2 = 2 + 20 * (index % 3);
                 final int Y2 = 2 + 20 * (index / 3);
-                outputs.addWidget(new ButtonWidget(X2 + 2, Y2 + 2, 16 , 16,
+                outputs.addWidget(new ButtonWidget(X2 + 2, Y2 + 2, 16, 16,
                         new ResourceTexture("multiblocked:textures/gui/add.png"), cd -> addContent(this.outputs,
                         X2 - outputs.getScrollXOffset() + group.getSelfPosition().x + 176 - 74 + 5,
                         Y2 - outputs.getScrollYOffset() + group.getSelfPosition().y + 5)).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.dialogs.recipe_map.add_out"));
@@ -431,7 +429,7 @@ public class RecipeMapWidget extends DialogWidget {
                             conditions.remove(condition);
                             updateRecipeWidget();
                         }).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.remove"))
-                        .addWidget(new ImageWidget(22, 0, conditionsGroup.getSize().width - 22 - 17, 20, new TextTexture("").setSupplier(()->condition.getTooltips().getString()).setWidth(conditionsGroup.getSize().width - 22 - 17).setType(TextTexture.TextType.ROLL)))
+                        .addWidget(new ImageWidget(22, 0, conditionsGroup.getSize().width - 22 - 17, 20, new TextTexture("").setSupplier(() -> condition.getTooltips().getString()).setWidth(conditionsGroup.getSize().width - 22 - 17).setType(TextTexture.TextType.ROLL)))
                         .addWidget(new ImageWidget(2, 2, 18, 18, condition.getValidTexture()));
                 conditionsGroup.addWidget(conditionWidget);
             }
@@ -465,7 +463,7 @@ public class RecipeMapWidget extends DialogWidget {
             }
             if (selectedContent != widget) {
                 widget.addWidget(removed = (ButtonWidget) new ButtonWidget(14, 0, 6, 6, cd -> {
-                    (input ? inputs: outputs).get(capability).remove(widget);
+                    (input ? inputs : outputs).get(capability).remove(widget);
                     updateRecipe();
                     updateRecipeWidget();
                 }).setButtonTexture(new ResourceTexture("multiblocked:textures/gui/remove.png")).setHoverBorderTexture(1, -1).setHoverTooltips("multiblocked.gui.tips.remove"));

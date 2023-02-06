@@ -302,6 +302,7 @@
   "multiblocked.recipe.condition.biome": "Biome",
   "multiblocked.recipe.condition.pos_y": "Position Y",
   "multiblocked.recipe.condition.pos_y.tooltip": "%d <= Y <= %d",
+  "multiblocked.recipe.condition.predicate": "Predicate",
   "multiblocked.gui.label.entity_type": "Entity Type",
   "multiblocked.gui.label.entity_tag": "Entity Tag",
 

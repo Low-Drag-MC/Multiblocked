@@ -21,6 +21,8 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
@@ -97,9 +99,8 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
                         if (Multiblocked.isKubeJSLoaded()) {
                             new RecipeUIEvent(recipeWidget).post(ScriptType.CLIENT, RecipeUIEvent.ID, recipeMap.name);
                         }
-                        return recipeWidget;
+                        return new RecipeWrapper(recipeWidget, recipe);
                     })
-                    .map(RecipeWrapper::new)
                     .collect(Collectors.toList()));
         }
     }
@@ -114,4 +115,8 @@ public class RecipeMapCategory extends ModularUIRecipeCategory<RecipeWrapper> {
         }
     }
 
+    @Override
+    public @Nullable ResourceLocation getRegistryName(@NotNull RecipeWrapper wrapper) {
+        return new ResourceLocation(Multiblocked.MODID, wrapper.recipe.uid.replace(" ", "_").toLowerCase());
+    }
 }

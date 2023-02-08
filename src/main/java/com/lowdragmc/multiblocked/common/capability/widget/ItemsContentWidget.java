@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
 import com.lowdragmc.multiblocked.api.gui.recipe.ContentWidget;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.SizedIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ItemsContentWidget extends ContentWidget<Ingredient> {
@@ -55,6 +57,9 @@ public class ItemsContentWidget extends ContentWidget<Ingredient> {
                 }
                 if (isDurability) {
                     l.add(new TranslatableComponent("multiblocked.gui.content.durability"));
+                }
+                for (Consumer<List<Component>> callback : this.tooltipCallback) {
+                    callback.accept(l);
                 }
             }));
             if (isDurability) {

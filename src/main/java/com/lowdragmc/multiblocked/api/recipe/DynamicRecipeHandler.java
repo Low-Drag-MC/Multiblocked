@@ -2,11 +2,14 @@ package com.lowdragmc.multiblocked.api.recipe;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.common.capability.*;
 import com.lowdragmc.multiblocked.common.recipe.conditions.*;
+import dev.latvian.mods.kubejs.item.ingredient.IngredientStackJS;
 import dev.latvian.mods.kubejs.util.MapJS;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
@@ -120,6 +123,10 @@ public class DynamicRecipeHandler {
 
     public DynamicRecipeHandler outputMultiplier(boolean perTick, String capability, double addition, Predicate<Content> predicate) {
         return addOperatorWithPredicate(capability, addition, perTick ? tickOutputHandler : outputHandler, ContentModifier.multiplier(addition), predicate);
+    }
+
+    public DynamicRecipeHandler outputAdder(boolean perTick, String capability, double addition) {
+        return addOperator(capability, addition, perTick ? tickOutputHandler : outputHandler, ContentModifier.addition(addition));
     }
 
     public DynamicRecipeHandler outputAdder(boolean perTick, String capability, double addition, Predicate<Content> predicate) {
@@ -265,12 +272,6 @@ public class DynamicRecipeHandler {
 
     public DynamicRecipeHandler inputItems(Ingredient... inputs) {
         return input(ItemMultiblockCapability.CAP, inputs);
-    }
-
-    public DynamicRecipeHandler inputItems(ItemStack... inputs) {
-        for (ItemStack input : inputs)
-            inputItems(Ingredient.of(input));
-        return this;
     }
 
     public DynamicRecipeHandler outputItems(ItemStack... outputs) {

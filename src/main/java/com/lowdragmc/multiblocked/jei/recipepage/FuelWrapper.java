@@ -12,4 +12,9 @@ public class FuelWrapper extends ModularWrapper<FuelWidget> {
         super(widget);
         recipe = widget.recipe;
     }
+
+    @Override
+    public String getUid() {
+        return recipe.uid;
+    }
 }

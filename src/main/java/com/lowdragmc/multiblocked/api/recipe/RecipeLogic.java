@@ -182,6 +182,7 @@ public class RecipeLogic {
 
     public void setupRecipe(Recipe recipe) {
         if (Multiblocked.isKubeJSLoaded() && controller != null && controller.self().getLevel() != null) {
+            this.dynamic = (dynamic && recipe == lastRecipe);
             SetupRecipeEvent event = new SetupRecipeEvent(this, recipe);
             if (event.post(ScriptType.of(controller.self().getLevel()), SetupRecipeEvent.ID, controller.getSubID())) {
                 return;
@@ -191,7 +192,9 @@ public class RecipeLogic {
                     !controller.getDefinition().getRecipeMap().recipes.containsValue(recipe));
         }
         if (dynamic) {
-            if (!(recipe.checkConditions(this) && recipe.matchRecipe(this.controller) && recipe.matchTickRecipe(this.controller)))
+            if (!(recipe.checkConditions(this) &&
+                    recipe.matchRecipe(this.controller) &&
+                    recipe.matchTickRecipe(this.controller)))
                 return;
         }
         if (handleFuelRecipe()) {

@@ -23,12 +23,15 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -48,6 +51,8 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
     protected IGuiTexture background;
     protected Consumer<ContentWidget<T>> onPhantomUpdate;
     protected Consumer<ContentWidget<T>> onMouseClicked;
+    @NotNull
+    protected List<Consumer<List<Component>>> tooltipCallback = new ArrayList<>();
 
     public ContentWidget() {
         super(0, 0, 20, 20);
@@ -133,15 +138,17 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
 
     /**
      * get the content from a JEI ingredient
+     *
      * @return content
      */
     @SuppressWarnings("unchecked")
     public T getJEIContent(Object content) {
-        return (T)content;
+        return (T) content;
     }
 
     /**
      * get the content's ingredient form in JEI
+     *
      * @return ingredient
      */
     @Nullable
@@ -178,17 +185,17 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
     /**
      * Configurator.
      */
-    public void openConfigurator(WidgetGroup dialog){
+    public void openConfigurator(WidgetGroup dialog) {
         dialog.addWidget(new LabelWidget(5, 8, "multiblocked.gui.label.chance"));
         dialog.addWidget(new TextFieldWidget(125 - 60, 5, 30, 15, null, number -> setContent(io, content, Float.parseFloat(number), perTick)).setNumbersOnly(0f, 1f).setCurrentString(chance + ""));
-        dialog.addWidget(new ButtonWidget(125 - 25 , 5, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"), cd -> {
+        dialog.addWidget(new ButtonWidget(125 - 25, 5, 15, 15, new ResourceTexture("multiblocked:textures/gui/option.png"), cd -> {
             DialogWidget dialogWidget = new DialogWidget(dialog, true);
             dialogWidget
                     .addWidget(new ImageWidget(0, 0, dialog.getSize().width, dialog.getSize().height, ResourceBorderTexture.BORDERED_BACKGROUND))
                     .addWidget(new LabelWidget(25, 8, "perTick"))
                     .addWidget(new SwitchWidget(5, 5, 15, 15, (x, r) -> setContent(io, content, chance, r))
-                            .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0,1,0.5))
-                            .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0,0.5,1,0.5))
+                            .setBaseTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0, 0, 1, 0.5))
+                            .setPressedTexture(new ResourceTexture("multiblocked:textures/gui/boolean.png").getSubTexture(0, 0.5, 1, 0.5))
                             .setHoverBorderTexture(1, -1)
                             .setPressed(perTick)
                             .setHoverTooltips("multiblocked.gui.content.per_tick"))
@@ -223,7 +230,23 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
             tooltipTexts = ArrayUtils.add(tooltipTexts, LocalizationUtils.format("multiblocked.gui.content.per_tick"));
         }
         super.setHoverTooltips(tooltipTexts);
+        List<Component> callbackTooltip = new ArrayList<>();
+        for (Consumer<List<Component>> callback : tooltipCallback) {
+            callback.accept(callbackTooltip);
+        }
+        if (callbackTooltip.isEmpty()) return this;
+        tooltipTexts = ArrayUtils.addAll(tooltipTexts, callbackTooltip.stream().map(Component::getString).toArray(String[]::new));
         return this;
+    }
+
+    @Override
+    public void addTooltipCallback(Consumer<List<Component>> callback) {
+        this.tooltipCallback.add(callback);
+    }
+
+    @Override
+    public void clearTooltipCallback() {
+        this.tooltipCallback.clear();
     }
 
     @Override
@@ -270,7 +293,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
         Position pos = getPosition();
         Size size = getSize();
         matrixStack.pushPose();
-        matrixStack.translate(0 ,0 , 400);
+        matrixStack.translate(0, 0, 400);
         matrixStack.scale(0.5f, 0.5f, 1);
         String s = chance == 0 ? LocalizationUtils.format("multiblocked.gui.content.chance_0_short") : String.format("%.1f", chance * 100) + "%";
         int color = chance == 0 ? 0xff0000 : 0xFFFF00;
@@ -286,7 +309,7 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
             Size size = getSize();
             matrixStack.pushPose();
             RenderSystem.disableDepthTest();
-            matrixStack.translate(0 ,0 , 400);
+            matrixStack.translate(0, 0, 400);
             matrixStack.scale(0.5f, 0.5f, 1);
             String s = LocalizationUtils.format("multiblocked.gui.content.tips.per_tick_short");
             int color = 0xFFFF00;

@@ -125,7 +125,7 @@ public class ParticleRenderer implements IMultiblockedRenderer {
         File png = new File(Multiblocked.location, "assets/multiblocked/textures");
         File shader = new File(Multiblocked.location, "assets/multiblocked/shaders");
         group.addWidget(new ButtonWidget(155, 1, 20, 20, cd -> DialogWidget.showFileDialog(parent, "select a texture/shader file", renderer.isShader ? shader : png, true,
-                renderer.isShader ? DialogWidget.suffixFilter(".frag") : DialogWidget.suffixFilter(".png"), r -> {
+                renderer.isShader ? DialogWidget.suffixFilter(".frag", ".fsh") : DialogWidget.suffixFilter(".png"), r -> {
                     if (r != null && r.isFile()) {
                         if (renderer.isShader) {
                             tfw.setCurrentString("multiblocked:" + r.getPath().replace(shader.getPath(), "").substring(1).replace(".frag", "").replace('\\', '/'));

@@ -29,6 +29,7 @@ import dev.latvian.mods.kubejs.fluid.FluidStackJS;
 import dev.latvian.mods.kubejs.recipe.RegisterRecipeHandlersEvent;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
+import dev.latvian.mods.kubejs.util.ClassFilter;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.fluids.FluidStack;
@@ -39,6 +40,12 @@ import net.minecraftforge.fluids.FluidStack;
  * @implNote MultiblockedJSPlugin
  */
 public class MultiblockedJSPlugin extends KubeJSPlugin {
+
+    @Override
+    public void addClasses(ScriptType type, ClassFilter filter) {
+        filter.allow("com.lowdragmc");
+    }
+
     @Override
     public void addBindings(BindingsEvent event) {
         event.add("MbdRecipeMap", RecipeMap.class);

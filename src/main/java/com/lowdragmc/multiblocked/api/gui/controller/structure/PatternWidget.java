@@ -24,7 +24,6 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
@@ -43,14 +42,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -187,7 +179,7 @@ public class PatternWidget extends WidgetGroup {
             }
         }
         slotWidgets = new SlotWidget[Math.min(pattern.parts.size(), 18)];
-        IItemHandler itemHandler = new ItemStackHandler(pattern.parts);
+        IItemHandler itemHandler = new CycleItemStackHandler(pattern.parts);
         for (int i = 0; i < slotWidgets.length; i++) {
             slotWidgets[i] = new SlotWidget(itemHandler, i, 7 + (i % 9) * 18, 176 + (i / 9) * 18, false, false)
                     .setItemHook(this::itemHook).setIngredientIO(IngredientIO.INPUT);
@@ -324,7 +316,7 @@ public class PatternWidget extends WidgetGroup {
             if (two.isTile && !one.isTile) return +1;
             if (one.blockId != two.blockId) return two.blockId - one.blockId;
             return two.amount - one.amount;
-        }).map(PartInfo::getItemStack).toArray(ItemStack[]::new), predicateMap, controllerBase);
+        }).map(PartInfo::getItemStack).toList(), predicateMap, controllerBase);
     }
 
     private void loadControllerFormed(Collection<BlockPos> poses, IControllerComponent controllerBase) {
@@ -386,16 +378,18 @@ public class PatternWidget extends WidgetGroup {
             }
         }
 
-        ItemStack getItemStack() {
-            ItemStack result = this.itemStackKey.getItemStack();
-            result.setCount(this.amount);
-            return result;
+        public List<ItemStack> getItemStack() {
+            return Arrays.stream(itemStackKey.getItemStack()).map(itemStack -> {
+                var item = itemStack.copy();
+                item.setCount(amount);
+                return item;
+            }).toList();
         }
     }
 
     private static class MBPattern {
         @Nonnull
-        final NonNullList<ItemStack> parts;
+        final List<List<ItemStack>> parts;
         @Nonnull
         final Map<BlockPos, TraceabilityPredicate> predicateMap;
         @Nonnull
@@ -404,8 +398,8 @@ public class PatternWidget extends WidgetGroup {
         final IControllerComponent controllerBase;
         final int maxY, minY;
 
-        public MBPattern(@Nonnull Map<BlockPos, BlockInfo> blockMap, @Nonnull ItemStack[] parts, @Nonnull Map<BlockPos, TraceabilityPredicate> predicateMap, @Nonnull IControllerComponent controllerBase) {
-            this.parts = NonNullList.of(ItemStack.EMPTY, parts);
+        public MBPattern(@Nonnull Map<BlockPos, BlockInfo> blockMap, List<List<ItemStack>> parts, @Nonnull Map<BlockPos, TraceabilityPredicate> predicateMap, @Nonnull IControllerComponent controllerBase) {
+            this.parts = parts;
             this.blockMap = blockMap;
             this.predicateMap = predicateMap;
             this.controllerBase = controllerBase;

@@ -24,6 +24,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,9 +33,11 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class ContentWidget<T> extends SelectableWidgetGroup implements IRecipeIngredientSlot {
     @Getter
@@ -229,13 +232,16 @@ public abstract class ContentWidget<T> extends SelectableWidgetGroup implements 
         if (perTick) {
             tooltipTexts = ArrayUtils.add(tooltipTexts, LocalizationUtils.format("multiblocked.gui.content.per_tick"));
         }
-        super.setHoverTooltips(tooltipTexts);
+
         List<Component> callbackTooltip = new ArrayList<>();
+        for (String tooltipText : tooltipTexts) {
+            callbackTooltip.add(new TranslatableComponent(tooltipText));
+        }
         for (Consumer<List<Component>> callback : tooltipCallback) {
             callback.accept(callbackTooltip);
         }
-        if (callbackTooltip.isEmpty()) return this;
-        tooltipTexts = ArrayUtils.addAll(tooltipTexts, callbackTooltip.stream().map(Component::getString).toArray(String[]::new));
+
+        super.setHoverTooltips(callbackTooltip);
         return this;
     }
 

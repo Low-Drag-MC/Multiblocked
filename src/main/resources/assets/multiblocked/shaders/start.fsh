@@ -5,6 +5,10 @@
 uniform vec2 iResolution;
 uniform float iTime;
 
+in vec2 texCoord;
+
+out vec4 fragColor;
+
 // based on https://www.shadertoy.com/view/lsf3RH by
 // trisomie21 (THANKS!)
 // My apologies for the ugly code.
@@ -96,5 +100,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 }
 
 void main() {
-    mainImage(gl_FragColor.rgba, vec2(gl_TexCoord[0].x * iResolution.x, gl_TexCoord[0].y * iResolution.y));
+    mainImage(fragColor, vec2(texCoord.x * iResolution.x, texCoord.y * iResolution.y));
 }

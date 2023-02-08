@@ -232,14 +232,18 @@ dependencies {
     // registrate:Registrate
     compileOnly fg.deobf("com.tterrag.registrate:Registrate:MC1.18.2-1.1.3")
 
-    //geckolib
+    // geckolib
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.18:3.0.42')
+    // FTB Chunks
+    compileOnly fg.deobf("curse.maven:ftb_chunks_forge-314906:4375248")
+    compileOnly fg.deobf("curse.maven:ftb_library_forge-404465:4210935")
+    compileOnly fg.deobf("curse.maven:ftb_teams_forge-404468:4375188")
 
-    //JEI
+    // JEI
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
     implementation fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
-    //REI
+    // REI
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-default-plugin-forge:${rei_version}")
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-api-forge:${rei_version}")
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")

@@ -69,7 +69,7 @@ public class IShaderWidget extends DialogWidget {
                 .setHoverTooltips("multiblocked.gui.tips.update"));
         File path = new File(Multiblocked.location, "assets/multiblocked/shaders");
         this.addWidget(new ButtonWidget(350, 55, 20, 20, cd -> DialogWidget.showFileDialog(this, "select a shader file", path, true,
-                DialogWidget.suffixFilter(".frag"), r -> {
+                DialogWidget.suffixFilter(".frag", ".fsh"), r -> {
                     if (r != null && r.isFile()) {
                         try {
                             textFieldWidget.setCurrentString(FileUtility.readInputStream(Files.newInputStream(r.toPath())));

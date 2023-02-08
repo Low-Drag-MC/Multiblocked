@@ -323,7 +323,7 @@ public class RecipeMapWidget extends DialogWidget {
             group.addWidget(new ImageWidget(-10, -10, group.getSize().width + 20, group.getSize().height + 20, ResourceBorderTexture.BORDERED_BACKGROUND));
             if (!isFuel) {
                 group.addWidget(new LabelWidget(5, 5, "multiblocked.gui.label.uid"));
-                group.addWidget(new TextFieldWidget(30, 5, 120, 10, () -> uid, s -> uid = s)
+                group.addWidget(new TextFieldWidget(30, 5, 120, 10, null, s -> uid = s)
                         .setResourceLocationOnly()
                         .setCurrentString(uid)
                         .setHoverTooltips("multiblocked.gui.tips.unique"));

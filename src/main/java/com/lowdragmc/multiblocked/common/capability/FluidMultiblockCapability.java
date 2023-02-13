@@ -142,7 +142,7 @@ public class FluidMultiblockCapability extends MultiblockCapability<FluidStack> 
                     for (Widget widget : modularUI.getWidgetsById("^%s_[0-9]+$".formatted(slotName))) {
                         if (widget instanceof TankWidget tankWidget) {
                             int index = Integer.parseInt(tankWidget.getId().split(slotName + "_")[1]);
-                            var capability = getCapability(slotName);
+                            var capability = getGuiCapability();
                             if (capability.getTanks() > index) {
                                 tankWidget.setFluidTank(new IFluidTank() {
                                     @NotNull

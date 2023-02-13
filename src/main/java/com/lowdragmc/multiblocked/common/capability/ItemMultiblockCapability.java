@@ -125,7 +125,7 @@ public class ItemMultiblockCapability extends MultiblockCapability<Ingredient> {
                     for (Widget widget : modularUI.getWidgetsById("^%s_[0-9]+$".formatted(slotName))) {
                         if (widget instanceof SlotWidget slotWidget) {
                             int index = Integer.parseInt(slotWidget.getId().split(slotName + "_")[1]);
-                            IItemHandler capability = getCapability(slotName);
+                            IItemHandler capability = getGuiCapability();
                             if (capability.getSlots() > index) {
                                 slotWidget.setHandlerSlot(capability, index);
                             }

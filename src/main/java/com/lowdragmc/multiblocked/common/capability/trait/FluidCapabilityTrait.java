@@ -350,8 +350,14 @@ public class FluidCapabilityTrait extends MultiCapabilityTrait {
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
+    public <T> LazyOptional<T> getInnerRecipeCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
         return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new FluidTankList(getRealMbdIO(), handler.fluidTanks, this.slotName, slotName)));
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getInnerGuiCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
+        return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new FluidTankList(this.guiIO, handler.fluidTanks, this.slotName, null)));
     }
 
     private class ProxyFluidHandler implements IFluidTank, IFluidHandler {

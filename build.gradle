@@ -238,6 +238,10 @@ dependencies {
     compileOnly fg.deobf("curse.maven:ftb_chunks_forge-314906:4375248")
     compileOnly fg.deobf("curse.maven:ftb_library_forge-404465:4210935")
     compileOnly fg.deobf("curse.maven:ftb_teams_forge-404468:4375188")
+    // Valkyrien Skies
+    compileOnly fg.deobf("curse.maven:valkyrien-skies-258371:4367151")
+    // Kotlin for Forge
+    compileOnly fg.deobf("curse.maven:kotlin-for-forge-351264:4311661")
 
     // JEI
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")

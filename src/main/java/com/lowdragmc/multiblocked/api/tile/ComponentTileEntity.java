@@ -22,7 +22,6 @@ import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -38,7 +37,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -50,8 +48,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.checkerframework.checker.units.qual.K;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -292,9 +288,21 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     @Nullable
     @Override
-    public  <K> LazyOptional<K> getInnerCapability(@Nonnull Capability<K> capability, @Nullable Direction facing, @Nullable String slotName) {
+    public  <K> LazyOptional<K> getInnerRecipeCapability(@Nonnull Capability<K> capability, @Nullable Direction facing, @Nullable String slotName) {
         for (CapabilityTrait trait : traits.values()) {
-            LazyOptional<K> result = trait.getInnerCapability(capability, facing, slotName);
+            LazyOptional<K> result = trait.getInnerRecipeCapability(capability, facing, slotName);
+            if (result.isPresent()) {
+                return result;
+            }
+        }
+        return getCapability(capability, facing);
+    }
+
+    @Nullable
+    @Override
+    public  <K> LazyOptional<K> getInnerGuiCapability(@Nonnull Capability<K> capability, @Nullable Direction facing) {
+        for (CapabilityTrait trait : traits.values()) {
+            LazyOptional<K> result = trait.getInnerGuiCapability(capability, facing);
             if (result.isPresent()) {
                 return result;
             }

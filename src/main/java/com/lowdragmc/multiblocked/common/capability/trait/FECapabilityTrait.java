@@ -22,6 +22,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class FECapabilityTrait extends ProgressCapabilityTrait {
     private EnergyStorage handler;
@@ -101,13 +102,19 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     @Override
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, capabilityIO)));
+        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, capabilityIO, true)));
     }
 
     @Override
     @Nonnull
-    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, getRealMbdIO())));
+    public <T> LazyOptional<T> getInnerRecipeCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
+        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, getRealMbdIO(), Objects.equals(this.slotName, slotName))));
+    }
+
+    @Override
+    @Nonnull
+    public <T> LazyOptional<T> getInnerGuiCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
+        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, this.guiIO, true)));
     }
 
     @Override
@@ -145,14 +152,17 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     private class ProxyEnergyStorage implements IEnergyStorage {
         public EnergyStorage proxy;
         public IO io;
+        public boolean canIO;
 
-        public ProxyEnergyStorage(EnergyStorage proxy, IO io) {
+        public ProxyEnergyStorage(EnergyStorage proxy, IO io, boolean canIO) {
             this.proxy = proxy;
             this.io = io;
+            this.canIO = canIO;
         }
 
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
+            if (!canIO) return 0;
             if (io == IO.BOTH || io == IO.IN) {
                 if (!simulate) markAsDirty();
                 return proxy.receiveEnergy(maxReceive, simulate);
@@ -162,6 +172,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
+            if (!canIO) return 0;
             if (io == IO.BOTH || io == IO.OUT) {
                 if (!simulate) markAsDirty();
                 return proxy.extractEnergy(maxExtract, simulate);
@@ -181,6 +192,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
 
         @Override
         public boolean canExtract() {
+            if (!canIO) return false;
             if (io == IO.BOTH ||io == IO.OUT) {
                 return proxy.canExtract();
             }
@@ -189,6 +201,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
 
         @Override
         public boolean canReceive() {
+            if (!canIO) return false;
             if (io == IO.BOTH || io == IO.IN) {
                 return proxy.canReceive();
             }

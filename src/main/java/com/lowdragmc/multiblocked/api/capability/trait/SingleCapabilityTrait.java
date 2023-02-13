@@ -88,7 +88,12 @@ public abstract class SingleCapabilityTrait extends CapabilityTrait {
         });
     }
 
+    protected boolean hasIOSettings() {
+        return true;
+    }
+
     protected void initSettingDialog(DialogWidget dialog, DraggableWidgetGroup slot) {
+        if (!hasIOSettings()) return;
         ImageWidget imageWidget = (ImageWidget) slot.widgets.get(0);
         dialog.addWidget(new TextFieldWidget(5, 10, 65, 15, null, s -> slotName = s)
                 .setCurrentString(slotName + "")

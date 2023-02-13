@@ -161,7 +161,11 @@ public class TraceabilityPredicate {
                 flag = true;
             }
         }
-        return flag || common.stream().anyMatch(predicate->predicate.test(blockWorldState));
+        flag = flag || common.stream().anyMatch(predicate->predicate.test(blockWorldState));
+        if (flag) {
+            blockWorldState.setError(null);
+        }
+        return flag;
     }
 
     public TraceabilityPredicate or(TraceabilityPredicate other) {

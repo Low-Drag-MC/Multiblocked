@@ -22,6 +22,10 @@ public abstract class CapCapabilityProxy<C, K> extends CapabilityProxy<K>{
         return super.getCapability(CAP, slotName);
     }
 
+    public C getGuiCapability() {
+        return super.getGuiCapability(CAP);
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof CapCapabilityProxy && Objects.equals(getCapability(null), ((CapCapabilityProxy<?, ?>) obj).getCapability(null));

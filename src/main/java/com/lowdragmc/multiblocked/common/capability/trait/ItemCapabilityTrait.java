@@ -235,8 +235,14 @@ public class ItemCapabilityTrait extends MultiCapabilityTrait {
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
+    public <T> LazyOptional<T> getInnerRecipeCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
         return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new ProxyItemHandler(handler, getRealMbdIO(), this.slotName, slotName)));
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getInnerGuiCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
+        return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.orEmpty(capability, LazyOptional.of(() -> new ProxyItemHandler(handler, this.guiIO, this.slotName, null)));
     }
 
     private class ProxyItemHandler implements IItemHandler, IItemHandlerModifiable {

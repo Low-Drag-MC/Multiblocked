@@ -43,7 +43,12 @@ public abstract class CapabilityProxy<K> {
 
     public <C> C getCapability(Capability<C> capability, @Nullable String slotName) {
         BlockEntity tileEntity = getTileEntity();
-        return tileEntity == null ? null : tileEntity instanceof IInnerCapabilityProvider ? ((IInnerCapabilityProvider) tileEntity).getInnerCapability(capability, facing, slotName).orElse(null) : tileEntity.getCapability(capability, facing).orElse(null);
+        return tileEntity == null ? null : tileEntity instanceof IInnerCapabilityProvider ? ((IInnerCapabilityProvider) tileEntity).getInnerRecipeCapability(capability, facing, slotName).orElse(null) : tileEntity.getCapability(capability, facing).orElse(null);
+    }
+
+    public <C> C getGuiCapability(Capability<C> capability) {
+        BlockEntity tileEntity = getTileEntity();
+        return tileEntity == null ? null : tileEntity instanceof IInnerCapabilityProvider ? ((IInnerCapabilityProvider) tileEntity).getInnerGuiCapability(capability, facing).orElse(null) : tileEntity.getCapability(capability, facing).orElse(null);
     }
 
     public long getLatestPeriodID() {

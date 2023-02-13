@@ -204,8 +204,14 @@ public class ChemicalCapabilityTrait<CHEMICAL extends Chemical<CHEMICAL>, STACK 
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getInnerCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
+    public <T> LazyOptional<T> getInnerRecipeCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
         return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(getRealMbdIO(), this.slotName, slotName)));
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getInnerGuiCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
+        return getCap().capability.get().orEmpty(capability, LazyOptional.of(() -> new ProxyChemicalHandler(this.guiIO, this.slotName, null)));
     }
 
     public class ProxyChemicalHandler implements IChemicalHandler<CHEMICAL, STACK> {

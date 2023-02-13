@@ -147,7 +147,7 @@ public class FEMultiblockCapability extends MultiblockCapability<Integer> {
                 for (String slotName : slots) {
                     for (Widget widget : modularUI.getWidgetsById("^%s$".formatted(slotName))) {
                         if (widget instanceof ProgressWidget progressWidget) {
-                            IEnergyStorage capability = getCapability(slotName);
+                            IEnergyStorage capability = getGuiCapability();
                             progressWidget.setProgressSupplier(() -> capability.getEnergyStored() * 1d / capability.getMaxEnergyStored());
                         }
                     }

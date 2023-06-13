@@ -23,7 +23,7 @@ import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.common.tile.JarTileEntity;
 import com.lowdragmc.multiblocked.common.tile.PedestalTileEntity;
 import com.lowdragmc.multiblocked.network.MultiblockedNetworking;
-import com.simibubi.create.foundation.block.BlockStressValues;
+import com.simibubi.create.content.kinetics.BlockStressValues;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;

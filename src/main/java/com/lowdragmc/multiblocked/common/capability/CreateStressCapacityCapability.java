@@ -21,7 +21,7 @@ import com.lowdragmc.multiblocked.common.block.CreateBlockComponent;
 import com.lowdragmc.multiblocked.common.capability.widget.NumberContentWidget;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
-import com.simibubi.create.foundation.block.BlockStressValues;
+import com.simibubi.create.content.kinetics.BlockStressValues;
 import com.simibubi.create.foundation.utility.Couple;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;

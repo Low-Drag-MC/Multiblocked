@@ -3,7 +3,7 @@ package com.lowdragmc.multiblocked.common.block;
 import com.lowdragmc.multiblocked.api.block.BlockComponent;
 import com.lowdragmc.multiblocked.api.definition.ComponentDefinition;
 import com.lowdragmc.multiblocked.common.tile.CreateKineticSourceTileEntity;
-import com.simibubi.create.content.contraptions.base.IRotate;
+import com.simibubi.create.content.kinetics.base.IRotate;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;

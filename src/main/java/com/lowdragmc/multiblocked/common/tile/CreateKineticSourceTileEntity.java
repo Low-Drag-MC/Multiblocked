@@ -5,9 +5,9 @@ import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
 import com.lowdragmc.multiblocked.api.tile.part.IPartComponent;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.common.definition.CreatePartDefinition;
-import com.simibubi.create.content.contraptions.KineticNetwork;
-import com.simibubi.create.content.contraptions.base.IRotate;
-import com.simibubi.create.content.contraptions.base.KineticTileEntity;
+import com.simibubi.create.content.kinetics.KineticNetwork;
+import com.simibubi.create.content.kinetics.base.IRotate;
+import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.utility.Lang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -35,7 +35,7 @@ import java.util.Set;
  * @implNote CreateKineticTileEntity
  */
 
-public class CreateKineticSourceTileEntity extends KineticTileEntity implements IPartComponent {
+public class CreateKineticSourceTileEntity extends KineticBlockEntity implements IPartComponent {
 
     public final CreatePartDefinition definition;
     protected IMultiblockedRenderer currentRenderer;
@@ -160,7 +160,7 @@ public class CreateKineticSourceTileEntity extends KineticTileEntity implements 
         super.setSource(source);
         if (!definition.isOutput) return;
         BlockEntity tileEntity = this.level.getBlockEntity(source);
-        if (tileEntity instanceof KineticTileEntity sourceTe) {
+        if (tileEntity instanceof KineticBlockEntity sourceTe) {
             if (this.reActivateSource && Math.abs(sourceTe.getSpeed()) >= Math.abs(this.getGeneratedSpeed())) {
                 this.reActivateSource = false;
             }

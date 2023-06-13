@@ -1,11 +1,9 @@
 package com.lowdragmc.multiblocked.common.capability.trait;
 
 import com.lowdragmc.lowdraglib.LDLMod;
-import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
+import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.ProgressWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.jei.JEIPlugin;
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
@@ -36,6 +34,25 @@ public class RecipeProgressTrait extends ProgressCapabilityTrait {
     @Override
     protected String dynamicHoverTips(double progress) {
         return LocalizationUtils.format("multiblocked.top.recipe_progress", ((int)(progress * 100)) + "%");
+    }
+
+    private void onClick(ClickData cd) {
+        if (cd.isRemote && component instanceof IControllerComponent controller) {
+            var recipeMap = controller.getDefinition().getRecipeMap();
+            if (recipeMap != RecipeMap.EMPTY) {
+                if (LDLMod.isJeiLoaded()) {
+                    JEIPlugin.jeiRuntime.getRecipesGui().showTypes(Collections.singletonList(RecipeMapCategory.TYPES.apply(recipeMap)));
+                } else if (LDLMod.isReiLoaded()) {
+                    ViewSearchBuilder.builder().addCategory(RecipeMapDisplayCategory.CATEGORIES.apply(recipeMap)).open();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void createUI(ComponentTileEntity<?> component, WidgetGroup group, Player player) {
+        super.createUI(component, group, player);
+        group.addWidget(new ButtonWidget(x, y, width, height, IGuiTexture.EMPTY, this::onClick));
     }
 
     @Override

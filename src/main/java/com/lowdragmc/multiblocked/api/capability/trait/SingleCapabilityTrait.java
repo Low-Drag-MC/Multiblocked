@@ -93,11 +93,11 @@ public abstract class SingleCapabilityTrait extends CapabilityTrait {
     }
 
     protected void initSettingDialog(DialogWidget dialog, DraggableWidgetGroup slot) {
-        if (!hasIOSettings()) return;
-        ImageWidget imageWidget = (ImageWidget) slot.widgets.get(0);
         dialog.addWidget(new TextFieldWidget(5, 10, 65, 15, null, s -> slotName = s)
                 .setCurrentString(slotName + "")
                 .setHoverTooltips("multiblocked.gui.trait.slot_name"));
+        if (!hasIOSettings()) return;
+        ImageWidget imageWidget = (ImageWidget) slot.widgets.get(0);
         dialog.addWidget(new SelectorWidget(5, 30, 40, 15, Arrays.stream(IO.VALUES).map(Enum::name).collect(Collectors.toList()), -1)
                 .setValue(capabilityIO.name())
                 .setOnChanged(io-> {

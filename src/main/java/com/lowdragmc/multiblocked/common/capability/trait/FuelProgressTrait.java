@@ -16,8 +16,8 @@ import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import com.lowdragmc.multiblocked.api.tile.ComponentTileEntity;
 import com.lowdragmc.multiblocked.api.tile.IControllerComponent;
-import com.lowdragmc.multiblocked.jei.recipepage.RecipeMapCategory;
-import com.lowdragmc.multiblocked.rei.recipepage.RecipeMapDisplayCategory;
+import com.lowdragmc.multiblocked.jei.recipepage.RecipeMapFuelCategory;
+import com.lowdragmc.multiblocked.rei.recipepage.RecipeMapFuelDisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import net.minecraft.world.entity.player.Player;
 
@@ -58,9 +58,9 @@ public class FuelProgressTrait extends ProgressCapabilityTrait {
             var recipeMap = controller.getDefinition().getRecipeMap();
             if (recipeMap != RecipeMap.EMPTY) {
                 if (LDLMod.isJeiLoaded()) {
-                    JEIPlugin.jeiRuntime.getRecipesGui().showTypes(Collections.singletonList(RecipeMapCategory.TYPES.apply(recipeMap)));
+                    JEIPlugin.jeiRuntime.getRecipesGui().showTypes(Collections.singletonList(RecipeMapFuelCategory.TYPES.apply(recipeMap)));
                 } else if (LDLMod.isReiLoaded()) {
-                    ViewSearchBuilder.builder().addCategory(RecipeMapDisplayCategory.CATEGORIES.apply(recipeMap)).open();
+                    ViewSearchBuilder.builder().addCategory(RecipeMapFuelDisplayCategory.CATEGORIES.apply(recipeMap)).open();
                 }
             }
         }

@@ -90,14 +90,14 @@ public class DimensionCondition extends RecipeCondition {
     @Override
     public RecipeCondition fromNetwork(FriendlyByteBuf buf) {
         super.fromNetwork(buf);
-        buf.writeUtf(dimension.toString());
+        dimension = new ResourceLocation(buf.readUtf());
         return this;
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
         super.toNetwork(buf);
-        dimension = new ResourceLocation(buf.readUtf());
+        buf.writeUtf(dimension.toString());
     }
 
     @Override

@@ -108,7 +108,7 @@ public class FECapabilityTrait extends ProgressCapabilityTrait {
     @Override
     @Nonnull
     public <T> LazyOptional<T> getInnerRecipeCapability(@Nonnull Capability<T> capability, @Nullable Direction facing, @Nullable String slotName) {
-        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, getRealMbdIO(), Objects.equals(this.slotName, slotName))));
+        return CapabilityEnergy.ENERGY.orEmpty(capability, LazyOptional.of(() -> new ProxyEnergyStorage(handler, getRealMbdIO(), slotName == null || Objects.equals(this.slotName, slotName))));
     }
 
     @Override

@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ public interface ICapabilityProxyHolder {
         return new CommonCapabilityProxyHolder(getCapabilitiesProxy()).mergeWith(otherHolder);
     }
 
+    @Nullable
     Table<IO, MultiblockCapability<?>, Long2ObjectOpenHashMap<CapabilityProxy<?>>> getCapabilitiesProxy();
 
     default Map<BlockPos, CapabilityProxy<?>> getProxies(IO io, MultiblockCapability<?> capability){

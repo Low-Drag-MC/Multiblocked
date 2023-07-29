@@ -9,6 +9,7 @@ import com.lowdragmc.multiblocked.api.capability.IO;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.capability.proxy.CapabilityProxy;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
@@ -22,6 +23,7 @@ public class Recipe {
     public final ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> outputs;
     public final ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickInputs;
     public final ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> tickOutputs;
+    @Getter
     public final CompoundTag data;
     public final int duration;
     public final Component text;
@@ -55,10 +57,6 @@ public class Recipe {
         this.data = data;
         this.text = text;
         this.conditions = conditions;
-    }
-
-    public CompoundTag getData() {
-        return data;
     }
 
     public List<Content> getInputContents(MultiblockCapability<?> capability) {
@@ -258,12 +256,14 @@ public class Recipe {
 
     public void handlePre(ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents, ICapabilityProxyHolder holder, IO io) {
         contents.forEach(((capability, tuples) -> {
-            if (holder.getCapabilitiesProxy().contains(io, capability)) {
-                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability).values()) {
+            var proxy = holder.getCapabilitiesProxy();
+            if (proxy == null) return;
+            if (proxy.contains(io, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : proxy.get(io, capability).values()) {
                     capabilityProxy.preWorking(holder, io, this);
                 }
-            } else if (holder.getCapabilitiesProxy().contains(IO.BOTH, capability)) {
-                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(IO.BOTH, capability).values()) {
+            } else if (proxy.contains(IO.BOTH, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : proxy.get(IO.BOTH, capability).values()) {
                     capabilityProxy.preWorking(holder, io, this);
                 }
             }
@@ -272,12 +272,14 @@ public class Recipe {
 
     public void handlePost(ImmutableMap<MultiblockCapability<?>, ImmutableList<Content>> contents, ICapabilityProxyHolder holder, IO io) {
         contents.forEach(((capability, tuples) -> {
-            if (holder.getCapabilitiesProxy().contains(io, capability)) {
-                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability).values()) {
+            var proxy = holder.getCapabilitiesProxy();
+            if (proxy == null) return;
+            if (proxy.contains(io, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : proxy.get(io, capability).values()) {
                     capabilityProxy.postWorking(holder, io, this);
                 }
-            } else if (holder.getCapabilitiesProxy().contains(IO.BOTH, capability)) {
-                for (CapabilityProxy<?> capabilityProxy : holder.getCapabilitiesProxy().get(IO.BOTH, capability).values()) {
+            } else if (proxy.contains(IO.BOTH, capability)) {
+                for (CapabilityProxy<?> capabilityProxy : proxy.get(IO.BOTH, capability).values()) {
                     capabilityProxy.postWorking(holder, io, this);
                 }
             }

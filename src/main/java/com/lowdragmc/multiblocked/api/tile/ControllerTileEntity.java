@@ -164,6 +164,8 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                     });
                 }
             }
+        } else {
+            capabilities = Tables.newCustomTable(new EnumMap<>(IO.class), Object2ObjectOpenHashMap::new);
         }
 
         // init parts

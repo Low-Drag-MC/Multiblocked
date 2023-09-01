@@ -3,6 +3,7 @@ package com.lowdragmc.multiblocked.jei;
 import com.lowdragmc.lowdraglib.LDLMod;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
+import com.lowdragmc.multiblocked.api.recipe.serde.recipe.MBDRecipeType;
 import com.lowdragmc.multiblocked.jei.multipage.MultiblockInfoCategory;
 import com.lowdragmc.multiblocked.jei.recipepage.RecipeMapCategory;
 import com.lowdragmc.multiblocked.jei.recipepage.RecipeMapFuelCategory;
@@ -13,6 +14,7 @@ import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -54,6 +56,7 @@ public class JEIPlugin implements IModPlugin {
     public void registerRecipes(@Nonnull IRecipeRegistration registration) {
         if (LDLMod.isReiLoaded()) return;
         Multiblocked.LOGGER.info("JEI register");
+        MBDRecipeType.loadRecipes(Minecraft.getInstance().getConnection().getRecipeManager(), true);
         RecipeMapCategory.registerRecipes(registration);
         RecipeMapFuelCategory.registerRecipes(registration);
         MultiblockInfoCategory.registerRecipes(registration);

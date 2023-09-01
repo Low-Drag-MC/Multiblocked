@@ -11,7 +11,7 @@ public class MBDRecipeReloadListener {
     public void reloadRecipes() {
         if (server == null) return;
         MBDRecipeType.unloadRecipes();
-        MBDRecipeType.loadRecipes(server.getRecipeManager());
+        MBDRecipeType.loadRecipes(server.getRecipeManager(), false);
     }
 
 }

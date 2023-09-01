@@ -28,7 +28,7 @@ public class MBDRecipeType {
     public static final RecipeSerializer<MultiBlockRecipe> MULTIBLOCK_RECIPE_SERIALIZER = new MultiBlockRecipe.Serializer();
     public static final Map<String, Set<String>> addedRecipes = new HashMap<>();
 
-    public static void loadRecipes(RecipeManager recipeManager) {
+    public static void loadRecipes(RecipeManager recipeManager, boolean isClientSide) {
         Map<ResourceLocation, Recipe<Container>> recipes = ((RecipeManagerMixin) recipeManager).mbd_byType(MULTIBLOCK_RECIPE_TYPE);
         for (Recipe<Container> recipe : recipes.values()) {
             if (recipe instanceof MultiBlockRecipe multiBlockRecipe) {
@@ -44,7 +44,7 @@ public class MBDRecipeType {
         }
         if (Multiblocked.isKubeJSLoaded()) {
             RecipeConverter.converters.clear();
-            new RecipeConverterRegisterEvent().post(ScriptType.getCurrent(ScriptType.SERVER), RecipeConverterRegisterEvent.ID);
+            new RecipeConverterRegisterEvent().post(ScriptType.getCurrent(isClientSide ? ScriptType.CLIENT : ScriptType.SERVER), RecipeConverterRegisterEvent.ID);
             for (RecipeConverter converter : RecipeConverter.converters) {
                 converter.apply();
             }
@@ -64,7 +64,7 @@ public class MBDRecipeType {
     @SubscribeEvent
     public static void onServerLoadRecipes(ServerStartedEvent event) {
         MBDRecipeReloadListener.INSTANCE.server = event.getServer();
-        loadRecipes(MBDRecipeReloadListener.INSTANCE.server.getRecipeManager());
+        loadRecipes(MBDRecipeReloadListener.INSTANCE.server.getRecipeManager(), false);
     }
 
     @SubscribeEvent

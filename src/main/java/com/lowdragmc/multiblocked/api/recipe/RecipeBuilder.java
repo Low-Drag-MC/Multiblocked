@@ -189,58 +189,42 @@ public class RecipeBuilder {
     }
 
     public RecipeBuilder inputGases(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_GAS, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_GAS::of).toArray(GasStack[]::new));
-        }
+        MekRecipeHelper.inputGases(this, inputs);
         return this;
     }
 
     public RecipeBuilder outputGases(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_GAS, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_GAS::of).toArray(GasStack[]::new));
-        }
+        MekRecipeHelper.outputGases(this, outputs);
         return this;
     }
 
     public RecipeBuilder inputSlurries(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_SLURRY, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_SLURRY::of).toArray(SlurryStack[]::new));
-        }
+        MekRecipeHelper.inputSlurries(this, inputs);
         return this;
     }
 
     public RecipeBuilder outputSlurries(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_SLURRY, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_SLURRY::of).toArray(SlurryStack[]::new));
-        }
+        MekRecipeHelper.outputSlurries(this, outputs);
         return this;
     }
 
     public RecipeBuilder inputInfusions(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_INFUSE, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_INFUSE::of).toArray(InfusionStack[]::new));
-        }
+        MekRecipeHelper.inputInfusions(this, inputs);
         return this;
     }
 
     public RecipeBuilder outputInfusions(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_INFUSE, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_INFUSE::of).toArray(InfusionStack[]::new));
-        }
+        MekRecipeHelper.outputInfusions(this, outputs);
         return this;
     }
 
     public RecipeBuilder inputPigments(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_PIGMENT, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_PIGMENT::of).toArray(PigmentStack[]::new));
-        }
+        MekRecipeHelper.inputPigments(this, inputs);
         return this;
     }
 
     public RecipeBuilder outputPigments(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_PIGMENT, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_PIGMENT::of).toArray(PigmentStack[]::new));
-        }
+        MekRecipeHelper.outputPigments(this, outputs);
         return this;
     }
 

@@ -48,7 +48,7 @@ public class RecipeMap {
         register(EMPTY);
     }
 
-    public HashMap<String, Recipe> recipes = new HashMap<>();
+    public Map<String, Recipe> recipes = new TreeMap<>();
 
     public RecipeMap(String name) {
         this.name = name;

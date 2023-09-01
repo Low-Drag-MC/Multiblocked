@@ -2,19 +2,12 @@ package com.lowdragmc.multiblocked.api.recipe;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.lowdragmc.multiblocked.Multiblocked;
 import com.lowdragmc.multiblocked.api.capability.MultiblockCapability;
 import com.lowdragmc.multiblocked.api.recipe.ingredient.EntityIngredient;
 import com.lowdragmc.multiblocked.common.capability.*;
 import com.lowdragmc.multiblocked.common.recipe.conditions.*;
-import dev.latvian.mods.kubejs.item.ingredient.IngredientStackJS;
 import dev.latvian.mods.kubejs.util.MapJS;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.infuse.InfusionStack;
-import mekanism.api.chemical.pigment.PigmentStack;
-import mekanism.api.chemical.slurry.SlurryStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -309,114 +302,82 @@ public class DynamicRecipeHandler {
     }
 
     public DynamicRecipeHandler inputGases(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_GAS, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_GAS::of).toArray(GasStack[]::new));
-        }
+        MekRecipeHelper.inputGases(this, inputs);
         return this;
     }
 
     public DynamicRecipeHandler inputGas(MapJS input) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_GAS, ChemicalMekanismCapability.CAP_GAS.serializer.fromJson(input.toJson()));
-        }
+        MekRecipeHelper.inputGas(this, input);
         return this;
     }
 
     public DynamicRecipeHandler outputGases(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_GAS, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_GAS::of).toArray(GasStack[]::new));
-        }
+        MekRecipeHelper.outputGases(this, outputs);
         return this;
     }
 
     public DynamicRecipeHandler outputGas(MapJS output) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_GAS, ChemicalMekanismCapability.CAP_GAS.serializer.fromJson(output.toJson()));
-        }
+        MekRecipeHelper.outputGas(this, output);
         return this;
     }
 
     public DynamicRecipeHandler inputSlurries(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_SLURRY, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_SLURRY::of).toArray(SlurryStack[]::new));
-        }
+        MekRecipeHelper.inputSlurries(this, inputs);
         return this;
     }
 
     public DynamicRecipeHandler inputSlurry(MapJS input) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_SLURRY, ChemicalMekanismCapability.CAP_SLURRY.serializer.fromJson(input.toJson()));
-        }
+        MekRecipeHelper.inputSlurry(this, input);
         return this;
     }
 
     public DynamicRecipeHandler outputSlurries(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_SLURRY, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_SLURRY::of).toArray(SlurryStack[]::new));
-        }
+        MekRecipeHelper.outputSlurries(this, outputs);
         return this;
     }
 
     public DynamicRecipeHandler outputSlurry(MapJS output) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_SLURRY, ChemicalMekanismCapability.CAP_SLURRY.serializer.fromJson(output.toJson()));
-        }
+        MekRecipeHelper.outputSlurry(this, output);
         return this;
     }
 
     public DynamicRecipeHandler inputInfusions(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_INFUSE, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_INFUSE::of).toArray(InfusionStack[]::new));
-        }
+        MekRecipeHelper.inputInfusions(this, inputs);
         return this;
     }
 
     public DynamicRecipeHandler inputInfusion(MapJS input) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_INFUSE, ChemicalMekanismCapability.CAP_INFUSE.serializer.fromJson(input.toJson()));
-        }
+        MekRecipeHelper.inputInfusion(this, input);
         return this;
     }
 
     public DynamicRecipeHandler outputInfusions(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_INFUSE, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_INFUSE::of).toArray(InfusionStack[]::new));
-        }
+        MekRecipeHelper.outputInfusions(this, outputs);
         return this;
     }
 
     public DynamicRecipeHandler outputInfusion(MapJS output) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_INFUSE, ChemicalMekanismCapability.CAP_INFUSE.serializer.fromJson(output.toJson()));
-        }
+        MekRecipeHelper.outputInfusion(this, output);
         return this;
     }
 
     public DynamicRecipeHandler inputPigments(Object... inputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_PIGMENT, Arrays.stream(inputs).map(ChemicalMekanismCapability.CAP_PIGMENT::of).toArray(PigmentStack[]::new));
-        }
+        MekRecipeHelper.inputPigments(this, inputs);
         return this;
     }
 
     public DynamicRecipeHandler inputPigment(MapJS input) {
-        if (Multiblocked.isMekLoaded()) {
-            return input(ChemicalMekanismCapability.CAP_PIGMENT, ChemicalMekanismCapability.CAP_PIGMENT.serializer.fromJson(input.toJson()));
-        }
+        MekRecipeHelper.inputPigment(this, input);
         return this;
     }
 
     public DynamicRecipeHandler outputPigments(Object... outputs) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_PIGMENT, Arrays.stream(outputs).map(ChemicalMekanismCapability.CAP_PIGMENT::of).toArray(PigmentStack[]::new));
-        }
+        MekRecipeHelper.outputPigments(this, outputs);
         return this;
     }
 
     public DynamicRecipeHandler outputPigment(MapJS output) {
-        if (Multiblocked.isMekLoaded()) {
-            return output(ChemicalMekanismCapability.CAP_PIGMENT, ChemicalMekanismCapability.CAP_PIGMENT.serializer.fromJson(output.toJson()));
-        }
+        MekRecipeHelper.outputPigment(this, output);
         return this;
     }
 

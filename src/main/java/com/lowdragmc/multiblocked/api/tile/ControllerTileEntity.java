@@ -30,6 +30,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
@@ -47,6 +48,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -203,6 +206,7 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
             parts = null;
         }
         capabilities = null;
+        settings = null;
 
         writeCustomData(-1, this::writeState);
         if (Multiblocked.isKubeJSLoaded() && level != null) {
@@ -450,18 +454,22 @@ public class ControllerTileEntity extends ComponentTileEntity<ControllerDefiniti
                         CapabilityProxy<?> proxy = capability.createProxy(io, tileEntity, facing, slotsMap);
                         capabilities.get(io, capability).put(entry.getKey().longValue(), proxy);
                     } else {
-                        Multiblocked.LOGGER.warn("""
+                        if (FMLLoader.isProduction()) {
+                            Multiblocked.LOGGER.warn("""
                                     controller capability proxies settings miss matching!!
                                     TileEntity at pos: {} doesn't match cap {} with io {}
                                 """, pos, capability, io);
+                        }
                         needReLoadSettings = true;
                     }
                 }
             } else {
-                Multiblocked.LOGGER.warn("""
+                if (FMLLoader.isProduction()) {
+                    Multiblocked.LOGGER.warn("""
                             controller capability proxies settings miss matching!!
                             can't find a TileEntity at pos: {}
                         """, pos);
+                }
                 needReLoadSettings = true;
             }
         }

@@ -47,7 +47,9 @@ public class RecipeLogic {
             if (getStatus() == Status.SUSPEND && timer % 5 == 0) {
                 checkAsyncRecipeSearching(this::handleRecipeWorking);
             } else {
-                handleRecipeWorking();
+                if (getStatus() == Status.WORKING) {
+                    handleRecipeWorking();
+                }
                 if (progress == duration) {
                     onRecipeFinish();
                 }

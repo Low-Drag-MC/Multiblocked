@@ -46,7 +46,9 @@ public class RecipeLogic {
             if (getStatus() == Status.SUSPEND && timer % 5 == 0) {
                 checkAsyncRecipeSearching(this::handleRecipeWorking);
             } else {
-                handleRecipeWorking();
+                if (getStatus() == Status.WORKING) {
+                    handleRecipeWorking();
+                }
                 if (progress == duration) {
                     onRecipeFinish();
                 }
@@ -204,15 +206,15 @@ public class RecipeLogic {
         return status;
     }
 
-    public boolean isWorking(){
+    public boolean isWorking() {
         return status == Status.WORKING;
     }
 
-    public boolean isIdle(){
+    public boolean isIdle() {
         return status == Status.IDLE;
     }
 
-    public boolean isSuspend(){
+    public boolean isSuspend() {
         return status == Status.SUSPEND;
     }
 
@@ -270,6 +272,7 @@ public class RecipeLogic {
         SUSPEND("suspend");
 
         public String name;
+
         Status(String name) {
             this.name = name;
         }

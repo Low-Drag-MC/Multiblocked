@@ -49,7 +49,7 @@ public class RecipeLogic {
                 if (getStatus() == Status.WORKING) {
                     handleRecipeWorking();
                 }
-                if (progress == duration) {
+                if (progress >= duration) {
                     onRecipeFinish();
                 }
             }

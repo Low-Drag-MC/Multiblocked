@@ -22,6 +22,7 @@ import com.lowdragmc.multiblocked.api.registry.MbdCapabilities;
 import com.lowdragmc.multiblocked.client.renderer.IMultiblockedRenderer;
 import com.lowdragmc.multiblocked.persistence.MultiblockWorldSavedData;
 import dev.latvian.kubejs.script.ScriptType;
+import dev.latvian.mods.rhino.mod.util.NBTWrapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.block.BlockState;
@@ -154,6 +155,13 @@ public abstract class ComponentTileEntity<T extends ComponentDefinition> extends
 
     public void setOwner(PlayerEntity player) {
         this.owner = player.getUUID();
+    }
+
+    public INBT getPersistedData() {
+        return this.persistedData;
+    }
+    public void setPersistedData(INBT data) {
+        this.persistedData = data;
     }
 
     public void update(){

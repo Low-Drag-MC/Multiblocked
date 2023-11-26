@@ -17,6 +17,7 @@ import com.lowdragmc.multiblocked.api.pattern.MultiblockShapeInfo;
 import com.lowdragmc.multiblocked.api.pattern.Predicates;
 import com.lowdragmc.multiblocked.api.pattern.util.RelativeDirection;
 import com.lowdragmc.multiblocked.api.recipe.ItemsIngredient;
+import com.lowdragmc.multiblocked.api.recipe.RecipeLogic;
 import com.lowdragmc.multiblocked.api.recipe.RecipeMap;
 import dev.latvian.kubejs.KubeJSPlugin;
 import dev.latvian.kubejs.fluid.FluidStackJS;
@@ -24,8 +25,11 @@ import dev.latvian.kubejs.item.ItemStackJS;
 import dev.latvian.kubejs.item.ingredient.IngredientJS;
 import dev.latvian.kubejs.script.BindingsEvent;
 import dev.latvian.kubejs.script.ScriptType;
+import dev.latvian.kubejs.util.MapJS;
+import dev.latvian.mods.rhino.mod.util.NBTWrapper;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import net.minecraft.nbt.INBT;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -47,6 +51,7 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("MbdIO", IO.class);
         event.add("Shapes", VoxelShapes.class);
         event.add("ICapabilityProxyHolder", ICapabilityProxyHolder.class);
+        event.add("MbdRecipeStatus", RecipeLogic.Status.class);
 
         // LDLib Widget
         event.add("ModularUI", ModularUI.class);
@@ -86,6 +91,9 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         event.add("RecipeWidget", RecipeWidget.class);
         event.add("GuiSize", Size.class);
         event.add("GuiPos", Position.class);
+
+        //kubejs utils
+        event.add("NBTUtils", NBTUtils.class);
     }
 
     @Override
@@ -94,6 +102,7 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         if (typeWrappers.getWrapperFactory(FluidStack.class, null) == null) {
             typeWrappers.register(FluidStack.class, MultiblockedJSPlugin::FluidStackWrapper);
         }
+        typeWrappers.register(INBT.class, MultiblockedJSPlugin::INBTWrapper);
     }
 
     public static FluidStack FluidStackWrapper(Object o) {
@@ -107,5 +116,9 @@ public class MultiblockedJSPlugin extends KubeJSPlugin {
         }
         IngredientJS ingredient = IngredientJS.of(o);
         return new ItemsIngredient(ingredient.createVanillaIngredient());
+    }
+    public static INBT INBTWrapper(Object o) {
+        INBT result = (MapJS.isNbt(o)) ? MapJS.nbt(o) : NBTWrapper.toTag(o);
+        return (result == null) ? NBTWrapper.compoundTag() : result;
     }
 }

@@ -49,7 +49,7 @@ public class RecipeLogic {
                 if (getStatus() == Status.WORKING) {
                     handleRecipeWorking();
                 }
-                if (progress == duration) {
+                if (progress >= duration) {
                     onRecipeFinish();
                 }
             }
@@ -200,6 +200,10 @@ public class RecipeLogic {
             this.status = status;
             controller.setStatus(status.name);
         }
+    }
+
+    public void setStatus(String statusName) {
+        this.setStatus(Status.valueOf(statusName));
     }
 
     public Status getStatus() {
